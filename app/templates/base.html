@@ -11,6 +11,7 @@
     <div class="container nav-inner">
       <a href="{{ url_for('scans.dashboard') }}" class="logo">Programma Alessio SaaS</a>
       <nav>
+        <a href="{{ url_for('admin.organizations') }}">Clienti</a>
         <a href="{{ url_for('scans.dashboard') }}">Dashboard</a>
         <a href="{{ url_for('wizard.onboarding') }}">Nuovo scan</a>
         <a href="{{ url_for('auth.logout') }}">Logout</a>
