@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Programma Alessio SaaS</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="navbar">
+    <div class="container nav-inner">
+      <a href="{{ url_for('scans.dashboard') }}" class="logo">Programma Alessio SaaS</a>
+      <nav>
+        <a href="{{ url_for('scans.dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('wizard.onboarding') }}">Nuovo scan</a>
+        <a href="{{ url_for('auth.logout') }}">Logout</a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="container main-content">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash">
+          {% for m in messages %}
+            <div class="flash-message">{{ m }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </div>
+</body>
+</html>

@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="dash-hero">
+  <div class="dash-hero-inner">
+    <div>
+      <h1 class="dash-title">Dashboard</h1>
+      <div class="dash-sub">Seleziona e gestisci le scansioni come una inbox.</div>
+    </div>
+
+    <div class="dash-actions">
+      <a class="btn" href="{{ url_for('wizard.onboarding') }}">Nuovo scan</a>
+      <button class="btn btn-danger" type="submit" form="bulkDeleteForm" id="bulkDeleteBtn" disabled>Elimina selezionate</button>
+    </div>
+  </div>
+</div>
+
+<form id="bulkDeleteForm" method="post" action="{{ url_for('scans.bulk_delete') }}">
+  <div class="card inbox-card">
+    <div class="inbox-toolbar">
+      <label class="chk">
+        <input type="checkbox" id="selectAll">
+        <span>Seleziona tutto</span>
+      </label>
+      <div class="muted" id="selCount">0 selezionate</div>
+    </div>
+
+    {% if scans %}
+      <div class="inbox-list">
+        {% for s in scans %}
+          <div class="inbox-row">
+            <div class="inbox-left">
+              <input class="rowchk" type="checkbox" name="scan_ids" value="{{ s.id }}">
+            </div>
+
+            <div class="inbox-main">
+              <div class="inbox-title">
+                <span class="pill">#{{ s.id }}</span>
+                <b>{{ s.settore }}</b>
+                <span class="muted">· {{ s.modello }} · {{ s.mese_riferimento }}</span>
+              </div>
+              <div class="inbox-meta muted">
+                Creato: {{ s.created_at|fmt_dt if s.created_at else "" }}
+              </div>
+            </div>
+
+            <div class="inbox-right">
+              <a class="btn" href="{{ url_for('scans.view_scan', scan_id=s.id) }}">Apri</a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-title">Nessuno scan ancora.</div>
+        <div class="muted">Crea il primo scan per vedere KPI, indicatori e PDF.</div>
+        <div style="margin-top:12px;">
+          <a class="btn" href="{{ url_for('wizard.onboarding') }}">Crea primo scan</a>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</form>
+
+<script>
+(function(){
+  const selectAll = document.getElementById('selectAll');
+  const checks = () => Array.from(document.querySelectorAll('.rowchk'));
+  const selCount = document.getElementById('selCount');
+  const delBtn = document.getElementById('bulkDeleteBtn');
+
+  function update(){
+    const all = checks();
+    const n = all.filter(x => x.checked).length;
+    selCount.textContent = `${n} selezionate`;
+    delBtn.disabled = n === 0;
+    if (selectAll) selectAll.checked = (n > 0 && n === all.length);
+  }
+
+  if (selectAll){
+    selectAll.addEventListener('change', () => {
+      checks().forEach(x => x.checked = selectAll.checked);
+      update();
+    });
+  }
+
+  checks().forEach(x => x.addEventListener('change', update));
+  update();
+
+  const form = document.getElementById('bulkDeleteForm');
+  if (form){
+    form.addEventListener('submit', (e) => {
+      if (delBtn.disabled) { e.preventDefault(); return; }
+      if (!confirm("Eliminare le scansioni selezionate?")) e.preventDefault();
+    });
+  }
+})();
+</script>
+
+{% endblock %}

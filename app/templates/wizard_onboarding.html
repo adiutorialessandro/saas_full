@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row" style="display:flex; justify-content:space-between; align-items:flex-end; gap:12px;">
+  <div>
+    <h1 style="margin:0;">Wizard – Onboarding</h1>
+    <p class="muted" style="margin:6px 0 0;">Imposta il contesto dello scan (settore, modello, mese).</p>
+  </div>
+  <div style="display:flex; gap:10px;">
+    <a class="btn" href="{{ url_for('scans.dashboard') }}">Dashboard</a>
+  </div>
+</div>
+
+<div class="card" style="margin-top:14px;">
+  <form method="post">
+    {{ form.hidden_tag() }}
+
+    <div class="grid" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+      <div>
+        <label>Settore</label>
+        {{ form.settore(class_='input', placeholder='es. Servizi, Retail, Industria') }}
+        {% if form.settore.errors %}<div class="err">{{ form.settore.errors[0] }}</div>{% endif %}
+      </div>
+
+      <div>
+        <label>Modello</label>
+        {{ form.modello(class_='input', placeholder='es. B2B, B2C, Abbonamento') }}
+        {% if form.modello.errors %}<div class="err">{{ form.modello.errors[0] }}</div>{% endif %}
+      </div>
+
+      <div>
+        <label>Mese riferimento (YYYY-MM)</label>
+        {{ form.mese_riferimento(class_='input', placeholder='2026-02') }}
+        {% if form.mese_riferimento.errors %}<div class="err">{{ form.mese_riferimento.errors[0] }}</div>{% endif %}
+      </div>
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; margin-top:14px;">
+      <button class="btn" type="submit">Continua</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

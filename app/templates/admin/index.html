@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+  <div>
+    <h1>Admin</h1>
+    <div class="muted">Gestione utenti e scans (ultimi 50).</div>
+  </div>
+  <div style="display:flex; gap:10px; align-items:center;">
+    <form method="post" action="{{ url_for('invites.create') }}" style="display:inline;">
+      <button class="btn" type="submit">Crea invito (Org corrente)</button>
+    </form>
+    <a class="btn" href="{{ url_for('scans.dashboard') }}">← Dashboard</a>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h3>Utenti</h3>
+    <div style="font-size:28px; font-weight:800;">{{ kpi.users }}</div>
+  </div>
+  <div class="card">
+    <h3>Scans</h3>
+    <div style="font-size:28px; font-weight:800;">{{ kpi.scans }}</div>
+  </div>
+  <div class="card">
+    <h3>Tu</h3>
+    <div class="muted">{{ current_user.email }}</div>
+    <div><b>Admin:</b> {{ "SI" if current_user.is_admin else "NO" }}</div>
+  </div>
+</div>
+
+<div style="height:16px"></div>
+
+<div class="card">
+  <h2>Utenti</h2>
+  <table style="width:100%; border-collapse:collapse;">
+    <thead>
+      <tr style="text-align:left; color:rgba(233,238,251,.8);">
+        <th style="padding:10px 6px;">ID</th>
+        <th style="padding:10px 6px;">Email</th>
+        <th style="padding:10px 6px;">Admin</th>
+        <th style="padding:10px 6px;">Creato</th>
+        <th style="padding:10px 6px;"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr style="border-top:1px solid rgba(255,255,255,.06);">
+        <td style="padding:10px 6px;">#{{ u.id }}</td>
+        <td style="padding:10px 6px;">{{ u.email }}</td>
+        <td style="padding:10px 6px;">{{ "SI" if u.is_admin else "NO" }}</td>
+        <td style="padding:10px 6px;">{{ u.created_at }}</td>
+        <td style="padding:10px 6px; text-align:right;">
+          <form method="post" action="{{ url_for('admin.toggle_admin', user_id=u.id) }}" style="display:inline;">
+            <button class="btn" type="submit">Toggle admin</button>
+          </form>
+          <form method="post" action="{{ url_for('admin.delete_user', user_id=u.id) }}" style="display:inline;">
+            <button class="btn btn-danger" type="submit">Elimina</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div style="height:16px"></div>
+
+<div class="card">
+  <h2>Ultimi scans</h2>
+  <table style="width:100%; border-collapse:collapse;">
+    <thead>
+      <tr style="text-align:left; color:rgba(233,238,251,.8);">
+        <th style="padding:10px 6px;">ID</th>
+        <th style="padding:10px 6px;">Org</th>
+        <th style="padding:10px 6px;">User</th>
+        <th style="padding:10px 6px;">Settore</th>
+        <th style="padding:10px 6px;">Modello</th>
+        <th style="padding:10px 6px;">Mese</th>
+        <th style="padding:10px 6px;"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in scans %}
+      <tr style="border-top:1px solid rgba(255,255,255,.06);">
+        <td style="padding:10px 6px;">#{{ s.id }}</td>
+        <td style="padding:10px 6px;">{{ s.org_id }}</td>
+        <td style="padding:10px 6px;">{{ s.user_id }}</td>
+        <td style="padding:10px 6px;">{{ s.settore }}</td>
+        <td style="padding:10px 6px;">{{ s.modello }}</td>
+        <td style="padding:10px 6px;">{{ s.mese_riferimento }}</td>
+        <td style="padding:10px 6px; text-align:right;">
+          <a class="btn" href="{{ url_for('scans.view_scan', scan_id=s.id) }}">Apri</a>
+          <form method="post" action="{{ url_for('admin.delete_scan', scan_id=s.id) }}" style="display:inline;">
+            <button class="btn btn-danger" type="submit">Elimina</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

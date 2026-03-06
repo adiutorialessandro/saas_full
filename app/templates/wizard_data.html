@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h1>Wizard — Dati essenziali</h1>
+  <p style="color:rgba(255,255,255,.7); margin-top:6px;">
+    Inserisci i numeri principali (se li hai). Anche valori approssimativi migliorano molto la qualità del risultato.
+  </p>
+
+  <form method="post">
+    {{ form.csrf_token }}
+
+    <div class="grid" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+      <div>
+        <label>Cassa attuale (€)</label>
+        {{ form.cassa_attuale(class_="input", placeholder="es. 25000") }}
+      </div>
+      <div>
+        <label>Burn mensile (€)</label>
+        {{ form.burn_mensile(class_="input", placeholder="es. 8000") }}
+      </div>
+
+      <div>
+        <label>Incassi mese (€)</label>
+        {{ form.incassi_mese(class_="input", placeholder="es. 42000") }}
+      </div>
+      <div>
+        <label>Costi fissi mese (€)</label>
+        {{ form.costi_fissi_mese(class_="input", placeholder="es. 18000") }}
+      </div>
+
+      <div>
+        <label>Margine lordo (%)</label>
+        {{ form.margine_lordo_pct(class_="input", placeholder="es. 45") }}
+      </div>
+      <div>
+        <label>Lead mese (#)</label>
+        {{ form.leads_mese(class_="input", placeholder="es. 120") }}
+      </div>
+
+      <div>
+        <label>Clienti mese (#)</label>
+        {{ form.clienti_mese(class_="input", placeholder="es. 10") }}
+      </div>
+    </div>
+
+    <div style="margin-top:14px;">
+      <button class="btn" type="submit">Continua</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

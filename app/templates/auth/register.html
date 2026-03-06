@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card" style="max-width:520px; margin: 0 auto;">
+  <h1>Registrazione</h1>
+  <p class="muted">Crea un account per iniziare.</p>
+
+  <form method="post">
+    {{ form.hidden_tag() }}
+
+    <label>Email</label>
+    {{ form.email(class_="input", placeholder="es. admin@demo.it") }}
+
+    <label>Password</label>
+    {{ form.password(class_="input", placeholder="Min 6 caratteri") }}
+
+    <label>Conferma password</label>
+    {{ form.password2(class_="input", placeholder="Ripeti password") }}
+
+    <div style="height:12px"></div>
+    <button class="btn" type="submit">{{ form.submit.label.text }}</button>
+  </form>
+
+  <div style="height:14px"></div>
+  <p class="muted">
+    Hai già un account?
+    <a href="{{ url_for('auth.login') }}">Accedi</a>
+  </p>
+</div>
+{% endblock %}

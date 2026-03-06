@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Invito</h1>
+
+<div class="card" style="max-width:720px;">
+  <p><b>Organizzazione:</b> #{{ org.id }} — {{ org.name }}</p>
+  <p><b>Ruolo:</b> {{ invite.role }}</p>
+
+  <form method="post">
+    <button class="btn" type="submit">Accetta invito</button>
+    <a style="margin-left:10px;" href="{{ url_for('scans.dashboard') }}">Annulla</a>
+  </form>
+
+  <div style="height:10px"></div>
+  <div class="muted">Dopo l’accettazione verrai aggiunto come membro e potrai cambiare org dalla navbar.</div>
+</div>
+{% endblock %}

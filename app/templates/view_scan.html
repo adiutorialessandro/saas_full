@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="row" style="align-items:flex-end;">
+  <div>
+    <h1 style="margin:0;">Scan #{{ scan.id }}</h1>
+    <div class="muted" style="margin-top:6px;">
+      {{ scan.settore }} · {{ scan.modello }} · {{ scan.mese_riferimento }}
+      {% if scan.created_at %} · {{ scan.created_at|fmt_dt }}{% endif %}
+    </div>
+  </div>
+
+  <div style="display:flex; gap:10px; align-items:center;">
+    <a class="btn" href="{{ url_for('scans.scan_pdf', scan_id=scan.id) }}">Scarica PDF</a>
+    <a class="btn" href="{{ url_for('scans.dashboard') }}">← Dashboard</a>
+
+    <form method="post" action="{{ url_for('scans.delete_scan', scan_id=scan.id) }}"
+          onsubmit="return confirm('Eliminare definitivamente lo scan #{{ scan.id }}?');"
+          style="display:inline;">
+      <button class="btn btn-danger" type="submit">Elimina</button>
+    </form>
+  </div>
+</div>
+
+{# ---------- Stato complessivo ---------- #}
+{% set state = vm.get('state', {}) %}
+{% set overall = (state.get('overall', '—') or '—') %}
+<div class="badge {{ overall|lower }}">Stato complessivo: <b>{{ overall }}</b></div>
+
+{# ---------- Rischi triade (0..1) ---------- #}
+{% set risks = vm.get('risks', {}) %}
+{% set cash = (risks.get('cash') if risks.get('cash') is not none else 0) %}
+{% set marg = (risks.get('margini') if risks.get('margini') is not none else 0) %}
+{% set acq  = (risks.get('acq') if risks.get('acq') is not none else 0) %}
+
+{# se per errore arrivano in percento #}
+{% if cash > 1 %}{% set cash = cash / 100 %}{% endif %}
+{% if marg > 1 %}{% set marg = marg / 100 %}{% endif %}
+{% if acq  > 1 %}{% set acq  = acq  / 100 %}{% endif %}
+
+{% set cash_pct = cash * 100 %}
+{% set marg_pct = marg * 100 %}
+{% set acq_pct  = acq  * 100 %}
+
+{% macro risk_label(pct) -%}
+  {% if pct >= 66 %}ROSSO{% elif pct >= 33 %}GIALLO{% else %}VERDE{% endif %}
+{%- endmacro %}
+
+<div class="grid">
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+      <h3 style="margin:0;">Rischio Cassa</h3>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <span class="badge {{ risk_label(cash_pct)|lower }}" style="margin:0;">{{ risk_label(cash_pct) }}</span>
+        <b>{{ "%.2f"|format(cash_pct) }}%</b>
+      </div>
+    </div>
+    <div style="height:10px; background:rgba(255,255,255,.08); border-radius:999px; overflow:hidden; margin-top:10px;">
+      <div style="height:100%; width: {{ cash_pct }}%; background: rgba(59,130,246,.9);"></div>
+    </div>
+    <p style="margin-top:10px; color:rgba(255,255,255,.7);">Quanto pesa la liquidità (cashflow/runway/incassi).</p>
+  </div>
+
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+      <h3 style="margin:0;">Rischio Margini</h3>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <span class="badge {{ risk_label(marg_pct)|lower }}" style="margin:0;">{{ risk_label(marg_pct) }}</span>
+        <b>{{ "%.2f"|format(marg_pct) }}%</b>
+      </div>
+    </div>
+    <div style="height:10px; background:rgba(255,255,255,.08); border-radius:999px; overflow:hidden; margin-top:10px;">
+      <div style="height:100%; width: {{ marg_pct }}%; background: rgba(59,130,246,.9);"></div>
+    </div>
+    <p style="margin-top:10px; color:rgba(255,255,255,.7);">Stabilità del margine e controllo costi/sconti.</p>
+  </div>
+
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+      <h3 style="margin:0;">Rischio Acquisizione</h3>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <span class="badge {{ risk_label(acq_pct)|lower }}" style="margin:0;">{{ risk_label(acq_pct) }}</span>
+        <b>{{ "%.2f"|format(acq_pct) }}%</b>
+      </div>
+    </div>
+    <div style="height:10px; background:rgba(255,255,255,.08); border-radius:999px; overflow:hidden; margin-top:10px;">
+      <div style="height:100%; width: {{ acq_pct }}%; background: rgba(59,130,246,.9);"></div>
+    </div>
+    <p style="margin-top:10px; color:rgba(255,255,255,.7);">Funnel, conversione, offerta e follow-up.</p>
+  </div>
+</div>
+
+{# ---------- Decisioni ---------- #}
+{% set decisions = vm.get('decisions', {}) %}
+<div class="grid">
+  <div class="card"><h3>Cassa</h3><p>{{ decisions.get('cash','—') }}</p></div>
+  <div class="card"><h3>Margini</h3><p>{{ decisions.get('margini','—') }}</p></div>
+  <div class="card"><h3>Acquisizione</h3><p>{{ decisions.get('acq','—') }}</p></div>
+</div>
+
+{# ---------- KPI principali (valori reali) ---------- #}
+{% set kpi = vm.get('kpi', {}) %}
+
+{% macro fmt_eur(x) -%}
+  {%- if x is none -%}—{%- else -%}
+    {{ "{:,.0f}".format(x).replace(",", "X").replace(".", ",").replace("X", ".") }} €
+  {%- endif -%}
+{%- endmacro %}
+
+{% macro fmt_pct01(x) -%}
+  {%- if x is none -%}—{%- else -%}{{ "%.2f"|format(x*100) }}%{%- endif -%}
+{%- endmacro %}
+
+<div class="card" style="margin-top:14px;">
+  <h3>KPI principali</h3>
+
+  <div class="grid" style="grid-template-columns: repeat(3, minmax(0,1fr));">
+    <div class="card" style="background:rgba(255,255,255,0.02); box-shadow:none;">
+      <div class="muted">Cassa attuale</div>
+      <div style="font-weight:900; font-size:22px; margin-top:6px;">{{ fmt_eur(kpi.get('cassa_attuale')) }}</div>
+      <div class="muted" style="margin-top:6px;">Burn mensile: {{ fmt_eur(kpi.get('burn_mensile')) }}</div>
+    </div>
+
+    <div class="card" style="background:rgba(255,255,255,0.02); box-shadow:none;">
+      <div class="muted">Runway</div>
+      <div style="font-weight:900; font-size:22px; margin-top:6px;">
+        {% if kpi.get('runway_mesi') is not none %}
+          {{ "%.2f"|format(kpi.get('runway_mesi')) }} mesi
+        {% else %}
+          —
+        {% endif %}
+      </div>
+      <div class="muted" style="margin-top:6px;">Incassi: {{ fmt_eur(kpi.get('incassi_mese')) }}</div>
+    </div>
+
+    <div class="card" style="background:rgba(255,255,255,0.02); box-shadow:none;">
+      <div class="muted">Margine lordo</div>
+      <div style="font-weight:900; font-size:22px; margin-top:6px;">{{ fmt_pct01(kpi.get('margine_pct')) }}</div>
+      <div class="muted" style="margin-top:6px;">Costi fissi: {{ fmt_eur(kpi.get('costi_fissi_mese')) }}</div>
+    </div>
+
+    <div class="card" style="background:rgba(255,255,255,0.02); box-shadow:none;">
+      <div class="muted">Conversione</div>
+      <div style="font-weight:900; font-size:22px; margin-top:6px;">{{ fmt_pct01(kpi.get('conversione')) }}</div>
+      <div class="muted" style="margin-top:6px;">
+        Lead: {{ kpi.get('leads_mese', '—') if kpi.get('leads_mese') is not none else '—' }}
+        · Clienti: {{ kpi.get('clienti_mese', '—') if kpi.get('clienti_mese') is not none else '—' }}
+      </div>
+    </div>
+
+    <div class="card" style="background:rgba(255,255,255,0.02); box-shadow:none;">
+      <div class="muted">Break-even ratio</div>
+      <div style="font-weight:900; font-size:22px; margin-top:6px;">
+        {% if kpi.get('break_even_ratio') is not none %}
+          {{ "%.2f"|format(kpi.get('break_even_ratio')) }}
+        {% else %}
+          —
+        {% endif %}
+      </div>
+      <div class="muted" style="margin-top:6px;">(Incassi / ricavi di pareggio)</div>
+    </div>
+
+    <div class="card" style="background:rgba(255,255,255,0.02); box-shadow:none;">
+      <div class="muted">Burn / Cash</div>
+      <div style="font-weight:900; font-size:22px; margin-top:6px;">
+        {% if kpi.get('burn_cash_ratio') is not none %}
+          {{ "%.2f"|format(kpi.get('burn_cash_ratio')*100) }}%
+        {% else %}
+          —
+        {% endif %}
+      </div>
+      <div class="muted" style="margin-top:6px;">(più basso = meglio)</div>
+    </div>
+  </div>
+</div>
+
+{# ---------- 6 indicatori (KPI normalizzati) ---------- #}
+<div class="card" style="margin-top:14px;">
+  <h3>6 indicatori (KPI normalizzati)</h3>
+  <p class="muted">Barra = rischio (0..100%). A destra il valore reale del KPI.</p>
+
+  {% set inds = vm.get('indicators', []) %}
+  {% if inds %}
+    <div style="display:grid; gap:10px; margin-top:10px;">
+      {% for it in inds %}
+        {% set s = it.get('score01') %}
+        {% if s is none %}{% set s = 0.5 %}{% endif %}
+        {% if s > 1 %}{% set s = s / 100 %}{% endif %}
+        {% set pct = (s * 100) %}
+        {% set lbl = it.get('label','GIALLO') %}
+
+        <div class="card" style="background:rgba(255,255,255,0.02); box-shadow:none;">
+          <div style="display:flex; justify-content:space-between; gap:12px; align-items:flex-start;">
+            <div style="min-width:240px;">
+              <div style="font-weight:900;">{{ it.get('title','—') }}</div>
+              <div class="muted">{{ it.get('desc','') }}</div>
+            </div>
+
+            <div style="flex:1; padding-top:4px;">
+              <div style="height:10px; background:rgba(255,255,255,.08); border-radius:999px; overflow:hidden;">
+                <div style="height:100%; width: {{ pct }}%; background: rgba(59,130,246,.9);"></div>
+              </div>
+
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+                <span class="badge {{ lbl|lower }}" style="margin:0;">{{ lbl }}</span>
+                <b>{{ it.get('value_str','—') }}</b>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>—</p>
+  {% endif %}
+</div>
+
+{# ---------- Alerts ---------- #}
+<div class="card" style="margin-top:14px;">
+  <h3>Alert automatici</h3>
+  {% set alerts = vm.get('alerts', []) %}
+  {% if alerts %}
+    <div style="display:grid; gap:10px; margin-top:10px;">
+      {% for a in alerts %}
+        {% set lvl = (a.get('level','GIALLO') or 'GIALLO')|upper %}
+        <div class="card" style="background:rgba(255,255,255,0.02); box-shadow:none;">
+          <div style="display:flex; justify-content:space-between; gap:10px; align-items:flex-start;">
+            <span class="badge {{ lvl|lower }}" style="margin:0;">{{ lvl }}</span>
+            <div style="flex:1; padding-left:8px;">{{ a.get('text','—') }}</div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>—</p>
+  {% endif %}
+</div>
+
+{# ---------- Action plan ---------- #}
+<div class="card" style="margin-top:14px;">
+  <h3>Action plan (priorità)</h3>
+  {% set ap = vm.get('action_plan', []) %}
+  {% if ap %}
+    <ol style="margin-top:10px;">
+      {% for a in ap %}
+        <li style="margin:8px 0;">{{ a }}</li>
+      {% endfor %}
+    </ol>
+  {% else %}
+    <p>—</p>
+  {% endif %}
+</div>
+
+{% endblock %}

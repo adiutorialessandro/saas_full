@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="row" style="display:flex; justify-content:space-between; align-items:flex-end; gap:12px;">
+  <div>
+    <h1 style="margin:0;">Wizard – Quiz</h1>
+    <p class="muted" style="margin:6px 0 0;">Scala 1..5 (1 = alto rischio, 5 = basso rischio). Se sei incerto, scegli 3.</p>
+  </div>
+  <div style="display:flex; gap:10px;">
+    <a class="btn" href="{{ url_for('wizard.data') }}">← Dati</a>
+    <a class="btn" href="{{ url_for('scans.dashboard') }}">Dashboard</a>
+  </div>
+</div>
+
+<div class="card" style="margin-top:14px;">
+  <form method="post">
+    {{ form.hidden_tag() }}
+
+    <div class="grid" style="grid-template-columns: 1fr; gap:12px;">
+      <div class="card" style="background:rgba(255,255,255,0.02);">
+        <h3 style="margin:0 0 8px;">Domande (10)</h3>
+        <p class="muted" style="margin:0;">
+          Il punteggio finale integra: dati reali (cassa, margini, break-even, conversione) + quiz.
+        </p>
+      </div>
+
+      {% set qs = [
+        (form.q1,  "Liquidità: riesci a coprire almeno 2–4 mesi senza stress?"),
+        (form.q2,  "Incassi: i clienti pagano puntuali o spesso in ritardo?"),
+        (form.q3,  "Previsione: hai un cashflow (anche semplice) aggiornato?"),
+        (form.q4,  "Margini: sai quali servizi/prodotti ti fanno guadagnare davvero?"),
+        (form.q5,  "Sconti: gli sconti sono controllati o “succedono”?"),
+        (form.q6,  "Costi fissi: sono stabili e sotto controllo?"),
+        (form.q7,  "Lead: entrano contatti con continuità?"),
+        (form.q8,  "Conversione: trasformi i lead in clienti con regolarità?"),
+        (form.q9,  "Offerta: è chiara e ripetibile (pacchetti/step), o sempre personalizzata?"),
+        (form.q10, "Follow-up: ogni trattativa ha un prossimo step con data?")
+      ] %}
+
+      {% for field, label in qs %}
+        <div class="card" style="display:flex; justify-content:space-between; align-items:center; gap:14px;">
+          <div style="flex:1;">
+            <div style="font-weight:700;">{{ loop.index }}. {{ label }}</div>
+            <div class="muted" style="margin-top:4px;">Seleziona 1..5</div>
+          </div>
+          <div style="min-width:220px;">
+          <div class="rating">
+            {% for sub in field %}
+              <label class="rating-pill">
+                {{ sub }}
+                <span>{{ sub.label.text }}</span>
+              </label>
+            {% endfor %}
+          </div>
+  {% if field.errors %}
+    <div class="err" style="margin-top:6px;">{{ field.errors[0] }}</div>
+  {% endif %}
+</div>
+        </div>
+      {% endfor %}
+
+      <div style="display:flex; justify-content:flex-end; margin-top:6px;">
+        <button class="btn" type="submit">Genera scan</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+{% endblock %}
