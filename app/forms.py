@@ -1,11 +1,15 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, FloatField, RadioField
-from wtforms.validators import DataRequired, Email, Length, NumberRange, Optional, Regexp
+from wtforms.validators import DataRequired, Email, Length, NumberRange, Optional, Regexp, EqualTo
 
 
 class RegisterForm(FlaskForm):
     email = StringField("Email", validators=[DataRequired(), Email()])
     password = PasswordField("Password", validators=[DataRequired(), Length(min=6)])
+    password2 = PasswordField(
+        "Ripeti Password",
+        validators=[DataRequired(), EqualTo("password", message="Le password non coincidono")]
+    )
     submit = SubmitField("Registrati")
 
 
@@ -35,8 +39,8 @@ class EssentialDataForm(FlaskForm):
     clienti_mese = FloatField("Clienti mese (#)", validators=[Optional(), NumberRange(min=0)])
     submit = SubmitField("Continua")
 
+
 class QuizForm(FlaskForm):
-    # 1 = alto rischio, 5 = basso rischio
     _choices = [(1, "1"), (2, "2"), (3, "3"), (4, "4"), (5, "5")]
 
     q1 = RadioField("Q1", choices=_choices, coerce=int, validators=[DataRequired()])
