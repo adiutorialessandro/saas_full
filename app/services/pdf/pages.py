@@ -4,6 +4,7 @@ from typing import Any, Dict, Optional
 
 from reportlab.lib import colors
 from reportlab.lib.units import mm
+from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
 
 from .config import *
@@ -368,6 +369,26 @@ def _kpi_text_pct(v: Any) -> str:
         return "—"
     return fmt_pct01(v)
 
+
+def _draw_image_contain(c: canvas.Canvas, img_path: Optional[str], x: float, y: float, w: float, h: float) -> bool:
+    if not img_path:
+        return False
+    try:
+        img = ImageReader(img_path)
+        iw, ih = img.getSize()
+        if not iw or not ih:
+            return False
+
+        scale = min(w / float(iw), h / float(ih))
+        dw = iw * scale
+        dh = ih * scale
+        dx = x + (w - dw) / 2.0
+        dy = y + (h - dh) / 2.0
+        c.drawImage(img, dx, dy, width=dw, height=dh, preserveAspectRatio=True, mask='auto')
+        return True
+    except Exception:
+        return False
+
 # =========================================================
 # PAGE 1 — EXECUTIVE
 # =========================================================
@@ -569,10 +590,25 @@ def _page_2_risk_snapshot(
     # Spostiamo leggermente verso il basso il blocco delle card per evitare sovrapposizioni
     top_y = top_y - 10 * mm
 
+    # Premium chart card (if available)
+    chart_h = 42 * mm
+    chart_y = top_y - chart_h
+    if ctx.get("risk_bar_chart"):
+        _shadow_card(c, M_L, chart_y, SAFE_W, chart_h)
+        c.setFillColor(DEFAULT_TEXT)
+        c.setFont("Helvetica-Bold", 11.5)
+        c.drawString(M_L + 8 * mm, chart_y + chart_h - 10 * mm, "Business Risk Profile")
+        drawn = _draw_image_contain(c, ctx.get("risk_bar_chart"), M_L + 8 * mm, chart_y + 5 * mm, SAFE_W - 16 * mm, chart_h - 16 * mm)
+        if not drawn:
+            c.setFillColor(DEFAULT_MUTED)
+            c.setFont("Helvetica", 9.5)
+            c.drawString(M_L + 8 * mm, chart_y + 16 * mm, "Grafico rischio non disponibile.")
+        top_y = chart_y - 8 * mm
+
     gap = 10 * mm
     col_w = (SAFE_W - 2 * gap) / 3
 
-    card_h = 75 * mm
+    card_h = 62 * mm
     y = top_y - card_h
 
     _risk_card(
@@ -610,7 +646,7 @@ def _page_2_risk_snapshot(
 
     # --- Top driver (perché) ---
     drivers_h = 25 * mm
-    drivers_y = y - drivers_h - 40 * mm
+    drivers_y = y - drivers_h - 14 * mm
     drv = ctx.get("drivers") or {}    
     items = (drv.get("cash") or []) + (drv.get("margins") or []) + (drv.get("acquisition") or [])
     items = items[:3] if items else ["Driver non disponibili (MVP)."]
@@ -717,7 +753,18 @@ def _page_4_radar(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total: in
     bm = ctx.get("benchmark_meta") or ctx.get("bm") or {}
     bm_enabled = bool(bm.get("enabled", False))
 
-    if bm_enabled:
+    radar_drawn = False
+    if ctx.get("triade_radar_chart"):
+        radar_drawn = _draw_image_contain(
+            c,
+            ctx.get("triade_radar_chart"),
+            cx - radar_r,
+            cy - radar_r,
+            radar_r * 2,
+            radar_r * 2,
+        )
+
+    if not radar_drawn and bm_enabled:
         _draw_radar(
             c,
             cx,
@@ -728,7 +775,7 @@ def _page_4_radar(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total: in
             ctx.get("benchmark"),
             accent=ctx["accent"],
         )
-    else:
+    elif not radar_drawn:
         # Benchmark OFF: show an explicit placeholder (no decorative radar)
         c.saveState()
         c.setFillColor(colors.HexColor("#64748b"))
@@ -945,10 +992,21 @@ def _one_pager_executive(
     c.setFillColor(DEFAULT_TEXT)
     c.setFont("Helvetica-Bold", 14)
     c.drawString(tri_x + 8 * mm, y + card_h - 14 * mm, f"Triad {ctx['triad']}/100")
-    _triad_progress(c, tri_x + 8 * mm, y + 18 * mm, col_w - 16 * mm, ctx["triad"], accent=ctx["accent"])
+
+    radar_ok = _draw_image_contain(
+        c,
+        ctx.get("triade_radar_chart"),
+        tri_x + 6 * mm,
+        y + 12 * mm,
+        col_w - 12 * mm,
+        24 * mm,
+    )
+    if not radar_ok:
+        _triad_progress(c, tri_x + 8 * mm, y + 18 * mm, col_w - 16 * mm, ctx["triad"], accent=ctx["accent"])
+
     c.setFillColor(DEFAULT_MUTED)
     c.setFont("Helvetica", 9.5)
-    c.drawString(tri_x + 8 * mm, y + 10 * mm, f"Confidence {ctx['confidence']}% · v1")
+    c.drawString(tri_x + 8 * mm, y + 6 * mm, f"Confidence {ctx['confidence']}% · v1")
 
     # Row 2: insight + 90 day plan
     row2_top = y - 10 * mm
