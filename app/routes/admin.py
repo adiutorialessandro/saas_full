@@ -79,12 +79,7 @@ def create_organization():
         db.session.add(org)
         db.session.flush()
 
-        membership = Membership(
-            user_id=user.id,
-            org_id=org.id,
-            role="owner",
-        )
-
+        membership = Membership(user_id=user.id, org_id=org.id, role="owner")
         db.session.add(membership)
         db.session.commit()
 
@@ -132,11 +127,7 @@ def organization_detail(org_id: int):
 
     org = Organization.query.get_or_404(org_id)
 
-    memberships = (
-        Membership.query.filter_by(org_id=org.id)
-        .order_by(Membership.id.asc())
-        .all()
-    )
+    memberships = Membership.query.filter_by(org_id=org.id).order_by(Membership.id.asc()).all()
 
     users = []
     for m in memberships:
@@ -150,11 +141,7 @@ def organization_detail(org_id: int):
                 "membership_id": m.id,
             })
 
-    scans = (
-        Scan.query.filter_by(org_id=org.id)
-        .order_by(Scan.id.desc())
-        .all()
-    )
+    scans = Scan.query.filter_by(org_id=org.id).order_by(Scan.id.desc()).all()
 
     return render_template(
         "admin/organization_detail.html",
@@ -191,12 +178,7 @@ def create_org_user(org_id: int):
         db.session.add(user)
         db.session.flush()
 
-        membership = Membership(
-            user_id=user.id,
-            org_id=org.id,
-            role=role,
-        )
-
+        membership = Membership(user_id=user.id, org_id=org.id, role=role)
         db.session.add(membership)
         db.session.commit()
 
@@ -214,7 +196,6 @@ def update_org_user_role(org_id: int, user_id: int):
 
     org = Organization.query.get_or_404(org_id)
     user = User.query.get_or_404(user_id)
-
     membership = Membership.query.filter_by(org_id=org.id, user_id=user.id).first_or_404()
 
     form = UpdateOrgUserRoleForm(role=membership.role)
@@ -266,16 +247,10 @@ def reset_org_user_password(org_id: int, user_id: int):
     if form.validate_on_submit():
         user.set_password(form.password.data)
         db.session.commit()
-
         flash("Password aggiornata con successo.")
         return redirect(url_for("admin.organization_detail", org_id=org.id))
 
-    return render_template(
-        "admin/reset_user_password.html",
-        form=form,
-        org=org,
-        user=user,
-    )
+    return render_template("admin/reset_user_password.html", form=form, org=org, user=user)
 
 
 @bp.post("/organizations/<int:org_id>/users/<int:user_id>/delete")
@@ -300,7 +275,6 @@ def delete_org_user(org_id: int, user_id: int):
         db.session.delete(user)
 
     db.session.commit()
-
     flash("Utente rimosso dall'azienda.")
     return redirect(url_for("admin.organization_detail", org_id=org.id))
 
