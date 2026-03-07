@@ -1,6 +1,6 @@
 from flask import Flask, redirect, url_for
 from .config import Config
-from .extensions import db, login_manager
+from .extensions import db, login_manager, migrate
 
 from .routes.auth import bp as auth_bp
 from .routes.wizard import bp as wizard_bp
@@ -14,6 +14,7 @@ def create_app():
 
     db.init_app(app)
     login_manager.init_app(app)
+    migrate.init_app(app, db)
 
     @app.template_filter("fmt_dt")
     def fmt_dt(value):
@@ -36,8 +37,5 @@ def create_app():
     app.register_blueprint(wizard_bp)
     app.register_blueprint(scans_bp)
     app.register_blueprint(admin_bp)
-
-    with app.app_context():
-        db.create_all()
 
     return app
