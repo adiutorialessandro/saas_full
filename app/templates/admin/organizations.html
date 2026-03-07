@@ -1,37 +1,42 @@
-{% extends "base.html" %}
-{% block content %}
+@bp.route("/organizations/new", methods=["GET", "POST"])
+@login_required
+def create_organization():
+    if not current_user.is_admin:
+        return "Forbidden", 403
 
-<a class="btn" href="{{ url_for('admin.create_organization') }}">
-+ Nuova azienda
-</a>
+    form = CreateOrganizationForm()
 
-<h1>Clienti (Organizations)</h1>
+    if form.validate_on_submit():
+        email = form.email.data.strip().lower()
+        org_name = form.name.data.strip()
 
-<div class="card">
-<table class="table">
-<thead>
-<tr>
-<th>ID</th>
-<th>Nome azienda</th>
-<th>Owner</th>
-<th>Utenti</th>
-<th>Scans</th>
-</tr>
-</thead>
+        if User.query.filter_by(email=email).first():
+            flash("Email già registrata.")
+            return render_template("admin/new_org.html", form=form)
 
-<tbody>
-{% for r in rows %}
-<tr>
-<td>{{ r.org.id }}</td>
-<td>{{ r.org.name }}</td>
-<td>{{ r.owner }}</td>
-<td>{{ r.users }}</td>
-<td>{{ r.scans }}</td>
-</tr>
-{% endfor %}
-</tbody>
+        if Organization.query.filter_by(name=org_name).first():
+            flash("Nome azienda già esistente.")
+            return render_template("admin/new_org.html", form=form)
 
-</table>
-</div>
+        user = User(email=email)
+        user.set_password(form.password.data)
 
-{% endblock %}
+        org = Organization(name=org_name)
+
+        db.session.add(user)
+        db.session.add(org)
+        db.session.flush()
+
+        membership = Membership(
+            user_id=user.id,
+            org_id=org.id,
+            role="owner"
+        )
+
+        db.session.add(membership)
+        db.session.commit()
+
+        flash("Azienda creata con successo.")
+        return redirect(url_for("admin.organizations"))
+
+    return render_template("admin/new_org.html", form=form)
