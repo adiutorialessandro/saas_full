@@ -1,6 +1,21 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, FloatField, RadioField, SelectField
-from wtforms.validators import DataRequired, Email, Length, NumberRange, Optional, Regexp, EqualTo
+from wtforms import (
+    StringField,
+    PasswordField,
+    SubmitField,
+    FloatField,
+    RadioField,
+    SelectField,
+)
+from wtforms.validators import (
+    DataRequired,
+    Email,
+    Length,
+    NumberRange,
+    Optional,
+    Regexp,
+    EqualTo,
+)
 
 
 class RegisterForm(FlaskForm):
@@ -8,7 +23,7 @@ class RegisterForm(FlaskForm):
     password = PasswordField("Password", validators=[DataRequired(), Length(min=6)])
     password2 = PasswordField(
         "Ripeti Password",
-        validators=[DataRequired(), EqualTo("password", message="Le password non coincidono")]
+        validators=[DataRequired(), EqualTo("password", message="Le password non coincidono")],
     )
     submit = SubmitField("Registrati")
 
@@ -41,18 +56,79 @@ class EssentialDataForm(FlaskForm):
 
 
 class QuizForm(FlaskForm):
+    # 1 = situazione critica / poco controllo
+    # 5 = situazione stabile / buon controllo
     _choices = [(1, "1"), (2, "2"), (3, "3"), (4, "4"), (5, "5")]
 
-    q1 = RadioField("Q1", choices=_choices, coerce=int, validators=[DataRequired()])
-    q2 = RadioField("Q2", choices=_choices, coerce=int, validators=[DataRequired()])
-    q3 = RadioField("Q3", choices=_choices, coerce=int, validators=[DataRequired()])
-    q4 = RadioField("Q4", choices=_choices, coerce=int, validators=[DataRequired()])
-    q5 = RadioField("Q5", choices=_choices, coerce=int, validators=[DataRequired()])
-    q6 = RadioField("Q6", choices=_choices, coerce=int, validators=[DataRequired()])
-    q7 = RadioField("Q7", choices=_choices, coerce=int, validators=[DataRequired()])
-    q8 = RadioField("Q8", choices=_choices, coerce=int, validators=[DataRequired()])
-    q9 = RadioField("Q9", choices=_choices, coerce=int, validators=[DataRequired()])
-    q10 = RadioField("Q10", choices=_choices, coerce=int, validators=[DataRequired()])
+    q1 = RadioField(
+        "Hai una visione chiara della liquidità disponibile per i prossimi 90 giorni?",
+        choices=_choices,
+        coerce=int,
+        validators=[DataRequired()],
+    )
+
+    q2 = RadioField(
+        "Gli incassi entrano con regolarità e nei tempi previsti?",
+        choices=_choices,
+        coerce=int,
+        validators=[DataRequired()],
+    )
+
+    q3 = RadioField(
+        "Conosci con chiarezza il margine reale dei tuoi prodotti o servizi?",
+        choices=_choices,
+        coerce=int,
+        validators=[DataRequired()],
+    )
+
+    q4 = RadioField(
+        "I ricavi attuali coprono con sufficiente sicurezza i costi fissi aziendali?",
+        choices=_choices,
+        coerce=int,
+        validators=[DataRequired()],
+    )
+
+    q5 = RadioField(
+        "La generazione di lead o opportunità commerciali è costante e prevedibile?",
+        choices=_choices,
+        coerce=int,
+        validators=[DataRequired()],
+    )
+
+    q6 = RadioField(
+        "Il processo commerciale converte lead in clienti con efficacia soddisfacente?",
+        choices=_choices,
+        coerce=int,
+        validators=[DataRequired()],
+    )
+
+    q7 = RadioField(
+        "La tua azienda è poco dipendente da pochi clienti o poche commesse?",
+        choices=_choices,
+        coerce=int,
+        validators=[DataRequired()],
+    )
+
+    q8 = RadioField(
+        "Hai KPI chiari e aggiornati per prendere decisioni rapide e corrette?",
+        choices=_choices,
+        coerce=int,
+        validators=[DataRequired()],
+    )
+
+    q9 = RadioField(
+        "I costi, i processi e l’operatività sono sotto controllo senza sprechi rilevanti?",
+        choices=_choices,
+        coerce=int,
+        validators=[DataRequired()],
+    )
+
+    q10 = RadioField(
+        "Il team o l’organizzazione riesce a eseguire priorità e decisioni con continuità?",
+        choices=_choices,
+        coerce=int,
+        validators=[DataRequired()],
+    )
 
     submit = SubmitField("Genera scan")
 
@@ -79,11 +155,11 @@ class UpdateOrgUserRoleForm(FlaskForm):
 class ResetUserPasswordForm(FlaskForm):
     password = PasswordField(
         "Nuova password",
-        validators=[DataRequired(), Length(min=6)]
+        validators=[DataRequired(), Length(min=6)],
     )
     password2 = PasswordField(
         "Ripeti password",
-        validators=[DataRequired(), EqualTo("password", message="Le password non coincidono")]
+        validators=[DataRequired(), EqualTo("password", message="Le password non coincidono")],
     )
     submit = SubmitField("Aggiorna password")
 

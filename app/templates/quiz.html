@@ -16,8 +16,13 @@
     <div class="wizard-head">
       <h1>Completa il mini assessment</h1>
       <p>
-        Valuta ogni area da 1 a 5. Il sistema userà queste risposte per rafforzare la lettura del report.
+        Valuta ogni area da <b>1 a 5</b>. Le risposte aiutano il sistema a capire
+        quanto la tua azienda sia stabile, controllata e prevedibile.
       </p>
+    </div>
+
+    <div class="wizard-tip">
+      <b>Legenda:</b> 1 = situazione critica / poco controllo · 5 = situazione stabile / buon controllo
     </div>
 
     <form method="post" class="wizard-form">
@@ -30,8 +35,10 @@
             <div class="quiz-question">
               <div class="quiz-number">{{ i }}</div>
               <div>
-                <div class="quiz-title">Domanda {{ i }}</div>
-                <div class="quiz-sub">Seleziona un valore da 1 (più critico) a 5 (più stabile)</div>
+                <div class="quiz-title">{{ field.label.text }}</div>
+                <div class="quiz-sub">
+                  Seleziona il valore che descrive meglio la situazione attuale della tua azienda.
+                </div>
               </div>
             </div>
 
