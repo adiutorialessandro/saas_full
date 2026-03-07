@@ -7,6 +7,7 @@ from ..models.organization import Organization
 from ..models.membership import Membership
 from ..models.scan import Scan
 from ..forms import CreateOrganizationForm
+from ..forms import CreateOrganizationForm, CreateOrgUserForm
 
 bp = Blueprint("admin", __name__, url_prefix="/admin")
 
@@ -88,6 +89,46 @@ def create_organization():
 
     return render_template("admin/new_org.html", form=form)
 
+@bp.route("/organizations/<int:org_id>/users/new", methods=["GET", "POST"])
+@login_required
+def create_org_user(org_id: int):
+    if not admin_required():
+        return "Forbidden", 403
+
+    org = Organization.query.get_or_404(org_id)
+    form = CreateOrgUserForm()
+
+    if form.validate_on_submit():
+        email = form.email.data.strip().lower()
+        role = form.role.data.strip().lower()
+
+        if role not in {"owner", "admin", "member", "manager"}:
+            flash("Ruolo non valido. Usa: owner, admin, manager o member.")
+            return render_template("admin/new_org_user.html", form=form, org=org)
+
+        if User.query.filter_by(email=email).first():
+            flash("Email già registrata.")
+            return render_template("admin/new_org_user.html", form=form, org=org)
+
+        user = User(email=email, is_admin=False)
+        user.set_password(form.password.data)
+
+        db.session.add(user)
+        db.session.flush()
+
+        membership = Membership(
+            user_id=user.id,
+            org_id=org.id,
+            role=role,
+        )
+
+        db.session.add(membership)
+        db.session.commit()
+
+        flash("Utente cliente creato con successo.")
+        return redirect(url_for("admin.organization_detail", org_id=org.id))
+
+    return render_template("admin/new_org_user.html", form=form, org=org)
 
 @bp.get("/organizations")
 @login_required

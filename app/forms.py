@@ -62,3 +62,9 @@ class CreateOrganizationForm(FlaskForm):
     email = StringField("Email owner", validators=[DataRequired(), Email()])
     password = PasswordField("Password iniziale", validators=[DataRequired(), Length(min=6)])
     submit = SubmitField("Crea azienda")
+
+class CreateOrgUserForm(FlaskForm):
+    email = StringField("Email utente", validators=[DataRequired(), Email()])
+    password = PasswordField("Password iniziale", validators=[DataRequired(), Length(min=6)])
+    role = StringField("Ruolo", validators=[DataRequired(), Length(min=2, max=20)])
+    submit = SubmitField("Aggiungi utente")
