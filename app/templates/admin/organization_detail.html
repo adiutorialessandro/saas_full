@@ -19,6 +19,9 @@
       <a class="btn" href="{{ url_for('admin.create_org_user', org_id=org.id) }}">+ Utente</a>
       <a class="btn" href="{{ url_for('admin.update_organization_plan', org_id=org.id) }}">Piano</a>
       <a class="btn" href="{{ url_for('admin.organizations') }}">← Torna ai clienti</a>
+      {% if config.BILLING_ENABLED %}
+      <a class="btn" href="{{ url_for('billing.portal', org_id=org.id) }}">Billing</a>
+        {% endif %}
     </div>
   </div>
 </div>
