@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="dash-hero">
+  <div class="dash-hero-inner">
+    <div>
+      <h1 class="dash-title">Piani SaaS</h1>
+      <div class="dash-sub">Gestione dei piani di abbonamento.</div>
+    </div>
+
+    <div class="dash-actions">
+      <a class="btn" href="{{ url_for('admin.create_plan') }}">+ Nuovo piano</a>
+    </div>
+  </div>
+</div>
+
+<div class="card inbox-card">
+  {% if plans %}
+    <div class="inbox-list">
+      {% for p in plans %}
+        <div class="inbox-row">
+          <div class="inbox-main">
+            <div class="inbox-title">
+              <span class="pill">#{{ p.id }}</span>
+              <b>{{ p.name }}</b>
+            </div>
+            <div class="inbox-meta muted">
+              Limite scans: {{ "Illimitato" if p.scan_limit == -1 else p.scan_limit }}
+              · Prezzo/mese: € {{ "%.2f"|format(p.price_month) }}
+              · Attivo: {{ "Sì" if p.is_active else "No" }}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-title">Nessun piano presente.</div>
+    </div>
+  {% endif %}
+</div>
+
+{% endblock %}

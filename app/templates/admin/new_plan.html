@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card" style="max-width:560px; margin: 0 auto;">
+  <h1>Nuovo piano</h1>
+  <p class="muted">Crea un nuovo piano SaaS.</p>
+
+  <form method="post">
+    {{ form.hidden_tag() }}
+
+    <label>Nome piano</label>
+    {{ form.name(class_="input", placeholder="Es. Pro") }}
+
+    <label>Limite scansioni</label>
+    {{ form.scan_limit(class_="input", placeholder="Es. 50 oppure -1 per illimitato") }}
+
+    <label>Prezzo mensile</label>
+    {{ form.price_month(class_="input", placeholder="Es. 29.90") }}
+
+    <div style="height:12px"></div>
+    <button class="btn" type="submit">{{ form.submit.label.text }}</button>
+    <a class="btn" href="{{ url_for('admin.plans') }}">Annulla</a>
+  </form>
+</div>
+
+{% endblock %}

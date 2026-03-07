@@ -7,6 +7,10 @@ from .routes.wizard import bp as wizard_bp
 from .routes.scans import bp as scans_bp
 from .routes.admin import bp as admin_bp
 
+from .models.plan import Plan
+from .models.organization import Organization
+from .models.membership import Membership
+from .models.scan import Scan
 
 def create_app():
     app = Flask(__name__)

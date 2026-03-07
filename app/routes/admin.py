@@ -6,11 +6,14 @@ from ..models.user import User
 from ..models.organization import Organization
 from ..models.membership import Membership
 from ..models.scan import Scan
+from ..models.plan import Plan
 from ..forms import (
     CreateOrganizationForm,
     CreateOrgUserForm,
     UpdateOrgUserRoleForm,
     ResetUserPasswordForm,
+    CreatePlanForm,
+    UpdateOrganizationPlanForm,
 )
 
 bp = Blueprint("admin", __name__, url_prefix="/admin")
@@ -29,6 +32,7 @@ def index():
     users_count = User.query.count()
     orgs_count = Organization.query.count()
     scans_count = Scan.query.count()
+    plans_count = Plan.query.count()
 
     rows = []
     scans = Scan.query.order_by(Scan.id.desc()).limit(20).all()
@@ -46,6 +50,7 @@ def index():
         users_count=users_count,
         orgs_count=orgs_count,
         scans_count=scans_count,
+        plans_count=plans_count,
         rows=rows,
     )
 
@@ -79,7 +84,12 @@ def create_organization():
         db.session.add(org)
         db.session.flush()
 
-        membership = Membership(user_id=user.id, org_id=org.id, role="owner")
+        membership = Membership(
+            user_id=user.id,
+            org_id=org.id,
+            role="owner",
+        )
+
         db.session.add(membership)
         db.session.commit()
 
@@ -114,6 +124,7 @@ def organizations():
             "owner": owner.email if owner else "—",
             "users": users_count,
             "scans": scans_count,
+            "plan_name": org.plan.name if org.plan else "Nessuno",
         })
 
     return render_template("admin/organizations.html", rows=rows)
@@ -127,7 +138,11 @@ def organization_detail(org_id: int):
 
     org = Organization.query.get_or_404(org_id)
 
-    memberships = Membership.query.filter_by(org_id=org.id).order_by(Membership.id.asc()).all()
+    memberships = (
+        Membership.query.filter_by(org_id=org.id)
+        .order_by(Membership.id.asc())
+        .all()
+    )
 
     users = []
     for m in memberships:
@@ -141,7 +156,11 @@ def organization_detail(org_id: int):
                 "membership_id": m.id,
             })
 
-    scans = Scan.query.filter_by(org_id=org.id).order_by(Scan.id.desc()).all()
+    scans = (
+        Scan.query.filter_by(org_id=org.id)
+        .order_by(Scan.id.desc())
+        .all()
+    )
 
     return render_template(
         "admin/organization_detail.html",
@@ -178,7 +197,12 @@ def create_org_user(org_id: int):
         db.session.add(user)
         db.session.flush()
 
-        membership = Membership(user_id=user.id, org_id=org.id, role=role)
+        membership = Membership(
+            user_id=user.id,
+            org_id=org.id,
+            role=role,
+        )
+
         db.session.add(membership)
         db.session.commit()
 
@@ -247,10 +271,16 @@ def reset_org_user_password(org_id: int, user_id: int):
     if form.validate_on_submit():
         user.set_password(form.password.data)
         db.session.commit()
+
         flash("Password aggiornata con successo.")
         return redirect(url_for("admin.organization_detail", org_id=org.id))
 
-    return render_template("admin/reset_user_password.html", form=form, org=org, user=user)
+    return render_template(
+        "admin/reset_user_password.html",
+        form=form,
+        org=org,
+        user=user,
+    )
 
 
 @bp.post("/organizations/<int:org_id>/users/<int:user_id>/delete")
@@ -275,8 +305,87 @@ def delete_org_user(org_id: int, user_id: int):
         db.session.delete(user)
 
     db.session.commit()
+
     flash("Utente rimosso dall'azienda.")
     return redirect(url_for("admin.organization_detail", org_id=org.id))
+
+
+@bp.get("/plans")
+@login_required
+def plans():
+    if not admin_required():
+        return "Forbidden", 403
+
+    plans = Plan.query.order_by(Plan.id.asc()).all()
+    return render_template("admin/plans.html", plans=plans)
+
+
+@bp.route("/plans/new", methods=["GET", "POST"])
+@login_required
+def create_plan():
+    if not admin_required():
+        return "Forbidden", 403
+
+    form = CreatePlanForm()
+
+    if form.validate_on_submit():
+        name = form.name.data.strip()
+
+        try:
+            scan_limit = int(form.scan_limit.data.strip())
+            price_month = float(form.price_month.data.strip())
+        except Exception:
+            flash("Valori piano non validi.")
+            return render_template("admin/new_plan.html", form=form)
+
+        if Plan.query.filter_by(name=name).first():
+            flash("Piano già esistente.")
+            return render_template("admin/new_plan.html", form=form)
+
+        plan = Plan(
+            name=name,
+            scan_limit=scan_limit,
+            price_month=price_month,
+            is_active=True,
+        )
+
+        db.session.add(plan)
+        db.session.commit()
+
+        flash("Piano creato con successo.")
+        return redirect(url_for("admin.plans"))
+
+    return render_template("admin/new_plan.html", form=form)
+
+
+@bp.route("/organizations/<int:org_id>/plan", methods=["GET", "POST"])
+@login_required
+def update_organization_plan(org_id: int):
+    if not admin_required():
+        return "Forbidden", 403
+
+    org = Organization.query.get_or_404(org_id)
+    form = UpdateOrganizationPlanForm(plan_id=str(org.plan_id or ""))
+
+    if form.validate_on_submit():
+        try:
+            plan_id = int(form.plan_id.data.strip())
+        except Exception:
+            flash("ID piano non valido.")
+            return render_template("admin/update_org_plan.html", form=form, org=org)
+
+        plan = Plan.query.get(plan_id)
+        if not plan:
+            flash("Piano non trovato.")
+            return render_template("admin/update_org_plan.html", form=form, org=org)
+
+        org.plan_id = plan.id
+        db.session.commit()
+
+        flash("Piano azienda aggiornato.")
+        return redirect(url_for("admin.organization_detail", org_id=org.id))
+
+    return render_template("admin/update_org_plan.html", form=form, org=org)
 
 
 @bp.post("/user/<int:user_id>/toggle-admin")

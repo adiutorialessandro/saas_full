@@ -86,3 +86,15 @@ class ResetUserPasswordForm(FlaskForm):
         validators=[DataRequired(), EqualTo("password", message="Le password non coincidono")]
     )
     submit = SubmitField("Aggiorna password")
+
+
+class CreatePlanForm(FlaskForm):
+    name = StringField("Nome piano", validators=[DataRequired(), Length(min=2, max=50)])
+    scan_limit = StringField("Limite scansioni", validators=[DataRequired()])
+    price_month = StringField("Prezzo mensile", validators=[DataRequired()])
+    submit = SubmitField("Crea piano")
+
+
+class UpdateOrganizationPlanForm(FlaskForm):
+    plan_id = StringField("ID piano", validators=[DataRequired()])
+    submit = SubmitField("Aggiorna piano")
