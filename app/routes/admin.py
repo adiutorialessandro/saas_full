@@ -296,6 +296,7 @@ def reset_org_user_password(org_id: int, user_id: int):
         user=user,
     )
 
+
 @bp.get("/scan/<int:scan_id>")
 @login_required
 def view_scan(scan_id: int):
@@ -412,7 +413,7 @@ def update_organization_plan(org_id: int):
     form.plan_id.choices = [(p.id, f"{p.name} · Limite: {'Illimitato' if p.scan_limit == -1 else p.scan_limit} · € {p.price_month:.2f}/mese") for p in plans]
 
     if form.validate_on_submit():
-        plan = Plan.query.get(form.plan_id.data)
+        plan = db.session.get(Plan, form.plan_id.data)
         if not plan:
             flash("Piano non trovato.")
             return render_template("admin/update_org_plan.html", form=form, org=org)
@@ -441,6 +442,7 @@ def update_organization_plan(org_id: int):
         form.plan_id.data = org.plan_id
 
     return render_template("admin/update_org_plan.html", form=form, org=org)
+
 
 @bp.post("/user/<int:user_id>/toggle-admin")
 @login_required
