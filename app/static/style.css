@@ -1537,3 +1537,274 @@ h3{ margin:0 0 8px; font-size:18px; }
   font-size:14px;
   color:#334155;
 }
+
+.pricing-page{
+  display:flex;
+  flex-direction:column;
+  gap:24px;
+}
+
+.pricing-hero{
+  padding:10px 0 0;
+}
+
+.pricing-hero-inner{
+  padding:32px;
+  border:1px solid #e2e8f0;
+  border-radius:24px;
+  background:linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  box-shadow:0 10px 30px rgba(15, 23, 42, 0.05);
+  text-align:center;
+}
+
+.pricing-hero-inner h1{
+  margin:0 0 12px;
+  font-size:42px;
+  line-height:1.05;
+  color:#0f172a;
+}
+
+.pricing-hero-inner p{
+  max-width:760px;
+  margin:0 auto;
+  color:#64748b;
+  line-height:1.7;
+  font-size:16px;
+}
+
+.pricing-switch-note{
+  margin-top:-4px;
+}
+
+.pricing-note-card{
+  padding:16px 18px;
+  border:1px solid #dbeafe;
+  background:#eff6ff;
+  color:#1d4ed8;
+  border-radius:18px;
+  font-size:14px;
+  line-height:1.6;
+}
+
+.pricing-grid-pro{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:20px;
+}
+
+.price-card-pro{
+  position:relative;
+  padding:26px;
+  border:1px solid #e2e8f0;
+  border-radius:22px;
+  background:#fff;
+  box-shadow:0 10px 24px rgba(15, 23, 42, 0.04);
+  display:flex;
+  flex-direction:column;
+  min-height:100%;
+}
+
+.price-card-pro.featured{
+  border-color:rgba(37,99,235,.28);
+  box-shadow:0 16px 34px rgba(37,99,235,.10);
+  transform:translateY(-4px);
+}
+
+.featured-tag{
+  position:absolute;
+  top:16px;
+  right:16px;
+  padding:7px 10px;
+  border-radius:999px;
+  background:#2563eb;
+  color:#fff;
+  font-size:12px;
+  font-weight:800;
+}
+
+.price-card-top{
+  margin-bottom:18px;
+}
+
+.price-plan{
+  font-size:24px;
+  font-weight:800;
+  color:#0f172a;
+  margin-bottom:8px;
+}
+
+.price-desc{
+  color:#64748b;
+  line-height:1.6;
+  font-size:14px;
+}
+
+.price-amount{
+  font-size:44px;
+  font-weight:800;
+  line-height:1;
+  color:#0f172a;
+  margin-bottom:20px;
+}
+
+.price-amount span{
+  font-size:15px;
+  color:#64748b;
+  font-weight:700;
+  margin-left:4px;
+}
+
+.price-features{
+  list-style:none;
+  margin:0 0 22px;
+  padding:0;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.price-features li{
+  position:relative;
+  padding-left:18px;
+  color:#334155;
+  line-height:1.6;
+}
+
+.price-features li::before{
+  content:"•";
+  position:absolute;
+  left:0;
+  top:0;
+  color:#2563eb;
+  font-weight:900;
+}
+
+.price-actions{
+  margin-top:auto;
+}
+
+.pricing-faq{
+  padding-top:6px;
+}
+
+.faq-card{
+  padding:28px;
+  border:1px solid #e2e8f0;
+  border-radius:22px;
+  background:#fff;
+  box-shadow:0 10px 24px rgba(15, 23, 42, 0.04);
+}
+
+.faq-card h2{
+  margin:0 0 20px;
+  font-size:28px;
+  color:#0f172a;
+}
+
+.faq-item{
+  padding:16px 0;
+  border-top:1px solid #eef2f7;
+}
+
+.faq-item:first-of-type{
+  border-top:none;
+  padding-top:0;
+}
+
+.faq-item h3{
+  margin:0 0 8px;
+  font-size:18px;
+  color:#0f172a;
+}
+
+.faq-item p{
+  margin:0;
+  color:#64748b;
+  line-height:1.7;
+}
+
+.pricing-cta-final{
+  padding-bottom:10px;
+}
+
+.pricing-cta-box{
+  padding:32px;
+  border-radius:24px;
+  background:linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color:#fff;
+  box-shadow:0 16px 36px rgba(15, 23, 42, 0.14);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
+}
+
+.pricing-cta-box h2{
+  margin:0 0 10px;
+  font-size:34px;
+  line-height:1.08;
+}
+
+.pricing-cta-box p{
+  margin:0;
+  color:rgba(255,255,255,.78);
+  line-height:1.7;
+}
+
+.pricing-cta-actions{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  min-width:220px;
+}
+
+.pricing-cta-box .btn-secondary{
+  background:rgba(255,255,255,.08);
+  border-color:rgba(255,255,255,.18);
+  color:#fff;
+}
+
+@media (max-width: 1100px){
+  .pricing-grid-pro{
+    grid-template-columns:1fr;
+  }
+
+  .pricing-cta-box{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .pricing-cta-actions{
+    width:100%;
+    min-width:auto;
+    flex-direction:row;
+    flex-wrap:wrap;
+  }
+}
+
+@media (max-width: 760px){
+  .pricing-hero-inner{
+    padding:22px;
+  }
+
+  .pricing-hero-inner h1{
+    font-size:32px;
+  }
+
+  .faq-card,
+  .pricing-cta-box{
+    padding:22px;
+  }
+
+  .pricing-cta-box h2{
+    font-size:28px;
+  }
+
+  .pricing-cta-actions{
+    flex-direction:column;
+  }
+
+  .pricing-cta-actions .btn{
+    width:100%;
+  }
+}
