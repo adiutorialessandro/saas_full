@@ -6,7 +6,7 @@ from ..forms import RegisterForm, LoginForm
 from ..models.user import User
 from ..models.organization import Organization
 from ..models.membership import Membership
-
+from ..services.email_service import send_welcome_email
 
 bp = Blueprint("auth", __name__, url_prefix="/auth")
 
@@ -39,6 +39,7 @@ def register():
         db.session.add(m)
 
         db.session.commit()
+        send_welcome_email(u.email)
 
         session["org_id"] = org.id
         login_user(u)

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="processing-shell">
+
+  <div class="processing-card">
+
+    <div class="processing-icon">
+      ⌁
+    </div>
+
+    <h1 class="processing-title">
+      Analisi del business in corso
+    </h1>
+
+    <p class="processing-sub">
+      Il sistema sta elaborando i dati e generando il report strategico.
+    </p>
+
+    <div class="processing-progress">
+      <div class="processing-progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="processing-status" id="statusText">
+      Inizializzazione analisi...
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+const steps = [
+  "Raccolta dati aziendali...",
+  "Analisi stabilità finanziaria...",
+  "Calcolo rischio operativo...",
+  "Analisi acquisizione clienti...",
+  "Generazione KPI sintetici...",
+  "Costruzione piano d’azione...",
+  "Preparazione report finale..."
+]
+
+let i = 0
+let progress = 0
+
+function updateStatus(){
+
+  if(i < steps.length){
+      document.getElementById("statusText").innerText = steps[i]
+      i++
+  }
+
+  progress += 14
+
+  if(progress > 100){
+      progress = 100
+  }
+
+  document.getElementById("progressBar").style.width = progress + "%"
+
+}
+
+setInterval(updateStatus, 900)
+
+setTimeout(function(){
+    window.location.href = "{{ url_for('scans.view_scan', scan_id=scan.id) }}"
+}, 6500)
+
+</script>
+
+{% endblock %}

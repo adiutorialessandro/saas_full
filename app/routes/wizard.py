@@ -452,6 +452,6 @@ def quiz():
         db.session.commit()
 
         flash("Scan generato.")
-        return redirect(url_for("scans.view_scan", scan_id=s.id))
+        return render_template("scan_processing.html", scan=scan)
 
     return render_template("quiz.html", form=form)

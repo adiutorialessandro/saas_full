@@ -1,100 +1,145 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="dash-hero">
-  <div class="dash-hero-inner">
-    <div>
-      <h1 class="dash-title">Dashboard</h1>
-      <div class="dash-sub">Seleziona e gestisci le scansioni come una inbox.</div>
+<div class="dash-shell">
+  <section class="dash-hero-pro">
+    <div class="dash-hero-copy">
+      <div class="eyebrow-ui">Dashboard Cliente</div>
+      <h1 class="dash-title-pro">Controllo chiaro del tuo business</h1>
+      <p class="dash-sub-pro">
+        Monitora scansioni, priorità e stato generale dell’azienda in un’unica vista.
+      </p>
     </div>
 
-    <div class="dash-actions">
+    <div class="dash-hero-actions">
       <a class="btn" href="{{ url_for('wizard.onboarding') }}">Nuovo scan</a>
-      <button class="btn btn-danger" type="submit" form="bulkDeleteForm" id="bulkDeleteBtn" disabled>Elimina selezionate</button>
     </div>
-  </div>
-</div>
+  </section>
 
-<form id="bulkDeleteForm" method="post" action="{{ url_for('scans.bulk_delete') }}">
-  <div class="card inbox-card">
-    <div class="inbox-toolbar">
-      <label class="chk">
-        <input type="checkbox" id="selectAll">
-        <span>Seleziona tutto</span>
-      </label>
-      <div class="muted" id="selCount">0 selezionate</div>
-    </div>
+  <section class="stats-grid">
+    <article class="stat-card primary">
+      <div class="stat-label">Totale scansioni</div>
+      <div class="stat-value">{{ scans|length if scans else 0 }}</div>
+      <div class="stat-sub">Report generati sulla tua azienda</div>
+    </article>
 
-    {% if scans %}
-      <div class="inbox-list">
-        {% for s in scans %}
-          <div class="inbox-row">
-            <div class="inbox-left">
-              <input class="rowchk" type="checkbox" name="scan_ids" value="{{ s.id }}">
-            </div>
-
-            <div class="inbox-main">
-              <div class="inbox-title">
-                <span class="pill">#{{ s.id }}</span>
-                <b>{{ s.settore }}</b>
-                <span class="muted">· {{ s.modello }} · {{ s.mese_riferimento }}</span>
-              </div>
-              <div class="inbox-meta muted">
-                Creato: {{ s.created_at|fmt_dt if s.created_at else "" }}
-              </div>
-            </div>
-
-            <div class="inbox-right">
-              <a class="btn" href="{{ url_for('scans.view_scan', scan_id=s.id) }}">Apri</a>
-            </div>
-          </div>
-        {% endfor %}
+    <article class="stat-card">
+      <div class="stat-label">Ultimo scan</div>
+      <div class="stat-value">
+        {% if scans and scans[0].mese_riferimento %}
+          {{ scans[0].mese_riferimento }}
+        {% else %}
+          —
+        {% endif %}
       </div>
-    {% else %}
-      <div class="empty-state">
-        <div class="empty-title">Nessuno scan ancora.</div>
-        <div class="muted">Crea il primo scan per vedere KPI, indicatori e PDF.</div>
-        <div style="margin-top:12px;">
-          <a class="btn" href="{{ url_for('wizard.onboarding') }}">Crea primo scan</a>
+      <div class="stat-sub">Ultimo mese analizzato</div>
+    </article>
+
+    <article class="stat-card">
+      <div class="stat-label">Stato archivio</div>
+      <div class="stat-value">
+        {% if scans and scans|length > 0 %}
+          Attivo
+        {% else %}
+          Vuoto
+        {% endif %}
+      </div>
+      <div class="stat-sub">Disponibilità report</div>
+    </article>
+
+    <article class="stat-card">
+      <div class="stat-label">Workspace</div>
+      <div class="stat-value">Operativo</div>
+      <div class="stat-sub">Area cliente pronta all’uso</div>
+    </article>
+  </section>
+
+  <section class="dash-main-grid">
+    <div class="dash-main-col">
+      <div class="card pro-card">
+        <div class="card-head">
+          <div>
+            <h2 class="section-title">Le tue scansioni</h2>
+            <p class="section-sub">Apri, consulta e gestisci i report generati.</p>
+          </div>
+
+          {% if scans and scans|length > 0 %}
+            <div class="section-badge ok">Archivio attivo</div>
+          {% endif %}
+        </div>
+
+        {% if scans %}
+          <div class="scan-list-pro">
+            {% for s in scans %}
+              <div class="scan-row-pro">
+                <div class="scan-row-main">
+                  <div class="scan-row-top">
+                    <span class="scan-pill">#{{ s.id }}</span>
+                    <h3>{{ s.settore }}</h3>
+                  </div>
+
+                  <div class="scan-row-meta">
+                    <span>{{ s.modello }}</span>
+                    <span>•</span>
+                    <span>{{ s.mese_riferimento }}</span>
+                    {% if s.created_at %}
+                      <span>•</span>
+                      <span>{{ s.created_at|fmt_dt }}</span>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <div class="scan-row-actions">
+                  <a class="btn btn-secondary" href="{{ url_for('scans.view_scan', scan_id=s.id) }}">Apri</a>
+                  <a class="btn btn-secondary" href="{{ url_for('scans.scan_pdf', scan_id=s.id) }}">PDF</a>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="empty-pro">
+            <div class="empty-icon">△</div>
+            <h3>Nessuna scansione disponibile</h3>
+            <p>
+              Inizia con il primo scan per ottenere una diagnosi sintetica del business
+              e un report operativo da consultare.
+            </p>
+            <a class="btn" href="{{ url_for('wizard.onboarding') }}">Crea il primo scan</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <aside class="dash-side-col">
+      <div class="card pro-card side-card">
+        <h2 class="section-title">Cosa puoi fare ora</h2>
+        <div class="action-stack">
+          <a class="action-link-card" href="{{ url_for('wizard.onboarding') }}">
+            <div class="action-link-title">Nuovo scan</div>
+            <div class="action-link-sub">Avvia una nuova analisi del business</div>
+          </a>
+
+          <div class="action-link-card muted-card">
+            <div class="action-link-title">Storico report</div>
+            <div class="action-link-sub">Consulta i report già salvati nell’archivio</div>
+          </div>
+
+          <div class="action-link-card muted-card">
+            <div class="action-link-title">Monitoraggio continuo</div>
+            <div class="action-link-sub">Ripeti gli scan per confrontare l’evoluzione aziendale</div>
+          </div>
         </div>
       </div>
-    {% endif %}
-  </div>
-</form>
 
-<script>
-(function(){
-  const selectAll = document.getElementById('selectAll');
-  const checks = () => Array.from(document.querySelectorAll('.rowchk'));
-  const selCount = document.getElementById('selCount');
-  const delBtn = document.getElementById('bulkDeleteBtn');
-
-  function update(){
-    const all = checks();
-    const n = all.filter(x => x.checked).length;
-    selCount.textContent = `${n} selezionate`;
-    delBtn.disabled = n === 0;
-    if (selectAll) selectAll.checked = (n > 0 && n === all.length);
-  }
-
-  if (selectAll){
-    selectAll.addEventListener('change', () => {
-      checks().forEach(x => x.checked = selectAll.checked);
-      update();
-    });
-  }
-
-  checks().forEach(x => x.addEventListener('change', update));
-  update();
-
-  const form = document.getElementById('bulkDeleteForm');
-  if (form){
-    form.addEventListener('submit', (e) => {
-      if (delBtn.disabled) { e.preventDefault(); return; }
-      if (!confirm("Eliminare le scansioni selezionate?")) e.preventDefault();
-    });
-  }
-})();
-</script>
+      <div class="card pro-card side-card">
+        <h2 class="section-title">Suggerimento</h2>
+        <p class="helper-copy">
+          Mantieni uno storico mensile degli scan: ti aiuterà a vedere con chiarezza
+          come cambiano rischio, margini e stabilità del business nel tempo.
+        </p>
+      </div>
+    </aside>
+  </section>
+</div>
 
 {% endblock %}
