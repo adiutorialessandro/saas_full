@@ -11,15 +11,25 @@ from flask import (
     send_file,
     url_for,
 )
-from flask_login import login_required
+from flask_login import current_user, login_required
 
 from ..extensions import db
 from ..models.scan import Scan
 from ..tenant import ensure_current_org_id
 from app.services.pdf.engine import generate_scan_pdf_enterprise
 
+
 bp = Blueprint("scans", __name__)
 
+
+def get_accessible_scan_or_404(scan_id: int) -> Scan:
+    user = current_user._get_current_object()
+
+    if getattr(user, "is_admin", False):
+        return Scan.query.filter_by(id=scan_id).first_or_404()
+
+    org_id = ensure_current_org_id()
+    return Scan.query.filter_by(id=scan_id, org_id=org_id).first_or_404()
 
 @bp.get("/dashboard")
 @login_required
@@ -36,8 +46,7 @@ def dashboard():
 @bp.get("/scan/<int:scan_id>")
 @login_required
 def view_scan(scan_id: int):
-    org_id = ensure_current_org_id()
-    scan = Scan.query.filter_by(id=scan_id, org_id=org_id).first_or_404()
+    scan = get_accessible_scan_or_404(scan_id)
 
     report = {}
     try:
@@ -79,8 +88,7 @@ def view_scan(scan_id: int):
 @bp.post("/scan/<int:scan_id>/delete")
 @login_required
 def delete_scan(scan_id: int):
-    org_id = ensure_current_org_id()
-    scan = Scan.query.filter_by(id=scan_id, org_id=org_id).first_or_404()
+    scan = get_accessible_scan_or_404(scan_id)
 
     db.session.delete(scan)
     db.session.commit()
@@ -126,8 +134,7 @@ def bulk_delete():
 @bp.get("/scan/<int:scan_id>/pdf")
 @login_required
 def scan_pdf(scan_id: int):
-    org_id = ensure_current_org_id()
-    scan = Scan.query.filter_by(id=scan_id, org_id=org_id).first_or_404()
+    scan = get_accessible_scan_or_404(scan_id)
 
     report = {}
     try:
