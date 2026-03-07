@@ -48,6 +48,19 @@
           ({{ state.get("confidence") }}%)
         {% endif %}
       </div>
+
+      {% if state.get("summary") %}
+        <div class="score-summary-pro">{{ state.get("summary") }}</div>
+      {% endif %}
+
+      <div class="score-meta-pro">
+        {% if state.get("risk_profile") %}
+          <div class="meta-pill">{{ state.get("risk_profile") }}</div>
+        {% endif %}
+        {% if state.get("maturity_label") %}
+          <div class="meta-pill">{{ state.get("maturity_label") }}</div>
+        {% endif %}
+      </div>
     </article>
 
     <article class="mini-score-card">
@@ -95,14 +108,34 @@
     </article>
   </section>
 
+  <section class="report-decisions-grid">
+    <article class="decision-card">
+      <div class="decision-label">Direzione strategica</div>
+      <h3>Cash</h3>
+      <p>{{ vm.get("decisions", {}).get("cash", "Nessuna indicazione disponibile.") }}</p>
+    </article>
+
+    <article class="decision-card">
+      <div class="decision-label">Direzione strategica</div>
+      <h3>Margini</h3>
+      <p>{{ vm.get("decisions", {}).get("margini", "Nessuna indicazione disponibile.") }}</p>
+    </article>
+
+    <article class="decision-card">
+      <div class="decision-label">Direzione strategica</div>
+      <h3>Acquisizione</h3>
+      <p>{{ vm.get("decisions", {}).get("acq", "Nessuna indicazione disponibile.") }}</p>
+    </article>
+  </section>
+
   <section class="report-main-grid">
     <div class="report-main-col">
 
       <div class="card pro-card">
         <div class="card-head">
           <div>
-            <h2 class="section-title">Indicatori principali</h2>
-            <p class="section-sub">Lettura sintetica dei KPI più rilevanti.</p>
+            <h2 class="section-title">Business Risk Map</h2>
+            <p class="section-sub">Mappa sintetica delle aree che stanno reggendo e di quelle che richiedono più attenzione.</p>
           </div>
         </div>
 
@@ -169,8 +202,8 @@
       <div class="card pro-card">
         <div class="card-head">
           <div>
-            <h2 class="section-title">Piano d’azione</h2>
-            <p class="section-sub">Le priorità operative consigliate dal report.</p>
+            <h2 class="section-title">Action Plan – prossimi 30 giorni</h2>
+            <p class="section-sub">Le priorità operative consigliate per migliorare controllo, qualità economica e continuità esecutiva.</p>
           </div>
         </div>
 
@@ -255,8 +288,8 @@
       <div class="card pro-card side-card">
         <h2 class="section-title">Lettura rapida</h2>
         <p class="helper-copy">
-          Questo report sintetizza i punti di pressione più importanti del business
-          e li traduce in una priorità operativa chiara.
+          Questo report traduce il livello di rischio emerso in una lettura manageriale sintetica:
+          cosa sta reggendo, dove aumentano le pressioni e quale area richiede più attenzione nel breve periodo.
         </p>
       </div>
 
@@ -283,4 +316,74 @@
   </section>
 </div>
 
+<style>
+.score-summary-pro{
+  margin-top:14px;
+  color:rgba(255,255,255,.86);
+  line-height:1.7;
+  font-size:14px;
+  max-width:820px;
+}
+
+.score-meta-pro{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:14px;
+}
+
+.meta-pill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:8px 12px;
+  border-radius:999px;
+  background:rgba(255,255,255,.10);
+  color:rgba(255,255,255,.92);
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.02em;
+}
+
+.report-decisions-grid{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:18px;
+}
+
+.decision-card{
+  padding:22px;
+  border:1px solid #e2e8f0;
+  border-radius:20px;
+  background:#fff;
+  box-shadow:0 10px 24px rgba(15, 23, 42, 0.04);
+}
+
+.decision-label{
+  color:#64748b;
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  margin-bottom:10px;
+}
+
+.decision-card h3{
+  margin:0 0 10px;
+  font-size:22px;
+  color:#0f172a;
+}
+
+.decision-card p{
+  margin:0;
+  color:#64748b;
+  line-height:1.7;
+}
+
+@media (max-width: 1100px){
+  .report-decisions-grid{
+    grid-template-columns:1fr;
+  }
+}
+</style>
 {% endblock %}
