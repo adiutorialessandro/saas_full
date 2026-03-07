@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aggiornamento piano</title>
+</head>
+
+<body style="margin:0;background:#f4f6f8;font-family:Arial,Helvetica,sans-serif">
+
+  <table width="100%" cellpadding="0" cellspacing="0" style="padding:30px 0">
+    <tr>
+      <td align="center">
+
+        <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;padding:40px">
+
+          <tr>
+            <td align="center" style="padding-bottom:20px">
+              <h2 style="margin:0;color:#111">SaaS Full</h2>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="font-size:16px;color:#333;line-height:1.6">
+              <p>Ciao <b>{{ user_email }}</b>,</p>
+
+              <p>
+                il piano della tua azienda <b>{{ org_name }}</b> è stato aggiornato.
+              </p>
+
+              <p>
+                Nuovo piano: <b>{{ plan_name }}</b>
+              </p>
+
+              <p>
+                {{ message }}
+              </p>
+            </td>
+          </tr>
+
+          <tr>
+            <td align="center" style="padding:30px 0">
+              <a href="{{ config.APP_BASE_URL }}"
+                 style="
+                   background:#111;
+                   color:#fff;
+                   padding:14px 28px;
+                   text-decoration:none;
+                   border-radius:6px;
+                   font-weight:bold;
+                   display:inline-block;
+                 ">
+                Vai alla piattaforma
+              </a>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="font-size:13px;color:#888;padding-top:20px;border-top:1px solid #eee">
+              <p style="margin:0">Questa email è stata inviata automaticamente da SaaS Full.</p>
+              <p style="margin:5px 0 0 0">{{ config.APP_BASE_URL }}</p>
+            </td>
+          </tr>
+
+        </table>
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>
