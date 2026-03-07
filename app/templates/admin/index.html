@@ -68,7 +68,7 @@
           </div>
 
           <div class="inbox-right">
-            <a class="btn" href="{{ url_for('scans.view_scan', scan_id=r.scan.id) }}">Apri</a>
+            <a class="btn" href="{{ url_for('admin.view_scan', scan_id=r.scan.id) }}">Apri</a>
 
             <form method="post" action="{{ url_for('admin.delete_scan', scan_id=r.scan.id) }}" style="display:inline;">
               <button class="btn btn-danger" type="submit" onclick="return confirm('Eliminare questa scansione?')">

@@ -1,3 +1,4 @@
+import json
 from flask import Blueprint, render_template, flash, redirect, url_for
 from flask_login import login_required, current_user
 
@@ -282,6 +283,31 @@ def reset_org_user_password(org_id: int, user_id: int):
         user=user,
     )
 
+@bp.get("/scan/<int:scan_id>")
+@login_required
+def view_scan(scan_id: int):
+    if not admin_required():
+        return "Forbidden", 403
+
+    scan = Scan.query.get_or_404(scan_id)
+
+    report = {}
+    try:
+        report = json.loads(scan.report_json or "{}")
+    except Exception:
+        report = {}
+
+    triade = report.get("triade", {}) if isinstance(report, dict) else {}
+    vm = triade if isinstance(triade, dict) else {}
+
+    vm.setdefault("state", {})
+    vm.setdefault("risks", {})
+    vm.setdefault("kpi", {})
+    vm.setdefault("indicators", [])
+    vm.setdefault("action_plan", [])
+    vm.setdefault("alerts", [])
+
+    return render_template("view_scan.html", scan=scan, vm=vm)
 
 @bp.post("/organizations/<int:org_id>/users/<int:user_id>/delete")
 @login_required
