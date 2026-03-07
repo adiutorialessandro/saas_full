@@ -56,7 +56,7 @@ def view_scan(scan_id: int):
     vm.setdefault("action_plan", [])
     vm.setdefault("alerts", [])
 
-    return render_template("view_scan.html", scan=scan, vm=vm)
+    return render_template("scans/view_scan.html", scan=scan, vm=vm)
 
 
 @bp.post("/scan/<int:scan_id>/delete")
