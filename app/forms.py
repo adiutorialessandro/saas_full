@@ -55,3 +55,9 @@ class QuizForm(FlaskForm):
     q10 = RadioField("Q10", choices=_choices, coerce=int, validators=[DataRequired()])
 
     submit = SubmitField("Genera scan")
+
+class CreateOrganizationForm(FlaskForm):
+    name = StringField("Nome azienda", validators=[DataRequired(), Length(min=2, max=120)])
+    email = StringField("Email owner", validators=[DataRequired(), Email()])
+    password = PasswordField("Password iniziale", validators=[DataRequired(), Length(min=6)])
+    submit = SubmitField("Crea azienda")

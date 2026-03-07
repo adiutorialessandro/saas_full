@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card" style="max-width:520px;margin:auto">
+
+<h1>Nuova azienda</h1>
+
+<form method="post">
+{{ form.hidden_tag() }}
+
+<label>Nome azienda</label>
+{{ form.name(class_="input") }}
+
+<label>Email owner</label>
+{{ form.email(class_="input") }}
+
+<label>Password iniziale</label>
+{{ form.password(class_="input") }}
+
+<br>
+<button class="btn">{{ form.submit.label.text }}</button>
+
+</form>
+
+</div>
+
+{% endblock %}
