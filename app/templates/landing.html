@@ -19,12 +19,21 @@
         <a href="#prodotto">Prodotto</a>
         <a href="#come-funziona">Come funziona</a>
         <a href="{{ url_for('pricing') }}">Prezzi</a>
-        <a href="{{ url_for('auth.login') }}">Login</a>
+
+        {% if current_user.is_authenticated %}
+          <a href="{{ url_for('scans.dashboard') }}">Dashboard</a>
+        {% else %}
+          <a href="{{ url_for('auth.login') }}">Login</a>
+        {% endif %}
       </nav>
 
       <div class="nav-actions">
-        <a class="btn btn-secondary" href="{{ url_for('auth.login') }}">Accedi</a>
-        <a class="btn" href="{{ url_for('auth.register') }}">Inizia ora</a>
+        {% if current_user.is_authenticated %}
+          <a class="btn" href="{{ url_for('scans.dashboard') }}">Vai alla dashboard</a>
+        {% else %}
+          <a class="btn btn-secondary" href="{{ url_for('auth.login') }}">Accedi</a>
+          <a class="btn" href="{{ url_for('auth.register') }}">Inizia ora</a>
+        {% endif %}
       </div>
     </div>
   </header>
@@ -41,8 +50,13 @@
           </p>
 
           <div class="hero-actions">
-            <a class="btn btn-lg" href="{{ url_for('auth.register') }}">Prova il primo scan</a>
-            <a class="btn btn-secondary btn-lg" href="#come-funziona">Guarda come funziona</a>
+            {% if current_user.is_authenticated %}
+              <a class="btn btn-lg" href="{{ url_for('scans.dashboard') }}">Vai alla dashboard</a>
+              <a class="btn btn-secondary btn-lg" href="{{ url_for('wizard.onboarding') }}">Nuovo scan</a>
+            {% else %}
+              <a class="btn btn-lg" href="{{ url_for('auth.register') }}">Prova il primo scan</a>
+              <a class="btn btn-secondary btn-lg" href="#come-funziona">Guarda come funziona</a>
+            {% endif %}
           </div>
 
           <div class="hero-trust">
@@ -226,7 +240,11 @@
                   <li>Report immediato</li>
                 </ul>
 
-                <a class="btn btn-block" href="{{ url_for('auth.register') }}">Inizia</a>
+                {% if current_user.is_authenticated %}
+                  <a class="btn btn-block" href="{{ url_for('scans.dashboard') }}">Vai alla dashboard</a>
+                {% else %}
+                  <a class="btn btn-block" href="{{ url_for('auth.register') }}">Inizia</a>
+                {% endif %}
               </article>
             {% endfor %}
           {% else %}
@@ -238,7 +256,12 @@
                 <li>Configurazione in corso</li>
                 <li>Torna presto</li>
               </ul>
-              <a class="btn btn-block" href="{{ url_for('auth.register') }}">Registrati</a>
+
+              {% if current_user.is_authenticated %}
+                <a class="btn btn-block" href="{{ url_for('scans.dashboard') }}">Vai alla dashboard</a>
+              {% else %}
+                <a class="btn btn-block" href="{{ url_for('auth.register') }}">Registrati</a>
+              {% endif %}
             </article>
           {% endif %}
         </div>
@@ -260,8 +283,13 @@
         </div>
 
         <div class="cta-side">
-          <a class="btn btn-lg" href="{{ url_for('auth.register') }}">Crea il tuo account</a>
-          <a class="btn btn-secondary btn-lg" href="{{ url_for('auth.login') }}">Ho già un account</a>
+          {% if current_user.is_authenticated %}
+            <a class="btn btn-lg" href="{{ url_for('scans.dashboard') }}">Vai alla dashboard</a>
+            <a class="btn btn-secondary btn-lg" href="{{ url_for('wizard.onboarding') }}">Nuovo scan</a>
+          {% else %}
+            <a class="btn btn-lg" href="{{ url_for('auth.register') }}">Crea il tuo account</a>
+            <a class="btn btn-secondary btn-lg" href="{{ url_for('auth.login') }}">Ho già un account</a>
+          {% endif %}
         </div>
       </div>
     </section>
@@ -278,7 +306,12 @@
         <a href="#prodotto">Prodotto</a>
         <a href="#come-funziona">Come funziona</a>
         <a href="{{ url_for('pricing') }}">Prezzi</a>
-        <a href="{{ url_for('auth.login') }}">Login</a>
+
+        {% if current_user.is_authenticated %}
+          <a href="{{ url_for('scans.dashboard') }}">Dashboard</a>
+        {% else %}
+          <a href="{{ url_for('auth.login') }}">Login</a>
+        {% endif %}
       </div>
     </div>
   </footer>
