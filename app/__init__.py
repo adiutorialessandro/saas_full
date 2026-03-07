@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for
+from flask import Flask, redirect, url_for, render_template
 from .config import Config
 from .extensions import db, login_manager, migrate
 
@@ -35,7 +35,7 @@ def create_app():
 
     @app.route("/")
     def home():
-        return redirect(url_for("auth.login"))
+        return render_template("landing.html")
 
     @app.route("/health")
     def health():
