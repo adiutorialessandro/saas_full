@@ -320,8 +320,25 @@ def view_scan(scan_id: int):
     vm.setdefault("indicators", [])
     vm.setdefault("action_plan", [])
     vm.setdefault("alerts", [])
+    vm.setdefault("decisions", {})
 
-    return render_template("view_scan.html", scan=scan, vm=vm)
+    vm["state"].setdefault("overall", "GIALLO")
+    vm["state"].setdefault("overall_score", 50)
+    vm["state"].setdefault("confidenza", "MEDIA")
+    vm["state"].setdefault("confidence", 50)
+    vm["state"].setdefault("summary", "Report storico caricato in modalità compatibile.")
+    vm["state"].setdefault("risk_profile", "Profilo di rischio: Non disponibile")
+    vm["state"].setdefault("maturity_label", "Maturità: Non disponibile")
+
+    vm["risks"].setdefault("cash", 0.5)
+    vm["risks"].setdefault("margini", 0.5)
+    vm["risks"].setdefault("acq", 0.5)
+
+    vm["decisions"].setdefault("cash", "Nessuna indicazione disponibile per questo report storico.")
+    vm["decisions"].setdefault("margini", "Nessuna indicazione disponibile per questo report storico.")
+    vm["decisions"].setdefault("acq", "Nessuna indicazione disponibile per questo report storico.")
+
+    return render_template("scans/view_scan.html", scan=scan, vm=vm)
 
 
 @bp.post("/organizations/<int:org_id>/users/<int:user_id>/delete")
