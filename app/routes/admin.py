@@ -119,6 +119,46 @@ def organizations():
     return render_template("admin/organizations.html", rows=rows)
 
 
+@bp.get("/organizations/<int:org_id>")
+@login_required
+def organization_detail(org_id: int):
+    if not admin_required():
+        return "Forbidden", 403
+
+    org = Organization.query.get_or_404(org_id)
+
+    memberships = (
+        Membership.query.filter_by(org_id=org.id)
+        .order_by(Membership.id.asc())
+        .all()
+    )
+
+    users = []
+    for m in memberships:
+        u = User.query.filter_by(id=m.user_id).first()
+        if u:
+            users.append({
+                "id": u.id,
+                "email": u.email,
+                "is_admin": bool(u.is_admin),
+                "role": m.role,
+                "membership_id": m.id,
+            })
+
+    scans = (
+        Scan.query.filter_by(org_id=org.id)
+        .order_by(Scan.id.desc())
+        .all()
+    )
+
+    return render_template(
+        "admin/organization_detail.html",
+        org=org,
+        users=users,
+        scans=scans,
+    )
+
+
 @bp.post("/user/<int:user_id>/toggle-admin")
 @login_required
 def toggle_admin(user_id: int):

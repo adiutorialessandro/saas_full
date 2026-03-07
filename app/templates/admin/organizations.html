@@ -28,6 +28,10 @@
               Owner: {{ r.owner }} · Utenti: {{ r.users }} · Scans: {{ r.scans }}
             </div>
           </div>
+
+          <div class="inbox-right">
+            <a class="btn" href="{{ url_for('admin.organization_detail', org_id=r.org.id) }}">Apri</a>
+          </div>
         </div>
       {% endfor %}
     </div>
