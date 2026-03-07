@@ -61,49 +61,49 @@ class QuizForm(FlaskForm):
     _choices = [(1, "1"), (2, "2"), (3, "3"), (4, "4"), (5, "5")]
 
     q1 = RadioField(
-        "Quanto hai visibilità reale e aggiornata sulla tenuta finanziaria della tua azienda nei prossimi 90 giorni?",
+        "Quanto hai visibilità chiara e aggiornata sulla tenuta finanziaria dell’azienda nei prossimi 90 giorni?",
         choices=_choices,
         coerce=int,
         validators=[DataRequired()],
     )
 
     q2 = RadioField(
-        "Quanto gli incassi sono regolari, prevedibili e coerenti con i tempi di cassa di cui l’azienda ha bisogno?",
+        "Quanto gli incassi sono regolari, prevedibili e coerenti con il fabbisogno di cassa aziendale?",
         choices=_choices,
         coerce=int,
         validators=[DataRequired()],
     )
 
     q3 = RadioField(
-        "Quanto hai controllo sul margine reale generato dai tuoi prodotti, servizi o commesse?",
+        "Quanto conosci con precisione il margine reale generato da prodotti, servizi o commesse?",
         choices=_choices,
         coerce=int,
         validators=[DataRequired()],
     )
 
     q4 = RadioField(
-        "Quanto il livello attuale dei ricavi copre con sicurezza costi fissi e struttura aziendale?",
+        "Quanto i ricavi attuali coprono con sicurezza costi fissi e struttura aziendale?",
         choices=_choices,
         coerce=int,
         validators=[DataRequired()],
     )
 
     q5 = RadioField(
-        "Quanto il flusso di nuove opportunità commerciali è costante e non dipende dal caso o da iniziative sporadiche?",
+        "Quanto il flusso di nuove opportunità commerciali è costante e non dipende da iniziative sporadiche?",
         choices=_choices,
         coerce=int,
         validators=[DataRequired()],
     )
 
     q6 = RadioField(
-        "Quanto il processo commerciale riesce a trasformare lead e opportunità in clienti in modo efficace e ripetibile?",
+        "Quanto il processo commerciale trasforma lead e opportunità in clienti in modo efficace e ripetibile?",
         choices=_choices,
         coerce=int,
         validators=[DataRequired()],
     )
 
     q7 = RadioField(
-        "Quanto il business è diversificato e non dipendente da pochi clienti, pochi canali o poche commesse critiche?",
+        "Quanto il business è diversificato e non dipende eccessivamente da pochi clienti, pochi canali o poche commesse chiave?",
         choices=_choices,
         coerce=int,
         validators=[DataRequired()],
@@ -117,7 +117,7 @@ class QuizForm(FlaskForm):
     )
 
     q9 = RadioField(
-        "Quanto costi, processi e operatività sono sotto controllo senza dispersioni, inefficienze o sprechi significativi?",
+        "Quanto costi, processi e operatività sono sotto controllo senza inefficienze o sprechi rilevanti?",
         choices=_choices,
         coerce=int,
         validators=[DataRequired()],
