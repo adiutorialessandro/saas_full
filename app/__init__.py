@@ -6,11 +6,15 @@ from .routes.auth import bp as auth_bp
 from .routes.wizard import bp as wizard_bp
 from .routes.scans import bp as scans_bp
 from .routes.admin import bp as admin_bp
+from .routes.billing import bp as billing_bp
 
-from .models.plan import Plan
+# importa i model per SQLAlchemy / Alembic
+from .models.user import User
 from .models.organization import Organization
 from .models.membership import Membership
 from .models.scan import Scan
+from .models.plan import Plan
+
 
 def create_app():
     app = Flask(__name__)
@@ -41,6 +45,7 @@ def create_app():
     app.register_blueprint(wizard_bp)
     app.register_blueprint(scans_bp)
     app.register_blueprint(admin_bp)
+    app.register_blueprint(billing_bp)
 
     @app.cli.command("seed-plans")
     def seed_plans_command():
