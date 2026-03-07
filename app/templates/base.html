@@ -3,18 +3,28 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Programma Alessio SaaS</title>
+  <title>SaaS Full</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
   <div class="navbar">
     <div class="container nav-inner">
-      <a href="{{ url_for('scans.dashboard') }}" class="logo">Programma Alessio SaaS</a>
+      <a href="{{ url_for('scans.dashboard') }}" class="logo">SaaS Full</a>
+
       <nav>
-        <a href="{{ url_for('admin.organizations') }}">Clienti</a>
-        <a href="{{ url_for('scans.dashboard') }}">Dashboard</a>
-        <a href="{{ url_for('wizard.onboarding') }}">Nuovo scan</a>
-        <a href="{{ url_for('auth.logout') }}">Logout</a>
+        {% if current_user.is_authenticated and current_user.is_admin %}
+          <a href="{{ url_for('admin.organizations') }}">Clienti</a>
+          <a href="{{ url_for('admin.index') }}">Admin</a>
+        {% endif %}
+
+        {% if current_user.is_authenticated %}
+          <a href="{{ url_for('scans.dashboard') }}">Dashboard</a>
+          <a href="{{ url_for('wizard.onboarding') }}">Nuovo scan</a>
+          <a href="{{ url_for('auth.logout') }}">Logout</a>
+        {% else %}
+          <a href="{{ url_for('auth.login') }}">Login</a>
+          <a href="{{ url_for('auth.register') }}">Registrati</a>
+        {% endif %}
       </nav>
     </div>
   </div>

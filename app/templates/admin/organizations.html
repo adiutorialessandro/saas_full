@@ -1,42 +1,45 @@
-@bp.route("/organizations/new", methods=["GET", "POST"])
-@login_required
-def create_organization():
-    if not current_user.is_admin:
-        return "Forbidden", 403
+{% extends "base.html" %}
+{% block content %}
 
-    form = CreateOrganizationForm()
+<div class="dash-hero">
+  <div class="dash-hero-inner">
+    <div>
+      <h1 class="dash-title">Clienti (Organizations)</h1>
+      <div class="dash-sub">Elenco aziende registrate nella piattaforma.</div>
+    </div>
 
-    if form.validate_on_submit():
-        email = form.email.data.strip().lower()
-        org_name = form.name.data.strip()
+    <div class="dash-actions">
+      <a class="btn" href="{{ url_for('admin.create_organization') }}">+ Nuova azienda</a>
+    </div>
+  </div>
+</div>
 
-        if User.query.filter_by(email=email).first():
-            flash("Email già registrata.")
-            return render_template("admin/new_org.html", form=form)
+<div class="card inbox-card">
+  {% if rows %}
+    <div class="inbox-list">
+      {% for r in rows %}
+        <div class="inbox-row">
+          <div class="inbox-main">
+            <div class="inbox-title">
+              <span class="pill">#{{ r.org.id }}</span>
+              <b>{{ r.org.name }}</b>
+            </div>
+            <div class="inbox-meta muted">
+              Owner: {{ r.owner }} · Utenti: {{ r.users }} · Scans: {{ r.scans }}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-title">Nessun cliente presente.</div>
+      <div class="muted">Crea la prima azienda per iniziare.</div>
+      <div style="margin-top:12px;">
+        <a class="btn" href="{{ url_for('admin.create_organization') }}">Crea azienda</a>
+      </div>
+    </div>
+  {% endif %}
+</div>
 
-        if Organization.query.filter_by(name=org_name).first():
-            flash("Nome azienda già esistente.")
-            return render_template("admin/new_org.html", form=form)
-
-        user = User(email=email)
-        user.set_password(form.password.data)
-
-        org = Organization(name=org_name)
-
-        db.session.add(user)
-        db.session.add(org)
-        db.session.flush()
-
-        membership = Membership(
-            user_id=user.id,
-            org_id=org.id,
-            role="owner"
-        )
-
-        db.session.add(membership)
-        db.session.commit()
-
-        flash("Azienda creata con successo.")
-        return redirect(url_for("admin.organizations"))
-
-    return render_template("admin/new_org.html", form=form)
+{% endblock %}

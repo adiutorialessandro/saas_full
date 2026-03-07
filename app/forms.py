@@ -56,6 +56,7 @@ class QuizForm(FlaskForm):
 
     submit = SubmitField("Genera scan")
 
+
 class CreateOrganizationForm(FlaskForm):
     name = StringField("Nome azienda", validators=[DataRequired(), Length(min=2, max=120)])
     email = StringField("Email owner", validators=[DataRequired(), Email()])
