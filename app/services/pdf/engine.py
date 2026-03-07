@@ -3,8 +3,17 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
+import math
+
 from reportlab.lib import colors
 from reportlab.pdfgen import canvas
+
+try:
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+except Exception:  # pragma: no cover
+    plt = None
 
 from .config import (
     DEFAULT_ACCENT,
@@ -86,7 +95,97 @@ def _as_color(value: Any, default: colors.Color) -> colors.Color:
     return default
 
 
-def _build_context(scan_meta: Dict[str, Any], vm: Dict[str, Any]) -> Dict[str, Any]:
+def _safe_float(value: Any, default: float = 0.0) -> float:
+    try:
+        if value is None:
+            return float(default)
+        return float(value)
+    except Exception:
+        return float(default)
+
+
+def _generate_triade_radar_chart(risks: Dict[str, Any], out_path: Path) -> Optional[Path]:
+    if plt is None:
+        return None
+
+    labels = ["Cash", "Margins", "Acquisition"]
+    values = [
+        clamp01(risks.get("cash"), 0.5) or 0.5,
+        clamp01(risks.get("margini"), 0.5) or 0.5,
+        clamp01(risks.get("acq"), 0.5) or 0.5,
+    ]
+
+    values = values + values[:1]
+    angles = [n / float(len(labels)) * 2.0 * math.pi for n in range(len(labels))]
+    angles += angles[:1]
+
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    fig = plt.figure(figsize=(4.4, 4.0))
+    ax = plt.subplot(111, polar=True)
+    ax.set_theta_offset(math.pi / 2)
+    ax.set_theta_direction(-1)
+    ax.plot(angles, values, linewidth=2)
+    ax.fill(angles, values, alpha=0.20)
+    ax.set_xticks(angles[:-1])
+    ax.set_xticklabels(labels)
+    ax.set_ylim(0, 1)
+    ax.set_yticks([0.25, 0.50, 0.75, 1.0])
+    ax.set_yticklabels(["25", "50", "75", "100"])
+    fig.tight_layout()
+    fig.savefig(out_path, dpi=180, bbox_inches="tight", transparent=True)
+    plt.close(fig)
+    return out_path
+
+
+def _generate_risk_bar_chart(risks: Dict[str, Any], out_path: Path) -> Optional[Path]:
+    if plt is None:
+        return None
+
+    labels = ["Cash", "Margins", "Acquisition"]
+    values = [
+        (clamp01(risks.get("cash"), 0.5) or 0.5) * 100,
+        (clamp01(risks.get("margini"), 0.5) or 0.5) * 100,
+        (clamp01(risks.get("acq"), 0.5) or 0.5) * 100,
+    ]
+
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    fig = plt.figure(figsize=(5.2, 3.2))
+    ax = fig.add_subplot(111)
+    bars = ax.bar(labels, values)
+    ax.set_ylim(0, 100)
+    ax.set_ylabel("Risk Score")
+    ax.set_title("Business Risk Profile")
+    ax.grid(axis="y", alpha=0.20)
+
+    for bar, val in zip(bars, values):
+        ax.text(bar.get_x() + bar.get_width() / 2, val + 2, f"{val:.0f}", ha="center", va="bottom", fontsize=9)
+
+    fig.tight_layout()
+    fig.savefig(out_path, dpi=180, bbox_inches="tight", transparent=True)
+    plt.close(fig)
+    return out_path
+
+
+def _build_chart_assets(asset_dir: Optional[Path], vm: Dict[str, Any]) -> Dict[str, Optional[str]]:
+    if asset_dir is None:
+        return {
+            "triade_radar_chart": None,
+            "risk_bar_chart": None,
+        }
+
+    risks = vm.get("risks") or {}
+    radar_path = _generate_triade_radar_chart(risks, asset_dir / "triade_radar.png")
+    bar_path = _generate_risk_bar_chart(risks, asset_dir / "risk_profile.png")
+
+    return {
+        "triade_radar_chart": str(radar_path) if radar_path else None,
+        "risk_bar_chart": str(bar_path) if bar_path else None,
+    }
+
+
+def _build_context(scan_meta: Dict[str, Any], vm: Dict[str, Any], asset_dir: Optional[Path] = None) -> Dict[str, Any]:
     branding = vm.get("branding") or {}
     primary = _as_color(branding.get("primary"), DEFAULT_PRIMARY)
     accent = _as_color(branding.get("accent"), DEFAULT_ACCENT)
@@ -124,6 +223,7 @@ def _build_context(scan_meta: Dict[str, Any], vm: Dict[str, Any]) -> Dict[str, A
     drivers = drivers_engine(vm, scan_meta)
     bm = benchmark_meta(vm, settore)
     plan = plan_tasks(vm, kpi)
+    chart_assets = _build_chart_assets(asset_dir, vm)
 
     ctx = {
         "schema_version": "1.2",
@@ -166,6 +266,10 @@ def _build_context(scan_meta: Dict[str, Any], vm: Dict[str, Any]) -> Dict[str, A
         "defs": defs,
         "drivers": drivers,
         "plan": plan,
+
+        # generated chart assets for premium PDF pages
+        "triade_radar_chart": chart_assets.get("triade_radar_chart"),
+        "risk_bar_chart": chart_assets.get("risk_bar_chart"),
 
         # KPIs commonly used
         "runway": kpi.get("runway_mesi"),
@@ -219,7 +323,9 @@ def generate_scan_pdf_enterprise(
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     c = canvas.Canvas(str(out_path), pagesize=PAGE_SIZE)
-    ctx = _build_context(scan_meta, vm)
+    scan_id = scan_meta.get("id", "report")
+    asset_dir = out_path.parent / "_assets" / f"scan_{scan_id}"
+    ctx = _build_context(scan_meta, vm, asset_dir=asset_dir)
 
     total_pages = DEFAULT_TOTAL_PAGES
 
@@ -267,7 +373,9 @@ def generate_one_pager(
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     c = canvas.Canvas(str(out_path), pagesize=PAGE_SIZE)
-    ctx = _build_context(scan_meta, vm)
+    scan_id = scan_meta.get("id", "report")
+    asset_dir = out_path.parent / "_assets" / f"scan_{scan_id}"
+    ctx = _build_context(scan_meta, vm, asset_dir=asset_dir)
 
     _one_pager_executive(c, ctx, 1, 1)
     c.save()
