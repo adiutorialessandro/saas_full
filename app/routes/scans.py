@@ -48,13 +48,30 @@ def view_scan(scan_id: int):
     triade = report.get("triade", {}) if isinstance(report, dict) else {}
     vm = triade if isinstance(triade, dict) else {}
 
-    # safety defaults
+    # safety defaults + retrocompatibilità report storici
     vm.setdefault("state", {})
     vm.setdefault("risks", {})
     vm.setdefault("kpi", {})
     vm.setdefault("indicators", [])
     vm.setdefault("action_plan", [])
     vm.setdefault("alerts", [])
+    vm.setdefault("decisions", {})
+
+    vm["state"].setdefault("overall", "GIALLO")
+    vm["state"].setdefault("overall_score", 50)
+    vm["state"].setdefault("confidenza", "MEDIA")
+    vm["state"].setdefault("confidence", 50)
+    vm["state"].setdefault("summary", "Report storico caricato in modalità compatibile.")
+    vm["state"].setdefault("risk_profile", "Profilo di rischio: Non disponibile")
+    vm["state"].setdefault("maturity_label", "Maturità: Non disponibile")
+
+    vm["risks"].setdefault("cash", 0.5)
+    vm["risks"].setdefault("margini", 0.5)
+    vm["risks"].setdefault("acq", 0.5)
+
+    vm["decisions"].setdefault("cash", "Nessuna indicazione disponibile per questo report storico.")
+    vm["decisions"].setdefault("margini", "Nessuna indicazione disponibile per questo report storico.")
+    vm["decisions"].setdefault("acq", "Nessuna indicazione disponibile per questo report storico.")
 
     return render_template("scans/view_scan.html", scan=scan, vm=vm)
 
@@ -121,7 +138,7 @@ def scan_pdf(scan_id: int):
     triade = report.get("triade", {}) if isinstance(report, dict) else {}
     triade = triade if isinstance(triade, dict) else {}
 
-    # VM safe for PDF
+    # VM safe for PDF + retrocompatibilità report storici
     vm = dict(triade)
     vm.setdefault("state", triade.get("state", {}))
     vm.setdefault("risks", triade.get("risks", {}))
@@ -129,6 +146,23 @@ def scan_pdf(scan_id: int):
     vm.setdefault("indicators", triade.get("indicators", []))
     vm.setdefault("action_plan", triade.get("action_plan", []))
     vm.setdefault("alerts", triade.get("alerts", []))
+    vm.setdefault("decisions", triade.get("decisions", {}))
+
+    vm["state"].setdefault("overall", "GIALLO")
+    vm["state"].setdefault("overall_score", 50)
+    vm["state"].setdefault("confidenza", "MEDIA")
+    vm["state"].setdefault("confidence", 50)
+    vm["state"].setdefault("summary", "Report storico caricato in modalità compatibile.")
+    vm["state"].setdefault("risk_profile", "Profilo di rischio: Non disponibile")
+    vm["state"].setdefault("maturity_label", "Maturità: Non disponibile")
+
+    vm["risks"].setdefault("cash", 0.5)
+    vm["risks"].setdefault("margini", 0.5)
+    vm["risks"].setdefault("acq", 0.5)
+
+    vm["decisions"].setdefault("cash", "Nessuna indicazione disponibile per questo report storico.")
+    vm["decisions"].setdefault("margini", "Nessuna indicazione disponibile per questo report storico.")
+    vm["decisions"].setdefault("acq", "Nessuna indicazione disponibile per questo report storico.")
 
     out_path = Path(current_app.instance_path) / f"scan_{scan.id}.pdf"
     out_path.parent.mkdir(parents=True, exist_ok=True)
