@@ -10,6 +10,8 @@ from ..forms import OnboardingForm, EssentialDataForm, QuizForm
 from ..models.scan import Scan
 from ..tenant import ensure_current_org_id
 
+from ..models.organization import Organization
+
 bp = Blueprint("wizard", __name__, url_prefix="/wizard")
 
 
@@ -465,6 +467,23 @@ def quiz():
 
         report = build_report(inp)
 
+        # Controllo piano / limite scansioni
+        org = Organization.query.get(org_id)
+
+        if not org:
+            flash("Organizzazione non trovata.")
+            return redirect(url_for("scans.dashboard"))
+
+        current_scans = Scan.query.filter_by(org_id=org.id).count()
+
+        if not org.plan:
+            flash("Nessun piano associato all'azienda.")
+            return redirect(url_for("scans.dashboard"))
+
+        if org.plan.scan_limit != -1 and current_scans >= org.plan.scan_limit:
+            flash("Limite scansioni raggiunto per il piano attuale.")
+            return redirect(url_for("scans.dashboard"))
+        
         s = Scan(
             org_id=org_id,
             user_id=current_user.id,
