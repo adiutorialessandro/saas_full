@@ -8,9 +8,8 @@ from flask_login import login_required, current_user
 from ..extensions import db
 from ..forms import OnboardingForm, EssentialDataForm, QuizForm
 from ..models.scan import Scan
-from ..tenant import ensure_current_org_id
-
 from ..models.organization import Organization
+from ..tenant import ensure_current_org_id
 
 bp = Blueprint("wizard", __name__, url_prefix="/wizard")
 
@@ -19,9 +18,6 @@ def utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
-# ================================
-# INPUT STRUCT
-# ================================
 class Inputs:
     def __init__(
         self,
@@ -50,9 +46,6 @@ class Inputs:
         self.clienti_mese = clienti_mese
 
 
-# ================================
-# ENGINE
-# ================================
 def build_report(inp: Inputs) -> dict:
     """
     Motore B (cash-centric) + report per UI/PDF.
@@ -62,35 +55,33 @@ def build_report(inp: Inputs) -> dict:
     - indicators: 6 KPI normalizzati (score01 + value_str + label)
     """
 
-    # ----------------------------
-    # KPI raw
-    # ----------------------------
     runway_mesi = None
     if (inp.cassa_attuale is not None) and (inp.burn_mensile is not None) and inp.burn_mensile > 0:
         runway_mesi = inp.cassa_attuale / inp.burn_mensile
 
     margine_pct = None
     if inp.margine_lordo_pct is not None:
-        margine_pct = inp.margine_lordo_pct / 100.0  # 0..1
+        margine_pct = inp.margine_lordo_pct / 100.0
 
     conversione = None
     if (inp.leads_mese is not None) and (inp.clienti_mese is not None) and inp.leads_mese > 0:
-        conversione = inp.clienti_mese / inp.leads_mese  # 0..1
+        conversione = inp.clienti_mese / inp.leads_mese
 
     break_even_ratio = None
-    if (inp.incassi_mese is not None) and (inp.costi_fissi_mese is not None) and (margine_pct is not None) and margine_pct > 0:
+    if (
+        (inp.incassi_mese is not None)
+        and (inp.costi_fissi_mese is not None)
+        and (margine_pct is not None)
+        and margine_pct > 0
+    ):
         be_ricavi = inp.costi_fissi_mese / margine_pct
         if be_ricavi and be_ricavi > 0:
             break_even_ratio = inp.incassi_mese / be_ricavi
 
-    # burn/cash ratio (mesi “inversi”): burn / cassa -> più è alto peggio è
     burn_cash_ratio = None
     if (inp.burn_mensile is not None) and (inp.cassa_attuale is not None) and inp.cassa_attuale > 0:
         burn_cash_ratio = inp.burn_mensile / inp.cassa_attuale
 
-    # ----------------------------
-    # Helpers
-    # ----------------------------
     def clamp01(x: Optional[float]) -> Optional[float]:
         if x is None:
             return None
@@ -101,43 +92,29 @@ def build_report(inp: Inputs) -> dict:
         return max(0.0, min(1.0, v))
 
     def label_from_score01(s: float) -> str:
-        # s: rischio 0..1
         if s >= 0.66:
             return "ROSSO"
         if s >= 0.33:
             return "GIALLO"
         return "VERDE"
 
-    # normalize value -> risk 0..1 with thresholds
-    # higher_is_better=True means risk increases when value decreases under thresholds
     def norm(value: Optional[float], good: float, bad: float, higher_is_better: bool = True) -> Optional[float]:
         if value is None:
             return None
         v = float(value)
 
         if higher_is_better:
-            # v >= good => 0 risk ; v <= bad => 1 risk
             if v >= good:
                 return 0.0
             if v <= bad:
                 return 1.0
             return (good - v) / (good - bad)
         else:
-            # v <= good => 0 risk ; v >= bad => 1 risk
             if v <= good:
                 return 0.0
             if v >= bad:
                 return 1.0
             return (v - good) / (bad - good)
-
-    def fmt_eur(x: Any) -> str:
-        if x is None:
-            return "—"
-        try:
-            v = float(x)
-            return f"{v:,.0f} €".replace(",", "X").replace(".", ",").replace("X", ".")
-        except Exception:
-            return "—"
 
     def fmt_pct01(x: Any) -> str:
         if x is None:
@@ -155,9 +132,6 @@ def build_report(inp: Inputs) -> dict:
         except Exception:
             return "—"
 
-    # ----------------------------
-    # Triade risks (macro) = KPI + quiz anti-autoinganno
-    # ----------------------------
     r_runway = norm(runway_mesi, good=6, bad=2, higher_is_better=True)
     r_margine = norm(margine_pct, good=0.55, bad=0.25, higher_is_better=True)
     r_conv = norm(conversione, good=0.10, bad=0.03, higher_is_better=True)
@@ -167,26 +141,24 @@ def build_report(inp: Inputs) -> dict:
     quiz_avg = sum(quiz) / len(quiz)
 
     def combine(primary: Optional[float]) -> float:
-        # KPI prevale, quiz “sporca” al 60% per evitare falsi verdi
         if primary is None:
             return float(quiz_avg)
         return max(float(primary), float(quiz_avg) * 0.6)
 
     risk_cash = clamp01(combine(r_runway)) or 0.6
-    marg_mix = None
+
     if (r_margine is not None) and (r_be is not None):
         marg_mix = (r_margine + r_be) / 2.0
     else:
         marg_mix = r_margine if r_margine is not None else r_be
+
     risk_margini = clamp01(combine(marg_mix)) or 0.6
     risk_acq = clamp01(combine(r_conv)) or 0.6
 
-    # Score cash-centric (più alto = più rischio)
     w_cash, w_marg, w_acq = 0.40, 0.35, 0.25
     overall = (risk_cash * w_cash) + (risk_margini * w_marg) + (risk_acq * w_acq)
     overall_score = round(overall * 100.0, 2)
 
-    # Confidence: quante KPI macro sono presenti
     kpi_count = sum(x is not None for x in [runway_mesi, margine_pct, conversione, break_even_ratio])
     confidence = round((kpi_count / 4.0) * 100.0, 0)
 
@@ -205,17 +177,11 @@ def build_report(inp: Inputs) -> dict:
         "acq": "Migliorare conversione e ridurre tempi di rientro (payback) prima di scalare.",
     }
 
-    # ----------------------------
-    # 6 INDICATORI (KPI normalizzati) — OPZIONE (2)
-    # score01 sempre = rischio 0..1
-    # ----------------------------
-    # soglie “manageriali” (tuning facile)
-    s_runway = norm(runway_mesi, good=6, bad=3, higher_is_better=True)            # <3 rosso
-    s_dso = None  # non lo hai in input: lo lasciamo come mancante
-    s_conv = norm(conversione, good=0.10, bad=0.05, higher_is_better=True)        # <5% rosso
-    s_margin = norm(margine_pct, good=0.40, bad=0.30, higher_is_better=True)      # <30% rosso
-    s_be = norm(break_even_ratio, good=1.15, bad=1.00, higher_is_better=True)     # <1.0 rosso
-    s_bcr = norm(burn_cash_ratio, good=0.12, bad=0.25, higher_is_better=False)    # più alto peggio (burn/cash)
+    s_runway = norm(runway_mesi, good=6, bad=3, higher_is_better=True)
+    s_conv = norm(conversione, good=0.10, bad=0.05, higher_is_better=True)
+    s_margin = norm(margine_pct, good=0.40, bad=0.30, higher_is_better=True)
+    s_be = norm(break_even_ratio, good=1.15, bad=1.00, higher_is_better=True)
+    s_bcr = norm(burn_cash_ratio, good=0.12, bad=0.25, higher_is_better=False)
 
     indicators: List[Dict[str, Any]] = [
         {
@@ -264,13 +230,10 @@ def build_report(inp: Inputs) -> dict:
             "desc": "Burn mensile / cassa (più basso, meglio).",
             "score01": clamp01(s_bcr),
             "label": label_from_score01(clamp01(s_bcr) or 0.5),
-            "value_str": (fmt_pct01(burn_cash_ratio) if burn_cash_ratio is not None else "—"),
+            "value_str": fmt_pct01(burn_cash_ratio) if burn_cash_ratio is not None else "—",
         },
     ]
 
-    # ----------------------------
-    # Alerts (coerenti con KPI)
-    # ----------------------------
     alerts = []
 
     if runway_mesi is None:
@@ -283,15 +246,15 @@ def build_report(inp: Inputs) -> dict:
 
     if conversione is not None:
         if conversione < 0.05:
-            alerts.append({"level": "ROSSO", "text": f"Conversione bassa ({conversione*100:.2f}%): rivedi offerta, target e follow-up."})
+            alerts.append({"level": "ROSSO", "text": f"Conversione bassa ({conversione * 100:.2f}%): rivedi offerta, target e follow-up."})
         elif conversione < 0.10:
-            alerts.append({"level": "GIALLO", "text": f"Conversione media ({conversione*100:.2f}%): ottimizza messaggi, pipeline e prossimi step."})
+            alerts.append({"level": "GIALLO", "text": f"Conversione media ({conversione * 100:.2f}%): ottimizza messaggi, pipeline e prossimi step."})
 
     if margine_pct is not None:
         if margine_pct < 0.30:
-            alerts.append({"level": "ROSSO", "text": f"Margine lordo basso ({margine_pct*100:.2f}%): rischio erosione. Rivedi prezzi/costi."})
+            alerts.append({"level": "ROSSO", "text": f"Margine lordo basso ({margine_pct * 100:.2f}%): rischio erosione. Rivedi prezzi/costi."})
         elif margine_pct < 0.40:
-            alerts.append({"level": "GIALLO", "text": f"Margine lordo da stabilizzare ({margine_pct*100:.2f}%): monitora sconti e costi."})
+            alerts.append({"level": "GIALLO", "text": f"Margine lordo da stabilizzare ({margine_pct * 100:.2f}%): monitora sconti e costi."})
 
     if break_even_ratio is not None:
         if break_even_ratio < 1.00:
@@ -299,9 +262,6 @@ def build_report(inp: Inputs) -> dict:
         elif break_even_ratio < 1.10:
             alerts.append({"level": "GIALLO", "text": f"Vicino al break-even (ratio {break_even_ratio:.2f}): piccole variazioni possono creare deficit."})
 
-    # ----------------------------
-    # Action plan (in base ai rischi macro)
-    # ----------------------------
     def bucket(r: float) -> str:
         if r >= 0.66:
             return "ROSSO"
@@ -311,7 +271,6 @@ def build_report(inp: Inputs) -> dict:
 
     ap: List[str] = []
 
-    # CASH
     c = bucket(risk_cash)
     if c == "ROSSO":
         ap += [
@@ -327,7 +286,6 @@ def build_report(inp: Inputs) -> dict:
     else:
         ap += ["Mantieni il cashflow sotto controllo con una revisione rapida settimanale (15 minuti)."]
 
-    # MARGINI
     m = bucket(risk_margini)
     if m == "ROSSO":
         ap += [
@@ -343,7 +301,6 @@ def build_report(inp: Inputs) -> dict:
     else:
         ap += ["Proteggi i margini: monitora costi e prezzi ogni mese, evitando erosioni invisibili."]
 
-    # ACQUISIZIONE
     a = bucket(risk_acq)
     if a == "ROSSO":
         ap += [
@@ -398,9 +355,6 @@ def build_report(inp: Inputs) -> dict:
     }
 
 
-# ================================
-# ROUTES (onboarding → data → quiz)
-# ================================
 @bp.route("/onboarding", methods=["GET", "POST"])
 @login_required
 def onboarding():
@@ -483,7 +437,7 @@ def quiz():
         if org.plan.scan_limit != -1 and current_scans >= org.plan.scan_limit:
             flash("Limite scansioni raggiunto per il piano attuale.")
             return redirect(url_for("scans.dashboard"))
-        
+
         s = Scan(
             org_id=org_id,
             user_id=current_user.id,
