@@ -443,6 +443,17 @@ h3{ margin:0 0 8px; font-size:18px; }
 }
 .empty-cta{ margin-top:24px; }
 
+/* ========================================================
+   NOTE ARCHITETTURALE
+   Questo file contiene ancora componenti eterogenei
+   (dashboard, report, wizard, pricing). Funziona, ma è
+   consigliato in una fase successiva separare in:
+   - dashboard.css
+   - report.css
+   - wizard.css
+   - pricing.css
+   per ridurre conflitti futuri tra classi generiche.
+======================================================== */
 /* Accessibility: disabled state */
 .btn:disabled{
   opacity:.45;
