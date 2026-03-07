@@ -10,7 +10,7 @@
 <body>
   <header class="site-header">
     <div class="container nav">
-      <a class="brand" href="#">
+      <a class="brand" href="{{ url_for('home') }}">
         <span class="brand-mark">▲</span>
         <span class="brand-text">Triad Insight</span>
       </a>
@@ -18,7 +18,7 @@
       <nav class="nav-links">
         <a href="#prodotto">Prodotto</a>
         <a href="#come-funziona">Come funziona</a>
-        <a class="btn btn-secondary" href="{{ url_for('pricing') }}">Vedi tutti i dettagli</a>
+        <a href="{{ url_for('pricing') }}">Prezzi</a>
         <a href="{{ url_for('auth.login') }}">Login</a>
       </nav>
 
@@ -203,39 +203,48 @@
         </div>
 
         <div class="card-grid three pricing-grid">
-          <article class="price-card">
-            <div class="price-name">Starter</div>
-            <div class="price-value">€19<span>/mese</span></div>
-            <ul>
-              <li>5 scan inclusi</li>
-              <li>Dashboard base</li>
-              <li>Report immediato</li>
-            </ul>
-            <a class="btn btn-block" href="{{ url_for('auth.register') }}">Inizia</a>
-          </article>
+          {% if plans %}
+            {% for plan in plans[:3] %}
+              {% set featured = (loop.index == 2) %}
+              <article class="price-card {% if featured %}featured{% endif %}">
+                {% if featured %}
+                  <div class="price-badge">Più scelto</div>
+                {% endif %}
 
-          <article class="price-card featured">
-            <div class="price-badge">Più scelto</div>
-            <div class="price-name">Growth</div>
-            <div class="price-value">€49<span>/mese</span></div>
-            <ul>
-              <li>50 scan inclusi</li>
-              <li>Gestione clienti</li>
-              <li>Workflow operativo completo</li>
-            </ul>
-            <a class="btn btn-block" href="{{ url_for('auth.register') }}">Scegli Growth</a>
-          </article>
+                <div class="price-name">{{ plan.name }}</div>
+                <div class="price-value">€{{ "%.0f"|format(plan.price_month or 0) }}<span>/mese</span></div>
 
-          <article class="price-card">
-            <div class="price-name">Pro</div>
-            <div class="price-value">€99<span>/mese</span></div>
-            <ul>
-              <li>Scan illimitati</li>
-              <li>Priorità elevate</li>
-              <li>Setup orientato al team</li>
-            </ul>
-            <a class="btn btn-block" href="{{ url_for('auth.register') }}">Vai Pro</a>
-          </article>
+                <ul>
+                  <li>
+                    {% if plan.scan_limit == -1 %}
+                      Scan illimitati
+                    {% else %}
+                      {{ plan.scan_limit }} scan inclusi
+                    {% endif %}
+                  </li>
+                  <li>Dashboard cliente</li>
+                  <li>Report immediato</li>
+                </ul>
+
+                <a class="btn btn-block" href="{{ url_for('auth.register') }}">Inizia</a>
+              </article>
+            {% endfor %}
+          {% else %}
+            <article class="price-card">
+              <div class="price-name">Piani in arrivo</div>
+              <div class="price-value">—</div>
+              <ul>
+                <li>Nessun piano attivo</li>
+                <li>Configurazione in corso</li>
+                <li>Torna presto</li>
+              </ul>
+              <a class="btn btn-block" href="{{ url_for('auth.register') }}">Registrati</a>
+            </article>
+          {% endif %}
+        </div>
+
+        <div style="text-align:center; margin-top:20px;">
+          <a class="btn btn-secondary btn-lg" href="{{ url_for('pricing') }}">Vedi tutti i dettagli</a>
         </div>
       </div>
     </section>
@@ -268,7 +277,7 @@
       <div class="footer-links">
         <a href="#prodotto">Prodotto</a>
         <a href="#come-funziona">Come funziona</a>
-        <a href="#prezzi">Prezzi</a>
+        <a href="{{ url_for('pricing') }}">Prezzi</a>
         <a href="{{ url_for('auth.login') }}">Login</a>
       </div>
     </div>

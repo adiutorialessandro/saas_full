@@ -8,11 +8,13 @@ from .routes.scans import bp as scans_bp
 from .routes.admin import bp as admin_bp
 from .routes.billing import bp as billing_bp
 
+# importa i model per SQLAlchemy / Alembic
 from .models.user import User
 from .models.organization import Organization
 from .models.membership import Membership
 from .models.scan import Scan
 from .models.plan import Plan
+
 
 def create_app():
     app = Flask(__name__)
