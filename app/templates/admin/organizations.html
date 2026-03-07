@@ -10,6 +10,7 @@
 
     <div class="dash-actions">
       <a class="btn" href="{{ url_for('admin.create_organization') }}">+ Nuova azienda</a>
+      <a class="btn" href="{{ url_for('admin.plans') }}">Piani</a>
     </div>
   </div>
 </div>
@@ -25,7 +26,10 @@
               <b>{{ r.org.name }}</b>
             </div>
             <div class="inbox-meta muted">
-              Owner: {{ r.owner }} · Utenti: {{ r.users }} · Scans: {{ r.scans }} · Piano: {{ r.plan_name }}
+              Owner: {{ r.owner }}
+              · Utenti: {{ r.users }}
+              · Scans: {{ r.scans }}
+              · Piano: {{ r.plan_name }}
             </div>
           </div>
 

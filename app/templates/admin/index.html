@@ -5,7 +5,12 @@
   <div class="dash-hero-inner">
     <div>
       <h1 class="dash-title">Admin Dashboard</h1>
-      <div class="dash-sub">Controllo globale di utenti, aziende e scansioni.</div>
+      <div class="dash-sub">Controllo globale di utenti, aziende, piani e scansioni.</div>
+    </div>
+
+    <div class="dash-actions">
+      <a class="btn" href="{{ url_for('admin.organizations') }}">Clienti</a>
+      <a class="btn" href="{{ url_for('admin.plans') }}">Piani</a>
     </div>
   </div>
 </div>
@@ -30,6 +35,13 @@
       <div class="inbox-main">
         <div class="inbox-title"><b>Scansioni</b></div>
         <div class="inbox-meta muted">{{ scans_count }}</div>
+      </div>
+    </div>
+
+    <div class="inbox-row">
+      <div class="inbox-main">
+        <div class="inbox-title"><b>Piani</b></div>
+        <div class="inbox-meta muted">{{ plans_count }}</div>
       </div>
     </div>
   </div>
@@ -59,7 +71,9 @@
             <a class="btn" href="{{ url_for('scans.view_scan', scan_id=r.scan.id) }}">Apri</a>
 
             <form method="post" action="{{ url_for('admin.delete_scan', scan_id=r.scan.id) }}" style="display:inline;">
-              <button class="btn btn-danger" type="submit" onclick="return confirm('Eliminare questa scansione?')">Elimina</button>
+              <button class="btn btn-danger" type="submit" onclick="return confirm('Eliminare questa scansione?')">
+                Elimina
+              </button>
             </form>
           </div>
         </div>
