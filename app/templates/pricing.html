@@ -9,7 +9,7 @@
       <h1>Scegli il piano giusto per il tuo modo di lavorare</h1>
       <p>
         Dalla prima diagnosi aziendale fino a un utilizzo continuativo con storico scan,
-        team e workflow più strutturati.
+        gestione clienti e workflow più strutturati.
       </p>
     </div>
   </section>
@@ -17,83 +17,77 @@
   <section class="pricing-switch-note">
     <div class="pricing-note-card">
       <strong>Trasparente e semplice.</strong>
-      Nessun costo nascosto. Puoi iniziare con un piano essenziale e crescere quando il tuo utilizzo aumenta.
+      I piani vengono caricati direttamente dalla piattaforma, così prezzi e limiti sono sempre aggiornati.
     </div>
   </section>
 
   <section class="pricing-grid-pro">
+    {% if plans %}
+      {% for plan in plans %}
+        {% set featured = (loop.index == 2) %}
+        <article class="price-card-pro {% if featured %}featured{% endif %}">
 
-    <article class="price-card-pro">
-      <div class="price-card-top">
-        <div class="price-plan">Starter</div>
-        <div class="price-desc">Per professionisti e micro-imprese che vogliono iniziare.</div>
+          {% if featured %}
+            <div class="featured-tag">Più scelto</div>
+          {% endif %}
+
+          <div class="price-card-top">
+            <div class="price-plan">{{ plan.name }}</div>
+
+            <div class="price-desc">
+              {% if plan.name|lower == 'starter' %}
+                Per professionisti e micro-imprese che vogliono iniziare con una diagnosi chiara.
+              {% elif plan.name|lower == 'growth' %}
+                Per chi usa lo strumento in modo continuativo e vuole più capacità operativa.
+              {% elif plan.name|lower == 'pro' %}
+                Per consulenti, team e utilizzo intensivo con workflow più evoluti.
+              {% else %}
+                Piano disponibile nella piattaforma, adatto a un utilizzo coerente con il tuo livello di attività.
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="price-amount">
+            €{{ "%.0f"|format(plan.price_month or 0) }}<span>/mese</span>
+          </div>
+
+          <ul class="price-features">
+            <li>
+              {% if plan.scan_limit == -1 %}
+                Scan illimitati
+              {% else %}
+                {{ plan.scan_limit }} scan inclusi
+              {% endif %}
+            </li>
+            <li>Dashboard cliente</li>
+            <li>Storico report</li>
+            <li>Download PDF</li>
+            <li>Workflow operativo</li>
+
+            {% if plan.name|lower == 'growth' %}
+              <li>Gestione più ampia dei clienti</li>
+            {% elif plan.name|lower == 'pro' %}
+              <li>Volume elevato e uso continuativo</li>
+            {% endif %}
+          </ul>
+
+          <div class="price-actions">
+            {% if current_user.is_authenticated %}
+              <a class="btn btn-block" href="{{ url_for('scans.dashboard') }}">Vai alla dashboard</a>
+            {% else %}
+              <a class="btn btn-block" href="{{ url_for('auth.register') }}">Scegli {{ plan.name }}</a>
+            {% endif %}
+          </div>
+        </article>
+      {% endfor %}
+    {% else %}
+      <div class="card pro-card" style="grid-column: 1 / -1; text-align:center; padding:32px;">
+        <h2 class="section-title">Nessun piano disponibile</h2>
+        <p class="section-sub">
+          Al momento non ci sono piani attivi configurati nella piattaforma.
+        </p>
       </div>
-
-      <div class="price-amount">
-        €19<span>/mese</span>
-      </div>
-
-      <ul class="price-features">
-        <li>5 scan inclusi</li>
-        <li>Dashboard cliente</li>
-        <li>Storico report base</li>
-        <li>Download PDF</li>
-        <li>Onboarding rapido</li>
-      </ul>
-
-      <div class="price-actions">
-        <a class="btn btn-block" href="{{ url_for('auth.register') }}">Inizia con Starter</a>
-      </div>
-    </article>
-
-    <article class="price-card-pro featured">
-      <div class="featured-tag">Più scelto</div>
-
-      <div class="price-card-top">
-        <div class="price-plan">Growth</div>
-        <div class="price-desc">Per chi usa lo strumento in modo continuativo con più clienti o più cicli di analisi.</div>
-      </div>
-
-      <div class="price-amount">
-        €49<span>/mese</span>
-      </div>
-
-      <ul class="price-features">
-        <li>50 scan inclusi</li>
-        <li>Gestione clienti più ampia</li>
-        <li>Storico scans completo</li>
-        <li>Report e PDF illimitati</li>
-        <li>Workflow operativo più scalabile</li>
-      </ul>
-
-      <div class="price-actions">
-        <a class="btn btn-block" href="{{ url_for('auth.register') }}">Scegli Growth</a>
-      </div>
-    </article>
-
-    <article class="price-card-pro">
-      <div class="price-card-top">
-        <div class="price-plan">Pro</div>
-        <div class="price-desc">Per consulenti strutturati, team e utilizzo intensivo.</div>
-      </div>
-
-      <div class="price-amount">
-        €99<span>/mese</span>
-      </div>
-
-      <ul class="price-features">
-        <li>Scan illimitati</li>
-        <li>Uso continuativo ad alto volume</li>
-        <li>Archivio completo</li>
-        <li>Setup ideale per team</li>
-        <li>Base pronta per billing evoluto</li>
-      </ul>
-
-      <div class="price-actions">
-        <a class="btn btn-block" href="{{ url_for('auth.register') }}">Vai Pro</a>
-      </div>
-    </article>
-
+    {% endif %}
   </section>
 
   <section class="pricing-faq">
@@ -102,22 +96,22 @@
 
       <div class="faq-item">
         <h3>Posso cambiare piano più avanti?</h3>
-        <p>Sì. La struttura è già predisposta per upgrade e downgrade del piano.</p>
+        <p>Sì. La struttura della piattaforma è già predisposta per upgrade e downgrade del piano.</p>
       </div>
 
       <div class="faq-item">
         <h3>Cosa succede se raggiungo il limite scansioni?</h3>
-        <p>Il sistema blocca i nuovi scan fino all’upgrade del piano o al rinnovo previsto.</p>
+        <p>Il sistema blocca i nuovi scan oltre la soglia prevista dal piano assegnato.</p>
       </div>
 
       <div class="faq-item">
         <h3>Il PDF è incluso?</h3>
-        <p>Sì, il report PDF è disponibile nei flussi previsti dalla piattaforma.</p>
+        <p>Sì, il report PDF è disponibile nel flusso di lavoro previsto dalla piattaforma.</p>
       </div>
 
       <div class="faq-item">
         <h3>Il billing è già attivo?</h3>
-        <p>La struttura è pronta. L’attivazione completa può essere collegata a Stripe quando deciderai di andare live.</p>
+        <p>La base tecnica è pronta. L’attivazione completa può essere collegata a Stripe quando deciderai di andare live.</p>
       </div>
     </div>
   </section>
@@ -127,12 +121,18 @@
       <div>
         <div class="eyebrow-ui">Pronto a iniziare?</div>
         <h2>Fai il primo passo verso una diagnosi più chiara del business.</h2>
-        <p>Registrati ora e accedi al workflow completo di analisi.</p>
+        <p>
+          Registrati ora e accedi al workflow completo di analisi.
+        </p>
       </div>
 
       <div class="pricing-cta-actions">
-        <a class="btn btn-lg" href="{{ url_for('auth.register') }}">Crea account</a>
-        <a class="btn btn-secondary btn-lg" href="{{ url_for('auth.login') }}">Accedi</a>
+        {% if current_user.is_authenticated %}
+          <a class="btn btn-lg" href="{{ url_for('scans.dashboard') }}">Vai alla dashboard</a>
+        {% else %}
+          <a class="btn btn-lg" href="{{ url_for('auth.register') }}">Crea account</a>
+          <a class="btn btn-secondary btn-lg" href="{{ url_for('auth.login') }}">Accedi</a>
+        {% endif %}
       </div>
     </div>
   </section>

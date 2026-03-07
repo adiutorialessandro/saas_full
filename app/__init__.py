@@ -14,7 +14,6 @@ from .models.membership import Membership
 from .models.scan import Scan
 from .models.plan import Plan
 
-
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
@@ -34,11 +33,13 @@ def create_app():
 
     @app.route("/")
     def home():
-        return render_template("landing.html")
+        plans = Plan.query.filter_by(is_active=True).order_by(Plan.price_month.asc()).all()
+        return render_template("landing.html", plans=plans)
 
     @app.route("/pricing")
     def pricing():
-        return render_template("pricing.html")
+        plans = Plan.query.filter_by(is_active=True).order_by(Plan.price_month.asc()).all()
+        return render_template("pricing.html", plans=plans)
 
     @app.route("/health")
     def health():
