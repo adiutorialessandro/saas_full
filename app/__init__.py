@@ -42,4 +42,9 @@ def create_app():
     app.register_blueprint(scans_bp)
     app.register_blueprint(admin_bp)
 
+    @app.cli.command("seed-plans")
+    def seed_plans_command():
+        from .seed import seed_plans
+        seed_plans()
+
     return app
