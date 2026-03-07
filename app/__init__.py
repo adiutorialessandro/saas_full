@@ -8,7 +8,6 @@ from .routes.scans import bp as scans_bp
 from .routes.admin import bp as admin_bp
 from .routes.billing import bp as billing_bp
 
-# importa i model per SQLAlchemy / Alembic
 from .models.user import User
 from .models.organization import Organization
 from .models.membership import Membership
@@ -36,6 +35,10 @@ def create_app():
     @app.route("/")
     def home():
         return render_template("landing.html")
+
+    @app.route("/pricing")
+    def pricing():
+        return render_template("pricing.html")
 
     @app.route("/health")
     def health():
