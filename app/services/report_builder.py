@@ -1,4 +1,3 @@
-
 from dataclasses import dataclass
 from typing import Any, Dict, List
 from datetime import datetime, timezone
@@ -155,37 +154,37 @@ def build_report(inp: Inputs) -> Dict[str, Any]:
 
     if overall == "ROSSO":
         executive_summary = (
-            "Il profilo emerso indica un business sotto pressione, con fragilità che richiedono priorità nette e interventi ravvicinati. "
-            "La raccomandazione principale è rafforzare controllo, disciplina economica e prevedibilità operativa prima di spingere la crescita."
+            "Il Business Scan evidenzia una struttura esposta a rischio elevato, con pressioni che richiedono decisioni ravvicinate e priorità molto nette. "
+            "Il vincolo principale non è crescere di più, ma recuperare controllo su cassa, qualità economica ed esecuzione prima che la fragilità diventi costo strutturale."
         )
     elif overall == "GIALLO":
         executive_summary = (
-            "Il business mostra basi presenti ma ancora non sufficientemente consolidate. "
-            "La priorità non è aumentare complessità, ma rendere più stabili cassa, margini ed esecuzione commerciale."
+            "Il quadro emerso mostra basi presenti ma ancora non sufficientemente consolidate. "
+            "L’azienda ha elementi su cui costruire, ma deve aumentare prevedibilità, disciplina e protezione economica per trasformare la crescita in stabilità reale."
         )
     else:
         executive_summary = (
-            "Il quadro generale è ordinato e relativamente solido. "
-            "La fase successiva consiste nel consolidare i vantaggi già presenti e trasformarli in maggiore continuità e scalabilità."
+            "Il business appare ordinato e relativamente solido, con segnali che indicano buona tenuta e capacità di controllo. "
+            "La priorità ora è consolidare ciò che funziona, aumentare replicabilità e usare la stabilità attuale come base per una crescita più scalabile."
         )
 
     if overall == "ROSSO":
         action_plan = [
-            "Impostare un controllo finanziario settimanale con visibilità su cassa, incassi attesi e priorità di uscita.",
-            "Ridurre dispersioni operative e proteggere margini prima di aumentare struttura o spesa commerciale.",
-            "Semplificare il funnel commerciale e rendere obbligatori follow-up, prossimi step e criteri di priorità.",
+            "Impostare un controllo finanziario settimanale con visibilità su cassa, incassi attesi, scadenze e priorità di uscita.",
+            "Ridurre dispersioni operative e bloccare iniziative che aumentano complessità senza rafforzare la tenuta economica.",
+            "Standardizzare il presidio commerciale: pipeline essenziale, follow-up obbligatorio, responsabilità chiare e priorità visibili.",
         ]
     elif overall == "GIALLO":
         action_plan = [
-            "Rendere più regolare il monitoraggio dei KPI chiave con una revisione manageriale ricorrente.",
-            "Stabilizzare margini e conversione commerciale con maggiore disciplina su pricing, offerta e processo.",
-            "Ridurre dipendenze da pochi fattori critici e costruire maggiore prevedibilità nelle attività di crescita.",
+            "Rendere più regolare la review dei KPI chiave con una cadenza manageriale breve e ricorrente.",
+            "Aumentare la qualità economica del business intervenendo su pricing, margini, mix offerta e disciplina commerciale.",
+            "Ridurre dipendenze da pochi fattori critici e costruire più continuità nella generazione di risultati.",
         ]
     else:
         action_plan = [
-            "Consolidare la disciplina di controllo per mantenere chiara la lettura dei KPI chiave.",
+            "Consolidare il sistema di controllo per mantenere leggibile l’evoluzione dei KPI chiave.",
             "Trasformare la stabilità attuale in routine gestionali replicabili e più scalabili.",
-            "Usare gli scan periodici per verificare continuità, miglioramenti e nuovi punti di attenzione.",
+            "Usare gli scan periodici per verificare progressi, anticipare deviazioni e difendere i vantaggi acquisiti.",
         ]
 
     decisions = {
@@ -223,6 +222,7 @@ def build_report(inp: Inputs) -> Dict[str, Any]:
                 "risk_profile": risk_profile,
                 "maturity_score": maturity_score,
                 "maturity_label": maturity_label,
+                "board_note": "Documento sintetico a supporto delle decisioni prioritarie del management.",
             },
             "risks": {
                 "cash": round(risk_cash, 4),

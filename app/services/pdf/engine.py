@@ -200,7 +200,7 @@ def _build_context(scan_meta: Dict[str, Any], vm: Dict[str, Any], asset_dir: Opt
     modello = scan_meta.get("modello", "—")
     mese = scan_meta.get("mese_riferimento", "—")
     created_at = scan_meta.get("created_at") or now_str()
-    scan_id = scan_meta.get("id", "—")
+    scan_id = str(scan_meta.get("id", "—"))
 
     overall = (state.get("overall") or state.get("stato") or "STABILE")
     overall = str(overall).upper()
@@ -226,13 +226,17 @@ def _build_context(scan_meta: Dict[str, Any], vm: Dict[str, Any], asset_dir: Opt
     chart_assets = _build_chart_assets(asset_dir, vm)
 
     ctx = {
-        "schema_version": "1.2",
-        "scenarios": scenario_matrix(vm.get("kpi", {})),
-        "stress_test": stress_cashflow(vm.get("kpi", {})),
-        "actions": strategic_actions(vm.get("kpi", {})),
         # input refs
         "vm": vm,
         "scan_meta": scan_meta,
+
+        # pass-through blocks for premium PDF pages
+        "state": state,
+        "risks": risks,
+        "kpi": kpi,
+        "decisions": vm.get("decisions") or {},
+        "action_plan": vm.get("action_plan") or [],
+        "alerts": vm.get("alerts") or [],
 
         # branding
         "primary": primary,
@@ -247,6 +251,11 @@ def _build_context(scan_meta: Dict[str, Any], vm: Dict[str, Any], asset_dir: Opt
         "created_at": created_at,
         "scan_id": scan_id,
         "overall": overall,
+
+        "risk_profile": state.get("risk_profile"),
+        "maturity_label": state.get("maturity_label"),
+        "summary": state.get("summary"),
+        "board_note": state.get("board_note"),
 
         # scores
         "triad": triad,
@@ -323,7 +332,7 @@ def generate_scan_pdf_enterprise(
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     c = canvas.Canvas(str(out_path), pagesize=PAGE_SIZE)
-    scan_id = scan_meta.get("id", "report")
+    scan_id = str(scan_meta.get("id", "report"))
     asset_dir = out_path.parent / "_assets" / f"scan_{scan_id}"
     ctx = _build_context(scan_meta, vm, asset_dir=asset_dir)
 
@@ -373,7 +382,7 @@ def generate_one_pager(
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     c = canvas.Canvas(str(out_path), pagesize=PAGE_SIZE)
-    scan_id = scan_meta.get("id", "report")
+    scan_id = str(scan_meta.get("id", "report"))
     asset_dir = out_path.parent / "_assets" / f"scan_{scan_id}"
     ctx = _build_context(scan_meta, vm, asset_dir=asset_dir)
 

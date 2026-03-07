@@ -495,17 +495,17 @@ def _page_1_executive(
         accent=ctx["accent"],
     )
 
-    # Small definition note (2 lines, no overflow)
+    # Small definition note (more executive, less technical)
     c.setFillColor(DEFAULT_MUTED)
-    c.setFont("Helvetica", 8.0)
+    c.setFont("Helvetica", 8.4)
     note_x = M_L + 10 * mm
     note_y = card_y + 10.0 * mm
     note_lines = [
-        "Triad Index v1 — media pesata di Cassa, Margini, Acquisizione.",
-        "(pesi equal-weight 1/3 ciascuno · metrica in calibrazione).",
+        "Business Stability Score basato su Cash, Margins e Acquisition.",
+        "Lettura sintetica dello stato aziendale a supporto delle decisioni.",
     ]
     for i, ln in enumerate(note_lines):
-        c.drawString(note_x, note_y - i * 3.6 * mm, ln)
+        c.drawString(note_x, note_y - i * 3.8 * mm, ln)
 
     c.setFillColor(DEFAULT_TEXT)
 
@@ -514,7 +514,7 @@ def _page_1_executive(
 
     c.setFillColor(DEFAULT_TEXT)
     c.setFont("Helvetica-Bold", 13)
-    c.drawString(M_L + left_w + 20 * mm, top_y - 12 * mm, "Executive insight")
+    c.drawString(M_L + left_w + 20 * mm, top_y - 12 * mm, "Executive Strategic Summary")
 
     # Render insight text to fill the card area cleanly (auto-fit)
     insight_x = M_L + left_w + 20 * mm
@@ -546,7 +546,7 @@ def _page_1_executive(
     if yy > y_min + 14 * mm and raw:
         c.setFillColor(DEFAULT_MUTED)
         c.setFont(font_name, 9.2)
-        c.drawString(insight_x, y_min + 6 * mm, "Nota: insight generato da KPI + quiz (v1).")
+        c.drawString(insight_x, y_min + 6 * mm, "Documento sintetico a supporto delle decisioni prioritarie del management.")
         c.setFillColor(DEFAULT_TEXT)
         c.setFont(font_name, font_size)
 
@@ -569,7 +569,7 @@ def _page_2_risk_snapshot(
 
     _header(
         c,
-        "Risk Snapshot",
+        "Business Risk Snapshot",
         f"{ctx['settore']} · {ctx['mese']}",
         ctx["overall"],
         primary=ctx["primary"],
@@ -670,7 +670,7 @@ def _page_2_risk_snapshot(
 def _page_3_kpi(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total: int, right_label: Optional[str] = None) -> None:
     _page_bg(c)
     _watermark(c, ctx["watermark_text"])
-    _header(c, "KPI", f"{ctx['settore']} · {ctx['mese']}", ctx["overall"], primary=ctx["primary"], logo_path=ctx["logo_path"])
+    _header(c, "KPI Dashboard", f"{ctx['settore']} · {ctx['mese']}", ctx["overall"], primary=ctx["primary"], logo_path=ctx["logo_path"])
 
     # v1.2 – show STIMA indicator if report contains estimated values
     try:
@@ -733,7 +733,7 @@ def _page_3_kpi(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total: int,
 def _page_4_radar(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total: int, right_label: Optional[str] = None) -> None:
     _page_bg(c)
     _watermark(c, ctx["watermark_text"])
-    _header(c, "Radar & Benchmark", f"{ctx['settore']} (Azienda vs Benchmark)", ctx["overall"], primary=ctx["primary"], logo_path=ctx["logo_path"])
+    _header(c, "Strategic Direction", f"{ctx['settore']} (Azienda vs Benchmark)", ctx["overall"], primary=ctx["primary"], logo_path=ctx["logo_path"])
 
     top_y = H - HEADER_H - 18 * mm
 
@@ -805,7 +805,7 @@ def _page_4_radar(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total: in
 def _page_5_execution(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total: int, right_label: Optional[str] = None) -> None:
     _page_bg(c)
     _watermark(c, ctx["watermark_text"])
-    _header(c, "Alerts & 90 Day Plan", f"{ctx['settore']} · {ctx['mese']}", ctx["overall"], primary=ctx["primary"], logo_path=ctx["logo_path"])
+    _header(c, "Action Plan — Next 90 Days", f"{ctx['settore']} · {ctx['mese']}", ctx["overall"], primary=ctx["primary"], logo_path=ctx["logo_path"])
 
     top_y = H - HEADER_H - 18 * mm
     plan = (ctx.get("plan") or [])[:4]
@@ -817,7 +817,7 @@ def _page_5_execution(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total
 
     c.setFillColor(DEFAULT_TEXT)
     c.setFont("Helvetica-Bold", 12.5)
-    c.drawString(M_L + 10*mm, card_y + card_h - 12*mm, "Piano 90 giorni (task-based, MVP 4 settimane)")
+    c.drawString(M_L + 10*mm, card_y + card_h - 12*mm, "Piano di esecuzione 90 giorni — priorità operative")
     x0 = M_L + 10*mm
     y = card_y + card_h - 26*mm
     col_week = 14 * mm
@@ -1019,7 +1019,7 @@ def _one_pager_executive(
     _shadow_card(c, M_L, box_y, left_w, box_h)
     c.setFillColor(DEFAULT_TEXT)
     c.setFont("Helvetica-Bold", 12.5)
-    c.drawString(M_L + 10 * mm, row2_top - 12 * mm, "Executive insight")
+    c.drawString(M_L + 10 * mm, row2_top - 12 * mm, "Executive Strategic Summary")
     c.setFont("Helvetica", 10.8)
     lines = _wrap(c, ctx["hero"], left_w - 20 * mm, size=10.8)
     yy = row2_top - 26 * mm
@@ -1030,7 +1030,7 @@ def _one_pager_executive(
     _shadow_card(c, M_L + left_w + 10 * mm, box_y, right_w, box_h)
     c.setFillColor(DEFAULT_TEXT)
     c.setFont("Helvetica-Bold", 12.5)
-    c.drawString(M_L + left_w + 20 * mm, row2_top - 12 * mm, "90 Day Plan (MVP)")
+    c.drawString(M_L + left_w + 20 * mm, row2_top - 12 * mm, "Action Plan — Next 90 Days")
     c.setFont("Helvetica", 10.5)
 
     yy = row2_top - 26 * mm
