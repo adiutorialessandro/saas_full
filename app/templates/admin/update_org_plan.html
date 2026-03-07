@@ -3,13 +3,20 @@
 
 <div class="card" style="max-width:560px; margin: 0 auto;">
   <h1>Aggiorna piano</h1>
-  <p class="muted">Azienda: {{ org.name }}</p>
+  <p class="muted">
+    Azienda: {{ org.name }}
+    {% if org.plan %}
+      <br>Piano attuale: <b>{{ org.plan.name }}</b>
+    {% else %}
+      <br>Piano attuale: <b>Nessuno</b>
+    {% endif %}
+  </p>
 
   <form method="post">
     {{ form.hidden_tag() }}
 
-    <label>ID piano</label>
-    {{ form.plan_id(class_="input", placeholder="Es. 1") }}
+    <label>Piano</label>
+    {{ form.plan_id(class_="input") }}
 
     <div style="height:12px"></div>
     <button class="btn" type="submit">{{ form.submit.label.text }}</button>

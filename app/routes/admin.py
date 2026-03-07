@@ -365,16 +365,14 @@ def update_organization_plan(org_id: int):
         return "Forbidden", 403
 
     org = Organization.query.get_or_404(org_id)
-    form = UpdateOrganizationPlanForm(plan_id=str(org.plan_id or ""))
+
+    plans = Plan.query.filter_by(is_active=True).order_by(Plan.name.asc()).all()
+
+    form = UpdateOrganizationPlanForm()
+    form.plan_id.choices = [(p.id, f"{p.name} · Limite: {'Illimitato' if p.scan_limit == -1 else p.scan_limit} · € {p.price_month:.2f}/mese") for p in plans]
 
     if form.validate_on_submit():
-        try:
-            plan_id = int(form.plan_id.data.strip())
-        except Exception:
-            flash("ID piano non valido.")
-            return render_template("admin/update_org_plan.html", form=form, org=org)
-
-        plan = Plan.query.get(plan_id)
+        plan = Plan.query.get(form.plan_id.data)
         if not plan:
             flash("Piano non trovato.")
             return render_template("admin/update_org_plan.html", form=form, org=org)
@@ -385,8 +383,10 @@ def update_organization_plan(org_id: int):
         flash("Piano azienda aggiornato.")
         return redirect(url_for("admin.organization_detail", org_id=org.id))
 
-    return render_template("admin/update_org_plan.html", form=form, org=org)
+    if org.plan_id:
+        form.plan_id.data = org.plan_id
 
+    return render_template("admin/update_org_plan.html", form=form, org=org)
 
 @bp.post("/user/<int:user_id>/toggle-admin")
 @login_required

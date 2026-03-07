@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, FloatField, RadioField
+from wtforms import StringField, PasswordField, SubmitField, FloatField, RadioField, SelectField
 from wtforms.validators import DataRequired, Email, Length, NumberRange, Optional, Regexp, EqualTo
 
 
@@ -96,5 +96,5 @@ class CreatePlanForm(FlaskForm):
 
 
 class UpdateOrganizationPlanForm(FlaskForm):
-    plan_id = StringField("ID piano", validators=[DataRequired()])
+    plan_id = SelectField("Piano", coerce=int, validators=[DataRequired()])
     submit = SubmitField("Aggiorna piano")
