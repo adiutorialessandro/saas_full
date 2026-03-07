@@ -1,42 +1,62 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="row" style="display:flex; justify-content:space-between; align-items:flex-end; gap:12px;">
-  <div>
-    <h1 style="margin:0;">Wizard – Onboarding</h1>
-    <p class="muted" style="margin:6px 0 0;">Imposta il contesto dello scan (settore, modello, mese).</p>
+
+<div class="wizard-shell">
+  <div class="wizard-progress-wrap">
+    <div class="wizard-progress-top">
+      <div class="eyebrow-ui">Step 1 di 3</div>
+      <div class="wizard-progress-label">Informazioni azienda</div>
+    </div>
+    <div class="wizard-progress">
+      <div class="wizard-progress-bar" style="width: 33%"></div>
+    </div>
   </div>
-  <div style="display:flex; gap:10px;">
-    <a class="btn" href="{{ url_for('scans.dashboard') }}">Dashboard</a>
+
+  <div class="wizard-card">
+    <div class="wizard-head">
+      <h1>Iniziamo con una fotografia chiara della tua azienda</h1>
+      <p>
+        Inserisci le informazioni essenziali per contestualizzare correttamente lo scan.
+      </p>
+    </div>
+
+    <form method="post" class="wizard-form">
+      {{ form.hidden_tag() }}
+
+      <div class="form-grid two">
+        <div class="field">
+          <label>Settore</label>
+          {{ form.settore(class_="input", placeholder="Es. Consulenza, eCommerce, Manifattura") }}
+          {% for e in form.settore.errors %}
+            <div class="field-error">{{ e }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="field">
+          <label>Modello</label>
+          {{ form.modello(class_="input", placeholder="Es. B2B, B2C, SaaS, Agenzia") }}
+          {% for e in form.modello.errors %}
+            <div class="field-error">{{ e }}</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="form-grid one">
+        <div class="field">
+          <label>Mese di riferimento</label>
+          {{ form.mese_riferimento(class_="input", placeholder="YYYY-MM") }}
+          {% for e in form.mese_riferimento.errors %}
+            <div class="field-error">{{ e }}</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="wizard-actions">
+        <a class="btn btn-secondary" href="{{ url_for('scans.dashboard') }}">Annulla</a>
+        <button class="btn" type="submit">{{ form.submit.label.text }}</button>
+      </div>
+    </form>
   </div>
 </div>
 
-<div class="card" style="margin-top:14px;">
-  <form method="post">
-    {{ form.hidden_tag() }}
-
-    <div class="grid" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
-      <div>
-        <label>Settore</label>
-        {{ form.settore(class_='input', placeholder='es. Servizi, Retail, Industria') }}
-        {% if form.settore.errors %}<div class="err">{{ form.settore.errors[0] }}</div>{% endif %}
-      </div>
-
-      <div>
-        <label>Modello</label>
-        {{ form.modello(class_='input', placeholder='es. B2B, B2C, Abbonamento') }}
-        {% if form.modello.errors %}<div class="err">{{ form.modello.errors[0] }}</div>{% endif %}
-      </div>
-
-      <div>
-        <label>Mese riferimento (YYYY-MM)</label>
-        {{ form.mese_riferimento(class_='input', placeholder='2026-02') }}
-        {% if form.mese_riferimento.errors %}<div class="err">{{ form.mese_riferimento.errors[0] }}</div>{% endif %}
-      </div>
-    </div>
-
-    <div style="display:flex; justify-content:flex-end; margin-top:14px;">
-      <button class="btn" type="submit">Continua</button>
-    </div>
-  </form>
-</div>
 {% endblock %}

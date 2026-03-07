@@ -1,51 +1,75 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="card">
-  <h1>Wizard — Dati essenziali</h1>
-  <p style="color:rgba(255,255,255,.7); margin-top:6px;">
-    Inserisci i numeri principali (se li hai). Anche valori approssimativi migliorano molto la qualità del risultato.
-  </p>
 
-  <form method="post">
-    {{ form.csrf_token }}
+<div class="wizard-shell">
+  <div class="wizard-progress-wrap">
+    <div class="wizard-progress-top">
+      <div class="eyebrow-ui">Step 2 di 3</div>
+      <div class="wizard-progress-label">Dati essenziali</div>
+    </div>
+    <div class="wizard-progress">
+      <div class="wizard-progress-bar" style="width: 66%"></div>
+    </div>
+  </div>
 
-    <div class="grid" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
-      <div>
-        <label>Cassa attuale (€)</label>
-        {{ form.cassa_attuale(class_="input", placeholder="es. 25000") }}
-      </div>
-      <div>
-        <label>Burn mensile (€)</label>
-        {{ form.burn_mensile(class_="input", placeholder="es. 8000") }}
-      </div>
-
-      <div>
-        <label>Incassi mese (€)</label>
-        {{ form.incassi_mese(class_="input", placeholder="es. 42000") }}
-      </div>
-      <div>
-        <label>Costi fissi mese (€)</label>
-        {{ form.costi_fissi_mese(class_="input", placeholder="es. 18000") }}
-      </div>
-
-      <div>
-        <label>Margine lordo (%)</label>
-        {{ form.margine_lordo_pct(class_="input", placeholder="es. 45") }}
-      </div>
-      <div>
-        <label>Lead mese (#)</label>
-        {{ form.leads_mese(class_="input", placeholder="es. 120") }}
-      </div>
-
-      <div>
-        <label>Clienti mese (#)</label>
-        {{ form.clienti_mese(class_="input", placeholder="es. 10") }}
-      </div>
+  <div class="wizard-card">
+    <div class="wizard-head">
+      <h1>Inserisci i KPI principali</h1>
+      <p>
+        Bastano pochi numeri per produrre una diagnosi più utile, leggibile e operativa.
+      </p>
     </div>
 
-    <div style="margin-top:14px;">
-      <button class="btn" type="submit">Continua</button>
-    </div>
-  </form>
+    <form method="post" class="wizard-form">
+      {{ form.hidden_tag() }}
+
+      <div class="form-grid two">
+        <div class="field">
+          <label>Cassa attuale (€)</label>
+          {{ form.cassa_attuale(class_="input", placeholder="Es. 25000") }}
+        </div>
+
+        <div class="field">
+          <label>Burn mensile (€)</label>
+          {{ form.burn_mensile(class_="input", placeholder="Es. 5000") }}
+        </div>
+
+        <div class="field">
+          <label>Incassi mese (€)</label>
+          {{ form.incassi_mese(class_="input", placeholder="Es. 18000") }}
+        </div>
+
+        <div class="field">
+          <label>Costi fissi mese (€)</label>
+          {{ form.costi_fissi_mese(class_="input", placeholder="Es. 12000") }}
+        </div>
+
+        <div class="field">
+          <label>Margine lordo (%)</label>
+          {{ form.margine_lordo_pct(class_="input", placeholder="Es. 35") }}
+        </div>
+
+        <div class="field">
+          <label>Lead mese (#)</label>
+          {{ form.leads_mese(class_="input", placeholder="Es. 120") }}
+        </div>
+
+        <div class="field">
+          <label>Clienti mese (#)</label>
+          {{ form.clienti_mese(class_="input", placeholder="Es. 9") }}
+        </div>
+      </div>
+
+      <div class="wizard-tip">
+        Più dati inserisci, più il report sarà preciso e utile.
+      </div>
+
+      <div class="wizard-actions">
+        <a class="btn btn-secondary" href="{{ url_for('wizard.onboarding') }}">Indietro</a>
+        <button class="btn" type="submit">{{ form.submit.label.text }}</button>
+      </div>
+    </form>
+  </div>
 </div>
+
 {% endblock %}
