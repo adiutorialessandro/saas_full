@@ -1,7 +1,6 @@
 from flask import Blueprint, render_template, flash, redirect, url_for
 from flask_login import login_required, current_user
 
-from ..forms import ResetUserPasswordForm
 from ..extensions import db
 from ..models.user import User
 from ..models.organization import Organization
@@ -11,6 +10,7 @@ from ..forms import (
     CreateOrganizationForm,
     CreateOrgUserForm,
     UpdateOrgUserRoleForm,
+    ResetUserPasswordForm,
 )
 
 bp = Blueprint("admin", __name__, url_prefix="/admin")
@@ -246,39 +246,37 @@ def update_org_user_role(org_id: int, user_id: int):
         membership=membership,
     )
 
+
 @bp.route("/organizations/<int:org_id>/users/<int:user_id>/reset-password", methods=["GET", "POST"])
 @login_required
 def reset_org_user_password(org_id: int, user_id: int):
-
     if not admin_required():
         return "Forbidden", 403
 
     org = Organization.query.get_or_404(org_id)
     user = User.query.get_or_404(user_id)
 
+    membership = Membership.query.filter_by(org_id=org.id, user_id=user.id).first()
+    if not membership:
+        flash("Associazione utente/azienda non trovata.")
+        return redirect(url_for("admin.organization_detail", org_id=org.id))
+
     form = ResetUserPasswordForm()
 
     if form.validate_on_submit():
-
         user.set_password(form.password.data)
-
         db.session.commit()
 
         flash("Password aggiornata con successo.")
-
-        return redirect(
-            url_for(
-                "admin.organization_detail",
-                org_id=org.id
-            )
-        )
+        return redirect(url_for("admin.organization_detail", org_id=org.id))
 
     return render_template(
         "admin/reset_user_password.html",
         form=form,
         org=org,
-        user=user
+        user=user,
     )
+
 
 @bp.post("/organizations/<int:org_id>/users/<int:user_id>/delete")
 @login_required
