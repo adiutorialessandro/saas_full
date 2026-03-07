@@ -56,75 +56,75 @@ class EssentialDataForm(FlaskForm):
 
 
 class QuizForm(FlaskForm):
-    # 1 = situazione critica / poco controllo
-    # 5 = situazione stabile / buon controllo
+    # 1 = situazione critica / fragile / poco controllata
+    # 5 = situazione solida / stabile / ben controllata
     _choices = [(1, "1"), (2, "2"), (3, "3"), (4, "4"), (5, "5")]
 
     q1 = RadioField(
-        "Hai una visione chiara della liquidità disponibile per i prossimi 90 giorni?",
+        "Quanto hai visibilità reale e aggiornata sulla tenuta finanziaria della tua azienda nei prossimi 90 giorni?",
         choices=_choices,
         coerce=int,
         validators=[DataRequired()],
     )
 
     q2 = RadioField(
-        "Gli incassi entrano con regolarità e nei tempi previsti?",
+        "Quanto gli incassi sono regolari, prevedibili e coerenti con i tempi di cassa di cui l’azienda ha bisogno?",
         choices=_choices,
         coerce=int,
         validators=[DataRequired()],
     )
 
     q3 = RadioField(
-        "Conosci con chiarezza il margine reale dei tuoi prodotti o servizi?",
+        "Quanto hai controllo sul margine reale generato dai tuoi prodotti, servizi o commesse?",
         choices=_choices,
         coerce=int,
         validators=[DataRequired()],
     )
 
     q4 = RadioField(
-        "I ricavi attuali coprono con sufficiente sicurezza i costi fissi aziendali?",
+        "Quanto il livello attuale dei ricavi copre con sicurezza costi fissi e struttura aziendale?",
         choices=_choices,
         coerce=int,
         validators=[DataRequired()],
     )
 
     q5 = RadioField(
-        "La generazione di lead o opportunità commerciali è costante e prevedibile?",
+        "Quanto il flusso di nuove opportunità commerciali è costante e non dipende dal caso o da iniziative sporadiche?",
         choices=_choices,
         coerce=int,
         validators=[DataRequired()],
     )
 
     q6 = RadioField(
-        "Il processo commerciale converte lead in clienti con efficacia soddisfacente?",
+        "Quanto il processo commerciale riesce a trasformare lead e opportunità in clienti in modo efficace e ripetibile?",
         choices=_choices,
         coerce=int,
         validators=[DataRequired()],
     )
 
     q7 = RadioField(
-        "La tua azienda è poco dipendente da pochi clienti o poche commesse?",
+        "Quanto il business è diversificato e non dipendente da pochi clienti, pochi canali o poche commesse critiche?",
         choices=_choices,
         coerce=int,
         validators=[DataRequired()],
     )
 
     q8 = RadioField(
-        "Hai KPI chiari e aggiornati per prendere decisioni rapide e corrette?",
+        "Quanto le decisioni aziendali vengono prese su KPI chiari, aggiornati e realmente utili alla gestione?",
         choices=_choices,
         coerce=int,
         validators=[DataRequired()],
     )
 
     q9 = RadioField(
-        "I costi, i processi e l’operatività sono sotto controllo senza sprechi rilevanti?",
+        "Quanto costi, processi e operatività sono sotto controllo senza dispersioni, inefficienze o sprechi significativi?",
         choices=_choices,
         coerce=int,
         validators=[DataRequired()],
     )
 
     q10 = RadioField(
-        "Il team o l’organizzazione riesce a eseguire priorità e decisioni con continuità?",
+        "Quanto il team o l’organizzazione riesce a trasformare rapidamente le priorità in esecuzione concreta e risultati?",
         choices=_choices,
         coerce=int,
         validators=[DataRequired()],
