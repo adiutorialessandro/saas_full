@@ -63,8 +63,30 @@ class CreateOrganizationForm(FlaskForm):
     password = PasswordField("Password iniziale", validators=[DataRequired(), Length(min=6)])
     submit = SubmitField("Crea azienda")
 
+
 class CreateOrgUserForm(FlaskForm):
     email = StringField("Email utente", validators=[DataRequired(), Email()])
     password = PasswordField("Password iniziale", validators=[DataRequired(), Length(min=6)])
     role = StringField("Ruolo", validators=[DataRequired(), Length(min=2, max=20)])
     submit = SubmitField("Aggiungi utente")
+
+
+class UpdateOrgUserRoleForm(FlaskForm):
+    role = StringField("Ruolo", validators=[DataRequired(), Length(min=2, max=20)])
+    submit = SubmitField("Aggiorna ruolo")
+
+class ResetUserPasswordForm(FlaskForm):
+    password = PasswordField(
+        "Nuova password",
+        validators=[DataRequired(), Length(min=6)]
+    )
+
+    password2 = PasswordField(
+        "Ripeti password",
+        validators=[
+            DataRequired(),
+            EqualTo("password", message="Le password non coincidono")
+        ]
+    )
+
+    submit = SubmitField("Aggiorna password")

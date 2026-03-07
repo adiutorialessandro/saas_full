@@ -9,6 +9,7 @@
     </div>
 
     <div class="dash-actions">
+      <a class="btn" href="{{ url_for('admin.create_org_user', org_id=org.id) }}">+ Utente</a>
       <a class="btn" href="{{ url_for('admin.organizations') }}">← Torna ai clienti</a>
     </div>
   </div>
@@ -30,6 +31,40 @@
             <div class="inbox-meta muted">
               Ruolo org: {{ u.role }} · Admin globale: {{ "Sì" if u.is_admin else "No" }}
             </div>
+          </div>
+
+          <div class="inbox-right">
+
+<a class="btn"
+href="{{ url_for('admin.update_org_user_role', org_id=org.id, user_id=u.id) }}">
+Ruolo
+</a>
+
+<a class="btn"
+href="{{ url_for('admin.reset_org_user_password', org_id=org.id, user_id=u.id) }}">
+Password
+</a>
+
+<form method="post"
+action="{{ url_for('admin.delete_org_user', org_id=org.id, user_id=u.id) }}"
+style="display:inline;">
+<button class="btn btn-danger" type="submit"
+onclick="return confirm('Rimuovere questo utente dall’azienda?')">
+Elimina
+</button>
+</form>
+
+</div>
+            <a class="btn" href="{{ url_for('admin.update_org_user_role', org_id=org.id, user_id=u.id) }}">Ruolo</a>
+
+            <form method="post"
+                  action="{{ url_for('admin.delete_org_user', org_id=org.id, user_id=u.id) }}"
+                  style="display:inline;">
+              <button class="btn btn-danger" type="submit"
+                      onclick="return confirm('Rimuovere questo utente dall’azienda?')">
+                Elimina
+              </button>
+            </form>
           </div>
         </div>
       {% endfor %}

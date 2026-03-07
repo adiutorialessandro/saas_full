@@ -1,13 +1,17 @@
 from flask import Blueprint, render_template, flash, redirect, url_for
 from flask_login import login_required, current_user
 
+from ..forms import ResetUserPasswordForm
 from ..extensions import db
 from ..models.user import User
 from ..models.organization import Organization
 from ..models.membership import Membership
 from ..models.scan import Scan
-from ..forms import CreateOrganizationForm
-from ..forms import CreateOrganizationForm, CreateOrgUserForm
+from ..forms import (
+    CreateOrganizationForm,
+    CreateOrgUserForm,
+    UpdateOrgUserRoleForm,
+)
 
 bp = Blueprint("admin", __name__, url_prefix="/admin")
 
@@ -89,46 +93,6 @@ def create_organization():
 
     return render_template("admin/new_org.html", form=form)
 
-@bp.route("/organizations/<int:org_id>/users/new", methods=["GET", "POST"])
-@login_required
-def create_org_user(org_id: int):
-    if not admin_required():
-        return "Forbidden", 403
-
-    org = Organization.query.get_or_404(org_id)
-    form = CreateOrgUserForm()
-
-    if form.validate_on_submit():
-        email = form.email.data.strip().lower()
-        role = form.role.data.strip().lower()
-
-        if role not in {"owner", "admin", "member", "manager"}:
-            flash("Ruolo non valido. Usa: owner, admin, manager o member.")
-            return render_template("admin/new_org_user.html", form=form, org=org)
-
-        if User.query.filter_by(email=email).first():
-            flash("Email già registrata.")
-            return render_template("admin/new_org_user.html", form=form, org=org)
-
-        user = User(email=email, is_admin=False)
-        user.set_password(form.password.data)
-
-        db.session.add(user)
-        db.session.flush()
-
-        membership = Membership(
-            user_id=user.id,
-            org_id=org.id,
-            role=role,
-        )
-
-        db.session.add(membership)
-        db.session.commit()
-
-        flash("Utente cliente creato con successo.")
-        return redirect(url_for("admin.organization_detail", org_id=org.id))
-
-    return render_template("admin/new_org_user.html", form=form, org=org)
 
 @bp.get("/organizations")
 @login_required
@@ -198,6 +162,149 @@ def organization_detail(org_id: int):
         users=users,
         scans=scans,
     )
+
+
+@bp.route("/organizations/<int:org_id>/users/new", methods=["GET", "POST"])
+@login_required
+def create_org_user(org_id: int):
+    if not admin_required():
+        return "Forbidden", 403
+
+    org = Organization.query.get_or_404(org_id)
+    form = CreateOrgUserForm()
+
+    if form.validate_on_submit():
+        email = form.email.data.strip().lower()
+        role = form.role.data.strip().lower()
+
+        if role not in {"owner", "admin", "manager", "member"}:
+            flash("Ruolo non valido. Usa: owner, admin, manager o member.")
+            return render_template("admin/new_org_user.html", form=form, org=org)
+
+        if User.query.filter_by(email=email).first():
+            flash("Email già registrata.")
+            return render_template("admin/new_org_user.html", form=form, org=org)
+
+        user = User(email=email, is_admin=False)
+        user.set_password(form.password.data)
+
+        db.session.add(user)
+        db.session.flush()
+
+        membership = Membership(
+            user_id=user.id,
+            org_id=org.id,
+            role=role,
+        )
+
+        db.session.add(membership)
+        db.session.commit()
+
+        flash("Utente cliente creato con successo.")
+        return redirect(url_for("admin.organization_detail", org_id=org.id))
+
+    return render_template("admin/new_org_user.html", form=form, org=org)
+
+
+@bp.route("/organizations/<int:org_id>/users/<int:user_id>/role", methods=["GET", "POST"])
+@login_required
+def update_org_user_role(org_id: int, user_id: int):
+    if not admin_required():
+        return "Forbidden", 403
+
+    org = Organization.query.get_or_404(org_id)
+    user = User.query.get_or_404(user_id)
+
+    membership = Membership.query.filter_by(org_id=org.id, user_id=user.id).first_or_404()
+
+    form = UpdateOrgUserRoleForm(role=membership.role)
+
+    if form.validate_on_submit():
+        role = form.role.data.strip().lower()
+
+        if role not in {"owner", "admin", "manager", "member"}:
+            flash("Ruolo non valido. Usa: owner, admin, manager o member.")
+            return render_template(
+                "admin/edit_org_user_role.html",
+                form=form,
+                org=org,
+                user=user,
+                membership=membership,
+            )
+
+        membership.role = role
+        db.session.commit()
+
+        flash("Ruolo aggiornato con successo.")
+        return redirect(url_for("admin.organization_detail", org_id=org.id))
+
+    return render_template(
+        "admin/edit_org_user_role.html",
+        form=form,
+        org=org,
+        user=user,
+        membership=membership,
+    )
+
+@bp.route("/organizations/<int:org_id>/users/<int:user_id>/reset-password", methods=["GET", "POST"])
+@login_required
+def reset_org_user_password(org_id: int, user_id: int):
+
+    if not admin_required():
+        return "Forbidden", 403
+
+    org = Organization.query.get_or_404(org_id)
+    user = User.query.get_or_404(user_id)
+
+    form = ResetUserPasswordForm()
+
+    if form.validate_on_submit():
+
+        user.set_password(form.password.data)
+
+        db.session.commit()
+
+        flash("Password aggiornata con successo.")
+
+        return redirect(
+            url_for(
+                "admin.organization_detail",
+                org_id=org.id
+            )
+        )
+
+    return render_template(
+        "admin/reset_user_password.html",
+        form=form,
+        org=org,
+        user=user
+    )
+
+@bp.post("/organizations/<int:org_id>/users/<int:user_id>/delete")
+@login_required
+def delete_org_user(org_id: int, user_id: int):
+    if not admin_required():
+        return "Forbidden", 403
+
+    org = Organization.query.get_or_404(org_id)
+    user = User.query.get_or_404(user_id)
+
+    membership = Membership.query.filter_by(org_id=org.id, user_id=user.id).first()
+    if not membership:
+        flash("Associazione utente/azienda non trovata.")
+        return redirect(url_for("admin.organization_detail", org_id=org.id))
+
+    db.session.delete(membership)
+    db.session.flush()
+
+    remaining_memberships = Membership.query.filter_by(user_id=user.id).count()
+    if remaining_memberships == 0:
+        db.session.delete(user)
+
+    db.session.commit()
+
+    flash("Utente rimosso dall'azienda.")
+    return redirect(url_for("admin.organization_detail", org_id=org.id))
 
 
 @bp.post("/user/<int:user_id>/toggle-admin")

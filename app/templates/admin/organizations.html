@@ -9,6 +9,7 @@
     </div>
 
     <div class="dash-actions">
+      <a class="btn" href="{{ url_for('admin.create_org_user', org_id=org.id) }}">+ Utente</a>
       <a class="btn" href="{{ url_for('admin.create_organization') }}">+ Nuova azienda</a>
     </div>
   </div>
