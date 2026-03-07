@@ -17,6 +17,13 @@ from ..forms import (
     UpdateOrganizationPlanForm,
 )
 
+from ..services.email_service import (
+    send_client_created_email,
+    send_user_invite_email,
+    send_password_reset_notice_email,
+    send_plan_notice_email,
+)
+
 bp = Blueprint("admin", __name__, url_prefix="/admin")
 
 
@@ -93,6 +100,8 @@ def create_organization():
 
         db.session.add(membership)
         db.session.commit()
+
+        send_client_created_email(user.email, org.name)
 
         flash("Azienda creata con successo.")
         return redirect(url_for("admin.organizations"))
@@ -207,6 +216,8 @@ def create_org_user(org_id: int):
         db.session.add(membership)
         db.session.commit()
 
+        send_user_invite_email(user.email, org.name, role)
+
         flash("Utente cliente creato con successo.")
         return redirect(url_for("admin.organization_detail", org_id=org.id))
 
@@ -273,6 +284,8 @@ def reset_org_user_password(org_id: int, user_id: int):
         user.set_password(form.password.data)
         db.session.commit()
 
+        send_password_reset_notice_email(user.email, org.name)
+
         flash("Password aggiornata con successo.")
         return redirect(url_for("admin.organization_detail", org_id=org.id))
 
@@ -308,6 +321,7 @@ def view_scan(scan_id: int):
     vm.setdefault("alerts", [])
 
     return render_template("view_scan.html", scan=scan, vm=vm)
+
 
 @bp.post("/organizations/<int:org_id>/users/<int:user_id>/delete")
 @login_required
@@ -405,6 +419,20 @@ def update_organization_plan(org_id: int):
 
         org.plan_id = plan.id
         db.session.commit()
+
+        owner = (
+            db.session.query(User)
+            .join(Membership, Membership.user_id == User.id)
+            .filter(Membership.org_id == org.id, Membership.role == "owner")
+            .first()
+        )
+        if owner:
+            send_plan_notice_email(
+                owner.email,
+                org.name,
+                plan.name,
+                "Il piano della tua azienda è stato aggiornato.",
+            )
 
         flash("Piano azienda aggiornato.")
         return redirect(url_for("admin.organization_detail", org_id=org.id))
