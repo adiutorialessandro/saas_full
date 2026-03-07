@@ -22,3 +22,12 @@ class Config:
     STRIPE_PORTAL_RETURN_URL = os.environ.get("STRIPE_PORTAL_RETURN_URL", "")
     STRIPE_CHECKOUT_SUCCESS_URL = os.environ.get("STRIPE_CHECKOUT_SUCCESS_URL", "")
     STRIPE_CHECKOUT_CANCEL_URL = os.environ.get("STRIPE_CHECKOUT_CANCEL_URL", "")
+
+    EMAIL_ENABLED = os.environ.get("EMAIL_ENABLED", "false").lower() == "true"
+    SMTP_HOST = os.environ.get("SMTP_HOST", "")
+    SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
+    SMTP_USERNAME = os.environ.get("SMTP_USERNAME", "")
+    SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "")
+    SMTP_USE_TLS = os.environ.get("SMTP_USE_TLS", "true").lower() == "true"
+    EMAIL_FROM = os.environ.get("EMAIL_FROM", "noreply@saasfull.local")
+    APP_BASE_URL = os.environ.get("APP_BASE_URL", "http://127.0.0.1:5000")
