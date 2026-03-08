@@ -303,7 +303,8 @@ def _page_5_execution(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total
     c.setFont("Helvetica-Bold", 12.5)
     c.drawString(M_L + 8 * mm, card_y + card_h - 10 * mm, "Piano di esecuzione 90 giorni — priorità operative")
 
-    row_y = card_y + card_h - 20 * mm
+    row_y = card_y + card_h - 18 * mm
+
     for item in plan:
         week = item.get("week", "—")
         action = item.get("action", "—")
@@ -311,17 +312,38 @@ def _page_5_execution(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total
         target_kpi = item.get("target_kpi", "—")
         target_value = item.get("target_value", "—")
 
+        # titolo settimana su riga dedicata
         c.setFillColor(DEFAULT_TEXT)
-        c.setFont("Helvetica-Bold", 10.4)
+        c.setFont("Helvetica-Bold", 10.5)
         c.drawString(M_L + 8 * mm, row_y, f"Settimana {week}")
 
-        c.setFont("Helvetica", 9.2)
-        _draw_multiline(c, M_L + 34 * mm, row_y, action, 88 * mm, "Helvetica", 9.2, 2)
-        c.drawString(M_L + 128 * mm, row_y, f"Owner: {owner}")
-        c.drawString(M_L + 172 * mm, row_y, f"KPI: {target_kpi}")
-        c.drawRightString(M_L + SAFE_W - 8 * mm, row_y, f"Target: {target_value}")
+        # azione su riga separata e più larga
+        c.setFont("Helvetica", 9.4)
+        _draw_multiline(
+            c,
+            M_L + 8 * mm,
+            row_y - 7 * mm,
+            action,
+            SAFE_W - 16 * mm,
+            "Helvetica",
+            9.4,
+            2,
+        )
 
-        row_y -= 18 * mm
+        # metadati distanziati su una riga successiva
+        meta_y = row_y - 17 * mm
+        c.setFont("Helvetica", 8.9)
+        c.drawString(M_L + 8 * mm, meta_y, f"Owner: {owner}")
+        c.drawString(M_L + 70 * mm, meta_y, f"KPI: {target_kpi}")
+        c.drawRightString(M_L + SAFE_W - 8 * mm, meta_y, f"Target: {target_value}")
+
+        # linea divisoria leggera
+        c.setStrokeColorRGB(0.86, 0.89, 0.94)
+        c.setLineWidth(0.6)
+        c.line(M_L + 8 * mm, meta_y - 5 * mm, M_L + SAFE_W - 8 * mm, meta_y - 5 * mm)
+
+        # spazio verticale maggiore tra i blocchi
+        row_y -= 30 * mm
 
     footer(c, page_no, total)
 
