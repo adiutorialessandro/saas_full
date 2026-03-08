@@ -396,39 +396,9 @@ def _one_pager_executive(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, to
     col_w = (SAFE_W - 2 * gap) / 3
 
     y = top_y - 32 * mm
-    kpi_card(
-        c,
-        M_L,
-        y,
-        col_w,
-        30 * mm,
-        "Triad Score",
-        f"{int(round(ctx['triad']))}/100",
-        "Business Stability Score",
-        ctx["overall"],
-    )
-    kpi_card(
-        c,
-        M_L + col_w + gap,
-        y,
-        col_w,
-        30 * mm,
-        "Risk Profile",
-        ctx.get("risk_profile") or "—",
-        "Profilo dominante",
-        "VERDE",
-    )
-    kpi_card(
-        c,
-        M_L + 2 * (col_w + gap),
-        y,
-        col_w,
-        30 * mm,
-        "Confidence",
-        f"{ctx.get('confidence', '—')}%",
-        "Affidabilità del report",
-        "VERDE",
-    )
+    kpi_card(c, M_L, y, col_w, 30 * mm, "Triad Score", f"{int(round(ctx['triad']))}/100", "Business Stability Score", ctx["overall"])
+    kpi_card(c, M_L + col_w + gap, y, col_w, 30 * mm, "Risk Profile", ctx.get("risk_profile") or "—", "Profilo dominante", "VERDE")
+    kpi_card(c, M_L + 2 * (col_w + gap), y, col_w, 30 * mm, "Confidence", f"{ctx.get('confidence', '—')}%", "Affidabilità del report", "VERDE")
 
     row2_top = y - 46 * mm
     left_w = (SAFE_W - gap) / 2
@@ -437,16 +407,7 @@ def _one_pager_executive(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, to
     c.setFillColor(DEFAULT_TEXT)
     c.setFont("Helvetica-Bold", 12.5)
     c.drawString(M_L + 8 * mm, row2_top - 10 * mm, "Executive Strategic Summary")
-    _draw_multiline(
-        c,
-        M_L + 8 * mm,
-        row2_top - 18 * mm,
-        ctx.get("summary") or "",
-        left_w - 16 * mm,
-        "Helvetica",
-        9.5,
-        5,
-    )
+    _draw_multiline(c, M_L + 8 * mm, row2_top - 18 * mm, ctx.get("summary") or "", left_w - 16 * mm, "Helvetica", 9.5, 5)
 
     right_x = M_L + left_w + gap
     shadow_card(c, right_x, row2_top - 42 * mm, left_w, 42 * mm)
@@ -462,6 +423,19 @@ def _one_pager_executive(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, to
         yy -= 8 * mm
 
     footer(c, page_no, total)
+
+
+def render_scan_pages(c: canvas.Canvas, ctx: Dict[str, Any]) -> None:
+    total = 5
+    _page_1_executive(c, ctx, 1, total)
+    c.showPage()
+    _page_2_risk_snapshot(c, ctx, 2, total)
+    c.showPage()
+    _page_3_kpi(c, ctx, 3, total)
+    c.showPage()
+    _page_4_radar(c, ctx, 4, total)
+    c.showPage()
+    _page_5_execution(c, ctx, 5, total)
 
 
 def render_one_pager(c: canvas.Canvas, ctx: Dict[str, Any]) -> None:
