@@ -50,7 +50,7 @@ def _page_1_executive(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total
     right_x = M_L + left_w + 10 * mm
     right_w = SAFE_W - left_w - 10 * mm
 
-    card_h = 66 * mm
+    card_h = 70 * mm
     card_y = top_y - card_h
 
     score_card(
@@ -72,22 +72,22 @@ def _page_1_executive(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total
 
     shadow_card(c, right_x, card_y, right_w, card_h)
     c.setFillColor(DEFAULT_TEXT)
-    c.setFont("Helvetica-Bold", 13)
-    c.drawString(right_x + 8 * mm, card_y + card_h - 10 * mm, "Lettura executive")
+    c.setFont("Helvetica-Bold", 13.6)
+    c.drawString(right_x + 8 * mm, card_y + card_h - 11 * mm, "Lettura executive")
 
     _draw_multiline(
         c,
         right_x + 8 * mm,
-        card_y + card_h - 19 * mm,
+        card_y + card_h - 21 * mm,
         ctx.get("summary") or "",
         right_w - 16 * mm,
         "Helvetica",
         10,
-        7,
+        8,
     )
 
-    row2_y = card_y - 42 * mm
-    row2_h = 34 * mm
+    row2_y = card_y - 46 * mm
+    row2_h = 36 * mm
     col_gap = 8 * mm
     col_w = (SAFE_W - 2 * col_gap) / 3
 
@@ -103,18 +103,18 @@ def _page_1_executive(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total
         x = M_L + idx * (col_w + col_gap)
         shadow_card(c, x, row2_y, col_w, row2_h)
         c.setFillColor(DEFAULT_TEXT)
-        c.setFont("Helvetica-Bold", 10.7)
-        c.drawString(x + 6 * mm, row2_y + row2_h - 8 * mm, title)
-        c.setFont("Helvetica", 8.9)
-        _draw_multiline(c, x + 6 * mm, row2_y + row2_h - 15 * mm, text, col_w - 12 * mm, "Helvetica", 8.9, 3)
+        c.setFont("Helvetica-Bold", 10.9)
+        c.drawString(x + 6 * mm, row2_y + row2_h - 9 * mm, title)
+        c.setFont("Helvetica", 9.0)
+        _draw_multiline(c, x + 6 * mm, row2_y + row2_h - 17 * mm, text, col_w - 12 * mm, "Helvetica", 9.0, 3)
 
-    note_y = row2_y - 14 * mm
-    shadow_card(c, M_L, note_y, SAFE_W, 12 * mm)
+    note_y = row2_y - 16 * mm
+    shadow_card(c, M_L, note_y, SAFE_W, 13 * mm)
     c.setFillColor(DEFAULT_MUTED)
     c.setFont("Helvetica", 9.2)
     c.drawString(
         M_L + 6 * mm,
-        note_y + 4 * mm,
+        note_y + 4.6 * mm,
         ctx.get("board_note") or "Documento sintetico a supporto delle decisioni prioritarie del management.",
     )
 
@@ -133,20 +133,20 @@ def _page_2_risk_snapshot(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, t
     top_y = H - M_T - 18 * mm
     gap = 8 * mm
     col_w = (SAFE_W - 2 * gap) / 3
-    card_h = 44 * mm
+    card_h = 48 * mm
     y = top_y - card_h
 
     risk_card(c, M_L, y, col_w, card_h, "Cassa", ctx["cash_r"], "Tenuta finanziaria e visibilità di breve.")
     risk_card(c, M_L + col_w + gap, y, col_w, card_h, "Margini", ctx["marg_r"], "Sostenibilità economica e protezione del margine.")
     risk_card(c, M_L + 2 * (col_w + gap), y, col_w, card_h, "Acquisizione", ctx["acq_r"], "Prevedibilità e continuità del motore commerciale.")
 
-    drv_y = y - 50 * mm
-    shadow_card(c, M_L, drv_y, SAFE_W, 42 * mm)
+    drv_y = y - 54 * mm
+    shadow_card(c, M_L, drv_y, SAFE_W, 46 * mm)
 
     items = (ctx.get("drivers", {}).get("cash") or []) + (ctx.get("drivers", {}).get("margins") or []) + (ctx.get("drivers", {}).get("acquisition") or [])
     items = items[:3] if items else ["Driver non disponibili con i dati attuali."]
 
-    bullet_block(c, M_L + 8 * mm, drv_y + 31 * mm, SAFE_W - 16 * mm, "Top driver – Sintesi", items)
+    bullet_block(c, M_L + 8 * mm, drv_y + 34 * mm, SAFE_W - 16 * mm, "Top driver – Sintesi", items)
 
     c.setFillColor(DEFAULT_MUTED)
     c.setFont("Helvetica", 8.8)
@@ -295,7 +295,7 @@ def _page_5_execution(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total
     top_y = H - M_T - 18 * mm
     plan = (ctx.get("plan") or [])[:4]
 
-    card_h = 90 * mm
+    card_h = 126 * mm
     card_y = top_y - card_h
     shadow_card(c, M_L, card_y, SAFE_W, card_h)
 
@@ -343,7 +343,7 @@ def _page_5_execution(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total
         c.line(M_L + 8 * mm, meta_y - 5 * mm, M_L + SAFE_W - 8 * mm, meta_y - 5 * mm)
 
         # spazio verticale maggiore tra i blocchi
-        row_y -= 36 * mm
+        row_y -= 26 * mm
 
     footer(c, page_no, total)
 
@@ -369,24 +369,24 @@ def _one_pager_executive(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, to
     row2_top = y - 46 * mm
     left_w = (SAFE_W - gap) / 2
 
-    shadow_card(c, M_L, row2_top - 42 * mm, left_w, 42 * mm)
+    shadow_card(c, M_L, row2_top - 46 * mm, left_w, 46 * mm)
     c.setFillColor(DEFAULT_TEXT)
     c.setFont("Helvetica-Bold", 12.5)
     c.drawString(M_L + 8 * mm, row2_top - 10 * mm, "Executive Strategic Summary")
-    _draw_multiline(c, M_L + 8 * mm, row2_top - 18 * mm, ctx.get("summary") or "", left_w - 16 * mm, "Helvetica", 9.5, 5)
+    _draw_multiline(c, M_L + 8 * mm, row2_top - 19 * mm, ctx.get("summary") or "", left_w - 16 * mm, "Helvetica", 9.5, 6)
 
     right_x = M_L + left_w + gap
-    shadow_card(c, right_x, row2_top - 42 * mm, left_w, 42 * mm)
+    shadow_card(c, right_x, row2_top - 46 * mm, left_w, 46 * mm)
     c.setFillColor(DEFAULT_TEXT)
     c.setFont("Helvetica-Bold", 12.5)
     c.drawString(right_x + 8 * mm, row2_top - 10 * mm, "Action Plan — Next 90 Days")
 
     plans = ctx.get("plan") or []
-    yy = row2_top - 18 * mm
+    yy = row2_top - 19 * mm
     c.setFont("Helvetica", 9.2)
     for item in plans[:3]:
-        c.drawString(right_x + 8 * mm, yy, f"• {item.get('action', '—')}")
-        yy -= 8 * mm
+        _draw_multiline(c, right_x + 8 * mm, yy, f"• {item.get('action', '—')}", left_w - 16 * mm, "Helvetica", 9.2, 2)
+        yy -= 11 * mm
 
     footer(c, page_no, total)
 
