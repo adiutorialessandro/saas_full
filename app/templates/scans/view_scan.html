@@ -23,6 +23,7 @@
     <div class="report-hero-actions">
       <a class="btn btn-secondary" href="{{ url_for('scans.scan_pdf', scan_id=scan.id) }}">Scarica PDF</a>
       <a class="btn" href="{{ url_for('wizard.onboarding') }}">Nuovo scan</a>
+      <a class="btn" href="{{ url_for('report.view_report', scan_id=scan.id) }}">Apri report interattivo</a>
     </div>
   </section>
 

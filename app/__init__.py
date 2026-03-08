@@ -7,6 +7,7 @@ from .routes.wizard import bp as wizard_bp
 from .routes.scans import bp as scans_bp
 from .routes.admin import bp as admin_bp
 from .routes.billing import bp as billing_bp
+from .routes.report import bp as report_bp
 
 # importa i model per SQLAlchemy / Alembic
 from .models.user import User
@@ -53,6 +54,7 @@ def create_app():
     app.register_blueprint(admin_bp)
     app.register_blueprint(billing_bp)
     app.register_blueprint(orgs_bp)
+    app.register_blueprint(report_bp)
     
     @app.cli.command("seed-plans")
     def seed_plans_command():

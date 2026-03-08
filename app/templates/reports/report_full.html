@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/report.css') }}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="report-wrap">
+  <div class="report-hero">
+    <div>
+      <div class="report-kicker">SaaS Full · Business Report</div>
+      <h1>{{ scan_meta.settore }}</h1>
+      <div class="report-sub">
+        {{ scan_meta.modello }} · {{ scan_meta.mese }}
+        {% if scan_meta.created_at %} · {{ scan_meta.created_at }}{% endif %}
+      </div>
+    </div>
+
+    <div class="hero-actions">
+      <a class="btn" href="{{ url_for('scans.scan_pdf', scan_id=scan.id) }}">Scarica PDF</a>
+      <a class="btn btn-secondary" href="{{ url_for('scans.scan_onepager', scan_id=scan.id) }}">One Pager</a>
+    </div>
+  </div>
+
+  <section class="hero-grid">
+    <div class="report-card score-card">
+      <div class="card-label">Business Stability Score</div>
+      <div class="score-big">{{ vm.state.overall_score or 50 }}/100</div>
+      <div class="muted">Confidence {{ vm.state.confidence or 50 }}%</div>
+      <div class="muted">{{ vm.state.risk_profile }}</div>
+      <div class="muted">{{ vm.state.maturity_label }}</div>
+    </div>
+
+    <div class="report-card">
+      <div class="card-title">Executive Summary</div>
+      <p>{{ vm.state.summary }}</p>
+    </div>
+  </section>
+
+  <section class="report-section">
+    <div class="section-head">
+      <h2>Business Risk Snapshot</h2>
+    </div>
+
+    <div class="grid-3">
+      <div class="report-card risk-card">
+        <div class="card-title">Cassa</div>
+        <div class="risk-value">{{ ((vm.risks.cash or 0) * 100)|round|int }}%</div>
+      </div>
+      <div class="report-card risk-card">
+        <div class="card-title">Margini</div>
+        <div class="risk-value">{{ ((vm.risks.margini or 0) * 100)|round|int }}%</div>
+      </div>
+      <div class="report-card risk-card">
+        <div class="card-title">Acquisizione</div>
+        <div class="risk-value">{{ ((vm.risks.acq or 0) * 100)|round|int }}%</div>
+      </div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="report-card">
+        <div class="card-title">Radar Rischi</div>
+        <canvas id="riskRadar"></canvas>
+      </div>
+      <div class="report-card">
+        <div class="card-title">Confronto Rischi</div>
+        <canvas id="riskBars"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <section class="report-section">
+    <div class="section-head">
+      <h2>KPI Dashboard</h2>
+    </div>
+
+    <div class="grid-3">
+      <div class="report-card">
+        <div class="card-title">Runway</div>
+        <div class="kpi-value">
+          {% if vm.kpi.runway_mesi is not none %}{{ "%.1f"|format(vm.kpi.runway_mesi) }} mesi{% else %}—{% endif %}
+        </div>
+      </div>
+      <div class="report-card">
+        <div class="card-title">Break-even ratio</div>
+        <div class="kpi-value">
+          {% if vm.kpi.break_even_ratio is not none %}{{ "%.2f"|format(vm.kpi.break_even_ratio) }}{% else %}—{% endif %}
+        </div>
+      </div>
+      <div class="report-card">
+        <div class="card-title">Conversione</div>
+        <div class="kpi-value">
+          {% if vm.kpi.conversione is not none %}{{ "%.1f"|format((vm.kpi.conversione if vm.kpi.conversione <= 1 else vm.kpi.conversione / 100) * 100) }}%{% else %}—{% endif %}
+        </div>
+      </div>
+      <div class="report-card">
+        <div class="card-title">Margine lordo</div>
+        <div class="kpi-value">
+          {% if vm.kpi.margine_pct is not none %}{{ "%.1f"|format((vm.kpi.margine_pct if vm.kpi.margine_pct <= 1 else vm.kpi.margine_pct / 100) * 100) }}%{% else %}—{% endif %}
+        </div>
+      </div>
+      <div class="report-card">
+        <div class="card-title">Burn/Cash</div>
+        <div class="kpi-value">
+          {% if vm.kpi.burn_cash_ratio is not none %}{{ "%.1f"|format((vm.kpi.burn_cash_ratio if vm.kpi.burn_cash_ratio <= 1 else vm.kpi.burn_cash_ratio / 100) * 100) }}%{% else %}—{% endif %}
+        </div>
+      </div>
+      <div class="report-card">
+        <div class="card-title">Incassi mese</div>
+        <div class="kpi-value">
+          {% if vm.kpi.incassi_mese is not none %}€ {{ "%.0f"|format(vm.kpi.incassi_mese) }}{% else %}—{% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="report-section">
+    <div class="section-head">
+      <h2>Direzione Strategica</h2>
+    </div>
+
+    <div class="grid-3">
+      <div class="report-card">
+        <div class="card-title">Cassa</div>
+        <p>{{ vm.decisions.cash or "—" }}</p>
+      </div>
+      <div class="report-card">
+        <div class="card-title">Margini</div>
+        <p>{{ vm.decisions.margini or "—" }}</p>
+      </div>
+      <div class="report-card">
+        <div class="card-title">Acquisizione</div>
+        <p>{{ vm.decisions.acq or "—" }}</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="report-section">
+    <div class="section-head">
+      <h2>Action Plan</h2>
+    </div>
+
+    <div class="report-card">
+      {% if vm.plan_tasks %}
+        <div class="plan-list">
+          {% for item in vm.plan_tasks %}
+            <div class="plan-row">
+              <div class="plan-week">Settimana {{ item.week }}</div>
+              <div class="plan-main">
+                <div class="plan-action">{{ item.action }}</div>
+                <div class="plan-meta">Owner: {{ item.owner }} · KPI: {{ item.target_kpi }} · Target: {{ item.target_value }}</div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% elif vm.action_plan %}
+        <ol class="action-plan-pro">
+          {% for item in vm.action_plan %}
+            <li>{{ item }}</li>
+          {% endfor %}
+        </ol>
+      {% else %}
+        <p>Nessun piano disponibile.</p>
+      {% endif %}
+    </div>
+  </section>
+</div>
+
+<script>
+  const riskValues = [
+    {{ ((vm.risks.cash or 0) * 100)|round(1) }},
+    {{ ((vm.risks.margini or 0) * 100)|round(1) }},
+    {{ ((vm.risks.acq or 0) * 100)|round(1) }}
+  ];
+
+  new Chart(document.getElementById('riskRadar'), {
+    type: 'radar',
+    data: {
+      labels: ['Cassa', 'Margini', 'Acquisizione'],
+      datasets: [{
+        label: 'Rischio %',
+        data: riskValues
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        r: {
+          min: 0,
+          max: 100
+        }
+      },
+      plugins: {
+        legend: { display: false }
+      }
+    }
+  });
+
+  new Chart(document.getElementById('riskBars'), {
+    type: 'bar',
+    data: {
+      labels: ['Cassa', 'Margini', 'Acquisizione'],
+      datasets: [{
+        label: 'Rischio %',
+        data: riskValues
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        y: {
+          min: 0,
+          max: 100
+        }
+      }
+    }
+  });
+</script>
+{% endblock %}
