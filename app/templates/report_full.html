@@ -20,12 +20,53 @@
     </div>
   </div>
 
+  <section class="report-section diagnosis-section">
+    <div class="report-card diagnosis-card diagnosis-{{ header_payload.diagnosis.status_tone if header_payload and header_payload.diagnosis else 'warning' }}">
+      <div class="diagnosis-topline">Strategic Diagnosis</div>
+      <div class="diagnosis-headline">{{ header_payload.diagnosis.headline if header_payload and header_payload.diagnosis else '🟡 Watchlist' }}</div>
+      <p class="diagnosis-summary">{{ header_payload.diagnosis.summary if header_payload and header_payload.diagnosis else vm.state.summary }}</p>
+
+      <div class="diagnosis-grid">
+        <div class="diagnosis-block">
+          <div class="card-label">Diagnosi</div>
+          <p>{{ header_payload.diagnosis.diagnosis if header_payload and header_payload.diagnosis else vm.state.summary }}</p>
+        </div>
+        <div class="diagnosis-block">
+          <div class="card-label">Trend</div>
+          <p>{{ header_payload.diagnosis.trend if header_payload and header_payload.diagnosis else 'Trend non disponibile.' }}</p>
+        </div>
+      </div>
+
+      <div class="diagnosis-grid diagnosis-grid-bottom">
+        <div class="diagnosis-block">
+          <div class="card-label">Priorità</div>
+          <p>{{ header_payload.diagnosis.priority if header_payload and header_payload.diagnosis else 'Priorità non disponibile.' }}</p>
+        </div>
+        <div class="diagnosis-block">
+          <div class="card-label">Punto forte relativo</div>
+          <p>{{ header_payload.diagnosis.strength if header_payload and header_payload.diagnosis else 'Punto di forza non disponibile.' }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="hero-grid">
     <div class="report-card score-card">
       <div class="card-label">Business Stability Score</div>
       <div class="score-big">{{ vm.state.overall_score or 50 }}/100</div>
 
-      {% if delta and delta.score is not none %}
+      {% if header_payload and header_payload.health %}
+        <div class="status-pill status-{{ header_payload.health.tone }}">
+          {{ header_payload.health.icon }} {{ header_payload.health.label }}
+        </div>
+      {% endif %}
+
+      {% if header_payload and header_payload.score_trend %}
+        <div class="trend-badge trend-{{ header_payload.score_trend.tone }}">
+          {{ header_payload.score_trend.icon }} {{ header_payload.score_trend.value }}
+          {{ header_payload.score_trend.label }}
+        </div>
+      {% elif delta and delta.score is not none %}
         <div class="trend-badge {% if delta.score > 0 %}trend-up{% elif delta.score < 0 %}trend-down{% else %}trend-flat{% endif %}">
           {% if delta.score > 0 %}
             ↑ +{{ delta.score }}
@@ -46,6 +87,12 @@
     <div class="report-card">
       <div class="card-title">Executive Summary</div>
       <p>{{ vm.state.summary }}</p>
+      {% if header_payload and header_payload.comparative_insight %}
+        <div class="insight-box">
+          <div class="card-label">Comparative Insight</div>
+          <p>{{ header_payload.comparative_insight }}</p>
+        </div>
+      {% endif %}
     </div>
   </section>
 
@@ -58,7 +105,12 @@
       <div class="report-card risk-card">
         <div class="card-title">Cassa</div>
         <div class="risk-value">{{ ((vm.risks.cash or 0) * 100)|round|int }}%</div>
-        {% if delta and delta.cash is not none %}
+        {% if header_payload and header_payload.cash_trend %}
+          <div class="trend-badge trend-{{ header_payload.cash_trend.tone }}">
+            {{ header_payload.cash_trend.icon }} {{ header_payload.cash_trend.value }}
+            {{ header_payload.cash_trend.label }}
+          </div>
+        {% elif delta and delta.cash is not none %}
           <div class="trend-badge {% if delta.cash < 0 %}trend-up{% elif delta.cash > 0 %}trend-down{% else %}trend-flat{% endif %}">
             {% if delta.cash < 0 %}
               ↑ {{ delta.cash|abs }}
@@ -75,7 +127,12 @@
       <div class="report-card risk-card">
         <div class="card-title">Margini</div>
         <div class="risk-value">{{ ((vm.risks.margini or 0) * 100)|round|int }}%</div>
-        {% if delta and delta.margini is not none %}
+        {% if header_payload and header_payload.margini_trend %}
+          <div class="trend-badge trend-{{ header_payload.margini_trend.tone }}">
+            {{ header_payload.margini_trend.icon }} {{ header_payload.margini_trend.value }}
+            {{ header_payload.margini_trend.label }}
+          </div>
+        {% elif delta and delta.margini is not none %}
           <div class="trend-badge {% if delta.margini < 0 %}trend-up{% elif delta.margini > 0 %}trend-down{% else %}trend-flat{% endif %}">
             {% if delta.margini < 0 %}
               ↑ {{ delta.margini|abs }}
@@ -92,7 +149,12 @@
       <div class="report-card risk-card">
         <div class="card-title">Acquisizione</div>
         <div class="risk-value">{{ ((vm.risks.acq or 0) * 100)|round|int }}%</div>
-        {% if delta and delta.acq is not none %}
+        {% if header_payload and header_payload.acq_trend %}
+          <div class="trend-badge trend-{{ header_payload.acq_trend.tone }}">
+            {{ header_payload.acq_trend.icon }} {{ header_payload.acq_trend.value }}
+            {{ header_payload.acq_trend.label }}
+          </div>
+        {% elif delta and delta.acq is not none %}
           <div class="trend-badge {% if delta.acq < 0 %}trend-up{% elif delta.acq > 0 %}trend-down{% else %}trend-flat{% endif %}">
             {% if delta.acq < 0 %}
               ↑ {{ delta.acq|abs }}
