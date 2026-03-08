@@ -116,10 +116,42 @@ def view_report(scan_id: int):
                 }
             )
 
+    delta = {
+        "score": None,
+        "cash": None,
+        "margini": None,
+        "acq": None,
+    }
+
+    if len(history) >= 2:
+        current = history[-1]
+        previous = history[-2]
+
+        try:
+            delta["score"] = round(float(current["overall_score"]) - float(previous["overall_score"]), 1)
+        except Exception:
+            delta["score"] = None
+
+        try:
+            delta["cash"] = round(float(current["cash"]) - float(previous["cash"]), 1)
+        except Exception:
+            delta["cash"] = None
+
+        try:
+            delta["margini"] = round(float(current["margini"]) - float(previous["margini"]), 1)
+        except Exception:
+            delta["margini"] = None
+
+        try:
+            delta["acq"] = round(float(current["acq"]) - float(previous["acq"]), 1)
+        except Exception:
+            delta["acq"] = None
+
     return render_template(
         "report_full.html",
         scan=scan,
         scan_meta=scan_meta,
         vm=vm,
         history=history,
+        delta=delta,
     )
