@@ -249,3 +249,54 @@ padding:28px 18px 40px;
   background:rgba(100,116,139,.12);
   color:#475569;
 }
+
+/* ===== FIX CONTRASTO PULSANTI CHIARI ===== */
+
+.btn,
+button.btn,
+a.btn {
+  font-weight: 700;
+}
+
+.btn-secondary,
+a.btn-secondary,
+button.btn-secondary {
+  background: #dbeafe !important;
+  color: #0f172a !important;
+  border: 1px solid #93c5fd !important;
+}
+
+.btn-secondary:hover,
+a.btn-secondary:hover,
+button.btn-secondary:hover {
+  background: #bfdbfe !important;
+  color: #0f172a !important;
+}
+
+/* Pulsanti chiari / disabilitati */
+button:disabled,
+.btn:disabled,
+.btn[disabled],
+a.btn.disabled {
+  background: #dbeafe !important;
+  color: #64748b !important;
+  border: 1px solid #bfd7ff !important;
+  opacity: 1 !important;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Pulsanti azione piccoli tipo Apri / PDF */
+.scan-row-actions .btn,
+.scan-row-actions .btn-secondary,
+.action-link-card .btn,
+.card .btn-secondary {
+  color: #0f172a !important;
+}
+
+/* Bottoni wizard tipo Annulla / Continua */
+.wizard-actions .btn-secondary,
+.wizard-actions .btn,
+form .btn-secondary {
+  color: #0f172a !important;
+}
