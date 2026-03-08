@@ -42,6 +42,40 @@ def _section_divider(c: canvas.Canvas, y: float) -> None:
     c.line(M_L, y, M_L + SAFE_W, y)
 
 
+def _health_label_from_triad(triad: Any) -> str:
+    try:
+        score = float(triad)
+    except Exception:
+        score = 50.0
+
+    if score >= 70:
+        return "Healthy"
+    if score >= 45:
+        return "Watchlist"
+    return "Critical"
+
+
+def _diagnosis_from_ctx(ctx: Dict[str, Any]) -> str:
+    health = _health_label_from_triad(ctx.get("triad"))
+    risk_profile = ctx.get("risk_profile") or "profilo non disponibile"
+    maturity = ctx.get("maturity_label") or "maturità non disponibile"
+    decisions = ctx.get("decisions") or {}
+
+    if health == "Healthy":
+        opening = "L’azienda mostra una struttura complessivamente solida."
+    elif health == "Watchlist":
+        opening = "L’azienda è operativa ma richiede attenzione attiva sulle priorità."
+    else:
+        opening = "L’azienda presenta una fragilità che richiede interventi ravvicinati."
+
+    dominant = decisions.get("cash") or decisions.get("margini") or decisions.get("acq") or "Definire una priorità manageriale più netta."
+
+    return (
+        f"{opening} Il profilo di rischio attuale indica: {risk_profile}. "
+        f"{maturity}. Priorità manageriale: {dominant}"
+    )
+
+
 def _page_1_executive(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total: int) -> None:
     page_bg(c)
     header(
@@ -72,6 +106,12 @@ def _page_1_executive(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total
         ctx["triad"],
     )
 
+    health_label = _health_label_from_triad(ctx.get("triad"))
+
+    c.setFillColor(DEFAULT_TEXT)
+    c.setFont("Helvetica-Bold", 9.4)
+    c.drawString(M_L + 8 * mm, card_y + card_h - 44 * mm, f"Stato attuale: {health_label}")
+
     c.setFillColor(DEFAULT_MUTED)
     c.setFont("Helvetica-Bold", 8.4)
     c.drawString(M_L + 8 * mm, card_y + card_h - 36 * mm, "PROFILO DI LETTURA")
@@ -84,13 +124,13 @@ def _page_1_executive(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total
     shadow_card(c, right_x, card_y, right_w, card_h)
     c.setFillColor(DEFAULT_TEXT)
     c.setFont("Helvetica-Bold", 13.6)
-    c.drawString(right_x + 8 * mm, card_y + card_h - 11 * mm, "Lettura executive")
+    c.drawString(right_x + 8 * mm, card_y + card_h - 11 * mm, "Diagnosi strategica")
 
     _draw_multiline(
         c,
         right_x + 8 * mm,
         card_y + card_h - 21 * mm,
-        ctx.get("summary") or "",
+        _diagnosis_from_ctx(ctx),
         right_w - 16 * mm,
         "Helvetica",
         10,
@@ -225,7 +265,7 @@ def _page_4_radar(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total: in
     page_bg(c)
     header(
         c,
-        "Strategic Direction",
+        "Strategic Priorities",
         f"{ctx['settore']} · {ctx['mese']}",
         ctx["overall"],
     )
@@ -301,7 +341,7 @@ def _page_5_execution(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total
     page_bg(c)
     header(
         c,
-        "Action Plan — Next 90 Days",
+        "Execution Roadmap — Next 90 Days",
         f"{ctx['settore']} · {ctx['mese']}",
         ctx["overall"],
     )
