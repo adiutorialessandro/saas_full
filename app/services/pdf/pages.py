@@ -133,7 +133,7 @@ def _draw_defs_box(c, x, y, w, h, defs_list):
         else:
             # If a core item is missing from payload, be honest but still informative
             pretty = token.title()
-            lines.append(f"• {pretty}: metrica non disponibile nel payload (v1)")
+            lines.append(f"• {pretty}: metrica non disponibile nel payload")
 
     # 2) Add extra definitions only if there is space (deduped)
     for k, line in defs:
@@ -266,13 +266,13 @@ def _draw_quality_box(c: canvas.Canvas, x: float, y: float, w: float, h: float, 
         if comp is not None:
             try:
                 if int(comp) >= 95:
-                    notes = ["Dati completi. Nessuna anomalia rilevata.", "Confidenza alta (v1)."]
+                    notes = ["Dati completi. Nessuna anomalia rilevata.", "Confidenza alta."]
                 else:
                     notes = ["Dati parziali. Aggiungi campi opzionali per aumentare confidenza."]
             except Exception:
-                notes = ["Dati minimi OK (MVP). Completa i campi opzionali per aumentare confidenza."]
+                notes = ["Dati essenziali presenti. Completa i campi opzionali per aumentare precisione e affidabilità."]
         else:
-            notes = ["Dati minimi OK (MVP). Completa i campi opzionali per aumentare confidenza."]
+            notes = ["Dati essenziali presenti. Completa i campi opzionali per aumentare precisione e affidabilità."]
 
     for t in (notes + flags)[:3]:
         for wln in _wrap(c, f"• {t}", w - 16 * mm, size=9.5)[:2]:
@@ -294,12 +294,12 @@ def _draw_drivers_box(c: canvas.Canvas, x: float, y: float, w: float, title: str
     # Normalizza items
     if isinstance(items, dict):
         lst = (items.get("cash") or []) + (items.get("margins") or []) + (items.get("acquisition") or [])
-        items = lst[:3] if lst else ["Driver non disponibili (MVP)."]
+        items = lst[:3] if lst else ["Driver non disponibili con i dati attuali."]
     if not isinstance(items, (list, tuple)):
         items = [str(items)]
     items = [str(t) for t in items if t is not None]
     if not items:
-        items = ["Driver non disponibili (MVP)."]
+        items = ["Driver non disponibili con i dati attuali."]
 
     _shadow_card(c, x, y, w, h)
 
@@ -332,7 +332,7 @@ def _draw_benchmark_meta(c, x, y, w, bm):
     c.setFillColor(DEFAULT_MUTED)
 
     if not enabled:
-        c.drawString(x, y, "Benchmark: baseline provvisoria (in calibrazione v1).")
+        c.drawString(x, y, "Benchmark: baseline provvisoria interna.")
         return
 
     src = str(bm.get("source","—"))
@@ -436,7 +436,7 @@ def _page_1_executive(
     c.drawString(
         M_L + 10 * mm,
         y_top - 24.5 * mm,
-        f"Confidence score (v1): {ctx.get('confidence','—')}% · calibrazione"
+        f"Confidence score: {ctx.get('confidence','—')}%"
     )
 
     # Executive Resilience Score (v1)
@@ -454,7 +454,7 @@ def _page_1_executive(
         c.drawString(
             M_L + 10 * mm,
             y_top - 32.0 * mm,
-            f"ERS (v1): {ers_txt}/100",
+            f"ERS: {ers_txt}/100",
         )
         # Executive Resilience visual bar (fragile → scalabile)
     ers_val = ctx.get("ers")
@@ -582,7 +582,7 @@ def _page_2_risk_snapshot(
     c.saveState()
     c.setFont("Helvetica", 9.2)
     c.setFillColor(DEFAULT_MUTED)
-    risk_legend = "Rischio %: trasformazione del punteggio di criticità (0–100). 0% = nessun rischio · 100% = massima criticità (metrica v1 in calibrazione)."
+    risk_legend = "Rischio %: trasformazione del punteggio di criticità (0–100). 0% = nessun rischio · 100% = massima criticità."
     for i, ln in enumerate(_wrap(c, risk_legend, SAFE_W - 20 * mm, size=9.2)[:2]):
         c.drawString(M_L + 10 * mm, top_y - 6 * mm - i * 4.8 * mm, ln)
     c.restoreState()
@@ -649,14 +649,14 @@ def _page_2_risk_snapshot(
     drivers_y = y - drivers_h - 14 * mm
     drv = ctx.get("drivers") or {}    
     items = (drv.get("cash") or []) + (drv.get("margins") or []) + (drv.get("acquisition") or [])
-    items = items[:3] if items else ["Driver non disponibili (MVP)."]
+    items = items[:3] if items else ["Driver non disponibili con i dati attuali."]
     _draw_drivers_box(c, M_L, drivers_y, SAFE_W, "Top driver – Sintesi", items)
 
     # Nota metrica rischio (v1.1): esplicita cosa significa la %
     c.saveState()
     c.setFont("Helvetica", 9.2)
     c.setFillColor(DEFAULT_MUTED)
-    note = "Rischio %: trasformazione del punteggio di criticità (0–100). 0% = nessun rischio, 100% = massima criticità (v1, in calibrazione)."
+    note = "Rischio %: trasformazione del punteggio di criticità (0–100). 0% = nessun rischio, 100% = massima criticità."
     for i, ln in enumerate(_wrap(c, note, SAFE_W - 20 * mm, size=9.2)[:2]):
         c.drawString(M_L + 10 * mm, drivers_y - (6.5 * mm) - i * 4.8 * mm, ln)
     c.restoreState()
@@ -782,7 +782,7 @@ def _page_4_radar(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total: in
         c.setFont("Helvetica-Bold", 12)
         c.drawCentredString(cx, cy + 6 * mm, "Benchmark disattivato")
         c.setFont("Helvetica", 10.5)
-        c.drawCentredString(cx, cy - 2 * mm, "Baseline provvisoria in calibrazione (v1)")
+        c.drawCentredString(cx, cy - 2 * mm, "Baseline provvisoria interna")
         c.restoreState()
 
     # Drivers row: anchored low inside the card so the radar area stays clean
@@ -1006,7 +1006,7 @@ def _one_pager_executive(
 
     c.setFillColor(DEFAULT_MUTED)
     c.setFont("Helvetica", 9.5)
-    c.drawString(tri_x + 8 * mm, y + 6 * mm, f"Confidence {ctx['confidence']}% · v1")
+    c.drawString(tri_x + 8 * mm, y + 6 * mm, f"Confidence {ctx['confidence']}%")
 
     # Row 2: insight + 90 day plan
     row2_top = y - 10 * mm

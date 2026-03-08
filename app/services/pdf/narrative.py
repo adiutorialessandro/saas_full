@@ -78,7 +78,7 @@ def confidence_score(vm: Dict[str, Any]) -> int:
 
 
 def data_quality(vm: Dict[str, Any], scan_meta: Dict[str, Any]) -> Dict[str, Any]:
-    """MVP: completeness + recency + coherence flags (+ notes)."""
+    """Completeness + recency + coherence flags (+ notes)."""
     risks = vm.get("risks") or {}
     kpi = vm.get("kpi") or {}
 
@@ -103,13 +103,13 @@ def data_quality(vm: Dict[str, Any], scan_meta: Dict[str, Any]) -> Dict[str, Any
     except Exception:
         pass
 
-    # Recency flag (MVP)
+    # Recency flag
     mese = str(scan_meta.get("mese_riferimento") or "").strip()
     recency = "OK" if mese and mese != "—" else "DA_VERIFICARE"
 
     # Badge mapping
     # - >=80 => VERDE
-    # - >=50 => MVP: se mese OK e nessuna anomalia => VERDE (dati minimi OK), altrimenti GIALLO
+    # - >=50 => se mese OK e nessuna anomalia => VERDE, altrimenti GIALLO
     # - <50  => ROSSO
     if completeness >= 80:
         badge = "VERDE"
@@ -127,7 +127,7 @@ def data_quality(vm: Dict[str, Any], scan_meta: Dict[str, Any]) -> Dict[str, Any
 
     notes: List[str] = []
 
-    # stime (flags MVP) se presenti nel vm
+    # stime se presenti nel vm
     est_notes = []
     if (vm.get("kpi") or {}).get("dso_is_estimated"):
         est_notes.append("DSO stimato da quiz.")
@@ -153,7 +153,7 @@ def data_quality(vm: Dict[str, Any], scan_meta: Dict[str, Any]) -> Dict[str, Any
     }
 
 def definitions_payload(vm: Dict[str, Any]) -> List[Dict[str, str]]:
-    """KPI definitions & formulas (MVP)."""
+    """KPI definitions & formulas."""
     return [
         {"name": "Runway (mesi)", "formula": "Cassa / Burn mensile (burn = media ultimi 3 mesi)", "unit": "mesi"},
         {"name": "Net Cash Flow", "formula": "Incassi − (Variabili + Fissi + Marketing + Rate)", "unit": "€"},
@@ -161,13 +161,13 @@ def definitions_payload(vm: Dict[str, Any]) -> List[Dict[str, str]]:
         {"name": "Break-even ricavi", "formula": "Costi fissi / % contribuzione (se disponibile)", "unit": "€/mese"},
         {"name": "Conversione", "formula": "Clienti / Lead (lead = contatti qualificati)", "unit": "%"},
         {"name": "Margine lordo %", "formula": "(Ricavi − Variabili) / Ricavi", "unit": "%"},
-        {"name": "Triad Index™", "formula": "Media resilienza 3 pilastri (v1, calibrazione)", "unit": "0–100"},
+        {"name": "Triad Index™", "formula": "Media resilienza dei 3 pilastri", "unit": "0–100"},
         {"name": "Rischio", "formula": "Score % criticità (0=ok, 100=critico)", "unit": "%"},
     ]
 
 
 def drivers_engine(vm: Dict[str, Any], scan_meta: Dict[str, Any]) -> Dict[str, List[str]]:
-    """Rule-based MVP drivers. Output 3 bullet per area."""
+    """Rule-based drivers. Output 3 bullet per area."""
     risks = vm.get("risks") or {}
     kpi = vm.get("kpi") or {}
 
@@ -287,11 +287,11 @@ def drivers_engine(vm: Dict[str, Any], scan_meta: Dict[str, Any]) -> Dict[str, L
 
     # Safety: if still short for any reason, pad with a generic unique suffix
     while len(cash_dr) < 3:
-        cash_dr.append(f"Driver da verificare: item {len(cash_dr)+1} (MVP).")
+        cash_dr.append(f"Driver da verificare: approfondimento richiesto sul fattore {len(cash_dr)+1}.")
     while len(marg_dr) < 3:
-        marg_dr.append(f"Driver da verificare: item {len(marg_dr)+1} (MVP).")
+        marg_dr.append(f"Driver da verificare: approfondimento richiesto sul fattore {len(marg_dr)+1}.")
     while len(acq_dr) < 3:
-        acq_dr.append(f"Driver da verificare: item {len(acq_dr)+1} (MVP).")
+        acq_dr.append(f"Driver da verificare: approfondimento richiesto sul fattore {len(acq_dr)+1}.")
 
     return {
         "cash": cash_dr[:3],
@@ -311,7 +311,7 @@ def benchmark_meta(vm: Dict[str, Any], settore: str) -> Dict[str, Any]:
             "source": None,
             "sample_n": None,
             "sector_definition": None,
-            "note": "Benchmark disattivato: baseline in calibrazione (v1).",
+            "note": "Benchmark non disponibile: baseline provvisoria interna.",
         }
 
     return {
@@ -324,12 +324,12 @@ def benchmark_meta(vm: Dict[str, Any], settore: str) -> Dict[str, Any]:
 
 
 def plan_tasks(vm: Dict[str, Any], kpi: Dict[str, Any]) -> List[Dict[str, Any]]:
-    """Return 4 weekly tasks MVP (task-based)."""
+    """Return 4 weekly tasks (task-based)."""
     plan = vm.get("plan_tasks")
     if isinstance(plan, list) and plan:
         return plan
 
-    # MVP default plan
+    # Default plan
     runway = kpi.get("runway_mesi")
     conv = kpi.get("conversione")
 
@@ -370,7 +370,7 @@ def plan_tasks(vm: Dict[str, Any], kpi: Dict[str, Any]) -> List[Dict[str, Any]]:
 
 
 def drivers_payload(vm: Dict[str, Any]) -> Dict[str, List[str]]:
-    """Rule-based MVP drivers: 3 bullet per triade."""
+    """Rule-based drivers: 3 bullet per triade."""
     k = vm.get("kpi") or {}
     r = vm.get("risks") or {}
 
@@ -437,17 +437,17 @@ def drivers_payload(vm: Dict[str, Any]) -> Dict[str, List[str]]:
 
     # fallback se vuoti
     if not cash:
-        cash = ["Driver in calibrazione (MVP): completa KPI cash per spiegazione più precisa."]
+        cash = ["Driver non ancora determinabile con precisione: completa i KPI cash per una spiegazione più affidabile."]
     if not margins:
-        margins = ["Driver in calibrazione (MVP): completa KPI margini per spiegazione più precisa."]
+        margins = ["Driver non ancora determinabile con precisione: completa i KPI margini per una spiegazione più affidabile."]
     if not acq:
-        acq = ["Driver in calibrazione (MVP): completa KPI acquisizione per spiegazione più precisa."]
+        acq = ["Driver non ancora determinabile con precisione: completa i KPI acquisizione per una spiegazione più affidabile."]
 
     return {"cash": cash[:3], "margins": margins[:3], "acquisition": acq[:3]}
 
 
 def benchmark_meta_payload(vm: Dict[str, Any]) -> Dict[str, Any]:
-    """Benchmark metadata (MVP). If missing, disable radar."""
+    """Benchmark metadata. If missing, disable radar."""
     b = (vm.get("benchmark") or {})
     enabled = bool(b.get("enabled")) and bool(b.get("source")) and bool(b.get("sample_n")) and bool(b.get("sector_definition"))
     if not enabled:
@@ -456,7 +456,7 @@ def benchmark_meta_payload(vm: Dict[str, Any]) -> Dict[str, Any]:
             "source": "",
             "sample_n": "",
             "sector_definition": "",
-            "note": "Benchmark non disponibile: baseline provvisoria (in calibrazione).",
+            "note": "Benchmark non disponibile: baseline provvisoria interna.",
         }
     return {
         "enabled": True,
@@ -468,7 +468,7 @@ def benchmark_meta_payload(vm: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def plan_tasks_payload(vm: Dict[str, Any]) -> List[Dict[str, Any]]:
-    """90-day plan MVP (4 settimane) task-based."""
+    """Piano operativo a 90 giorni (4 settimane)."""
     # se vm già contiene tasks, usali
     pre = (vm.get("plan_tasks") or [])
     if isinstance(pre, list) and pre:
