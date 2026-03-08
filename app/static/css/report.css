@@ -400,3 +400,122 @@ form .btn-secondary {
   width: 100% !important;
   height: 260px !important;
 }
+
+/* ===============================
+STRATEGIC DIAGNOSIS
+=============================== */
+
+.diagnosis-section{
+  margin-top:10px;
+}
+
+.diagnosis-card{
+  border-left:6px solid #64748b;
+}
+
+.diagnosis-positive{
+  border-left-color:#16a34a;
+}
+
+.diagnosis-warning{
+  border-left-color:#f59e0b;
+}
+
+.diagnosis-danger{
+  border-left-color:#dc2626;
+}
+
+.diagnosis-topline{
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  opacity:.6;
+  margin-bottom:6px;
+}
+
+.diagnosis-headline{
+  font-size:20px;
+  font-weight:700;
+  margin-bottom:6px;
+}
+
+.diagnosis-summary{
+  margin-bottom:16px;
+  color:#475569;
+}
+
+.diagnosis-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+  margin-top:10px;
+}
+
+.diagnosis-grid-bottom{
+  margin-top:14px;
+}
+
+.diagnosis-block p{
+  font-size:14px;
+  line-height:1.5;
+}
+
+/* ===============================
+STATUS PILL
+=============================== */
+
+.status-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:6px 12px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+  margin-top:10px;
+}
+
+.status-positive{
+  background:rgba(16,185,129,.12);
+  color:#059669;
+}
+
+.status-warning{
+  background:rgba(245,158,11,.12);
+  color:#b45309;
+}
+
+.status-danger{
+  background:rgba(239,68,68,.12);
+  color:#dc2626;
+}
+
+/* ===============================
+INSIGHT BOX
+=============================== */
+
+.insight-box{
+  margin-top:16px;
+  padding:14px;
+  border-radius:8px;
+  background:#f8fafc;
+  border:1px solid #e2e8f0;
+}
+
+.insight-box p{
+  margin:0;
+  font-size:14px;
+  line-height:1.5;
+}
+
+/* ===============================
+RESPONSIVE DIAGNOSIS
+=============================== */
+
+@media (max-width:900px){
+
+.diagnosis-grid{
+  grid-template-columns:1fr;
+}
+
+}
