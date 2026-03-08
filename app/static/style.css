@@ -304,9 +304,14 @@ h3{ margin:0 0 8px; font-size:18px; }
 /* =========================
    BUTTON VARIANTS
 ========================= */
-.btn-primary{
-  background: rgba(59,130,246,.22);
-  border:1px solid rgba(59,130,246,.45);
+.btn-dark{
+    background:#0f172a;
+    color:#fff;
+    border:none;
+}
+
+.btn-dark:hover{
+    background:#020617;
 }
 .btn-primary:hover{ background: rgba(59,130,246,.32); }
 
