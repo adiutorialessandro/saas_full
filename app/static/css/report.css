@@ -300,3 +300,103 @@ a.btn.disabled {
 form .btn-secondary {
   color: #0f172a !important;
 }
+
+/* ===== CONTRASTO REPORT INTERATTIVO ===== */
+
+.report-wrap,
+.report-wrap h1,
+.report-wrap h2,
+.report-wrap h3,
+.report-wrap h4,
+.report-wrap p,
+.report-wrap li,
+.report-wrap span,
+.report-wrap div {
+  color: #0f172a;
+}
+
+.report-wrap .muted,
+.report-wrap .report-sub,
+.report-wrap .card-label,
+.report-wrap .plan-meta {
+  color: #64748b !important;
+}
+
+.report-wrap .report-card,
+.report-wrap .score-card,
+.report-wrap .risk-card {
+  background: #ffffff;
+  color: #0f172a !important;
+}
+
+.report-wrap .card-title,
+.report-wrap .section-head h2,
+.report-wrap .score-big,
+.report-wrap .risk-value,
+.report-wrap .kpi-value,
+.report-wrap .plan-action,
+.report-wrap .plan-week {
+  color: #0f172a !important;
+}
+
+.report-wrap canvas {
+  background: transparent;
+}
+
+.report-wrap .btn {
+  font-weight: 700;
+}
+
+.report-wrap .btn-secondary {
+  background: #dbeafe !important;
+  color: #0f172a !important;
+  border: 1px solid #93c5fd !important;
+}
+
+.report-wrap .btn-secondary:hover {
+  background: #bfdbfe !important;
+  color: #0f172a !important;
+}
+
+/* trend badge */
+.report-wrap .trend-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.report-wrap .trend-up {
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669 !important;
+}
+
+.report-wrap .trend-down {
+  background: rgba(239, 68, 68, 0.12);
+  color: #dc2626 !important;
+}
+
+.report-wrap .trend-flat {
+  background: rgba(100, 116, 139, 0.12);
+  color: #475569 !important;
+}
+
+/* action plan list */
+.report-wrap .action-plan-pro li,
+.report-wrap ol li {
+  color: #0f172a !important;
+}
+
+/* chart cards */
+.report-wrap .chart-grid .report-card {
+  min-height: 340px;
+}
+
+.report-wrap .chart-grid canvas {
+  width: 100% !important;
+  height: 260px !important;
+}
