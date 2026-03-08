@@ -334,7 +334,7 @@ def _page_5_execution(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total
         meta_y = row_y - 17 * mm
         c.setFont("Helvetica", 8.9)
         c.drawString(M_L + 8 * mm, meta_y, f"Owner: {owner}")
-        c.drawString(M_L + 70 * mm, meta_y, f"KPI: {target_kpi}")
+        c.drawString(M_L + 60 * mm, meta_y, f"KPI: {target_kpi}")
         c.drawRightString(M_L + SAFE_W - 8 * mm, meta_y, f"Target: {target_value}")
 
         # linea divisoria leggera
@@ -343,7 +343,7 @@ def _page_5_execution(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total
         c.line(M_L + 8 * mm, meta_y - 5 * mm, M_L + SAFE_W - 8 * mm, meta_y - 5 * mm)
 
         # spazio verticale maggiore tra i blocchi
-        row_y -= 30 * mm
+        row_y -= 36 * mm
 
     footer(c, page_no, total)
 
