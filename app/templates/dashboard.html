@@ -12,7 +12,7 @@
     </div>
 
     <div class="dash-hero-actions">
-      <a class="btn" href="{{ url_for('wizard.onboarding') }}">Nuovo scan</a>
+      <a class="btn btn-primary" href="{{ url_for('wizard.onboarding') }}">Nuovo scan</a>
     </div>
   </section>
 
@@ -91,6 +91,7 @@
 
                 <div class="scan-row-actions">
                   <a class="btn btn-secondary" href="{{ url_for('scans.view_scan', scan_id=s.id) }}">Apri</a>
+                  <a class="btn btn-secondary" href="{{ url_for('report.view_report', scan_id=s.id) }}">Interattivo</a>
                   <a class="btn btn-secondary" href="{{ url_for('scans.scan_pdf', scan_id=s.id) }}">PDF</a>
                 </div>
               </div>
