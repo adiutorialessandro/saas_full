@@ -31,6 +31,12 @@ PRIORITY_META = {
     },
 }
 
+AREA_LABELS = {
+    "cash": "la cassa",
+    "margini": "i margini",
+    "acq": "l’acquisizione",
+}
+
 
 def _to_float(value: Any, default: Optional[float] = None) -> Optional[float]:
     try:
@@ -134,6 +140,7 @@ def strongest_area(risks: Dict[str, Any]) -> Dict[str, str]:
         "key": key,
         "title": meta["strength_if_low"],
         "description": f"L’area più difesa oggi riguarda {meta['focus']}.",
+        "area_label": AREA_LABELS.get(key, "questa area"),
         "value": f"{round(values[key], 1)}%",
     }
 
@@ -197,7 +204,8 @@ def strategic_diagnosis(vm: Dict[str, Any], delta: Dict[str, Any]) -> Dict[str, 
     diagnosis = (
         f"La tua azienda si trova oggi in una fase di {health['label'].lower()}. "
         f"Il principale punto di attenzione riguarda {priority['focus']}. "
-        f"Il punto relativamente più difeso riguarda invece {strength['key'] if strength['key'] != 'acq' else 'l’acquisizione'}.")
+        f"Il punto relativamente più difeso oggi riguarda invece {strength['area_label']}."
+    )
 
     priorities = (
         f"Priorità attuale: {priority['title']}. "
@@ -212,7 +220,8 @@ def strategic_diagnosis(vm: Dict[str, Any], delta: Dict[str, Any]) -> Dict[str, 
         "diagnosis": diagnosis,
         "trend": trend_sentence,
         "priority": priorities,
-        "strength": f"Punto relativamente più solido: {strength['title']}.",
+        "strength": strength["description"],
+        "strength_label": strength["title"],
     }
 
 
