@@ -36,6 +36,12 @@ def _draw_multiline(
         c.drawString(x, y - i * leading_mm * mm, line)
 
 
+def _section_divider(c: canvas.Canvas, y: float) -> None:
+    c.setStrokeColorRGB(0.86, 0.89, 0.94)
+    c.setLineWidth(0.8)
+    c.line(M_L, y, M_L + SAFE_W, y)
+
+
 def _page_1_executive(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total: int) -> None:
     page_bg(c)
     header(
@@ -44,6 +50,7 @@ def _page_1_executive(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total
         f"{ctx['settore']} · {ctx['modello']} · {ctx['mese']}",
         ctx["overall"],
     )
+    _section_divider(c, H - M_T - 13 * mm)
 
     top_y = H - M_T - 18 * mm
     left_w = 84 * mm
@@ -64,6 +71,10 @@ def _page_1_executive(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total
         f"Confidence score: {ctx.get('confidence', '—')}%",
         ctx["triad"],
     )
+
+    c.setFillColor(DEFAULT_MUTED)
+    c.setFont("Helvetica-Bold", 8.4)
+    c.drawString(M_L + 8 * mm, card_y + card_h - 36 * mm, "PROFILO DI LETTURA")
 
     c.setFillColor(DEFAULT_MUTED)
     c.setFont("Helvetica", 9.2)
@@ -129,6 +140,7 @@ def _page_2_risk_snapshot(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, t
         f"{ctx['settore']} · {ctx['mese']}",
         ctx["overall"],
     )
+    _section_divider(c, H - M_T - 13 * mm)
 
     top_y = H - M_T - 18 * mm
     gap = 8 * mm
@@ -146,10 +158,10 @@ def _page_2_risk_snapshot(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, t
     items = (ctx.get("drivers", {}).get("cash") or []) + (ctx.get("drivers", {}).get("margins") or []) + (ctx.get("drivers", {}).get("acquisition") or [])
     items = items[:3] if items else ["Driver non disponibili con i dati attuali."]
 
-    bullet_block(c, M_L + 8 * mm, drv_y + 34 * mm, SAFE_W - 16 * mm, "Top driver – Sintesi", items)
+    bullet_block(c, M_L + 8 * mm, drv_y + 35 * mm, SAFE_W - 16 * mm, "Top driver strategici", items)
 
     c.setFillColor(DEFAULT_MUTED)
-    c.setFont("Helvetica", 8.8)
+    c.setFont("Helvetica", 8.9)
     c.drawString(
         M_L + 8 * mm,
         drv_y + 6 * mm,
@@ -167,6 +179,7 @@ def _page_3_kpi(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total: int)
         f"{ctx['settore']} · {ctx['mese']}",
         ctx["overall"],
     )
+    _section_divider(c, H - M_T - 13 * mm)
 
     kpi = ctx.get("kpi") or {}
     indicators = ctx.get("indicators") or []
@@ -216,6 +229,7 @@ def _page_4_radar(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total: in
         f"{ctx['settore']} · {ctx['mese']}",
         ctx["overall"],
     )
+    _section_divider(c, H - M_T - 13 * mm)
 
     top_y = H - M_T - 18 * mm
     left_w = 92 * mm
@@ -227,7 +241,7 @@ def _page_4_radar(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total: in
 
     c.setFillColor(DEFAULT_TEXT)
     c.setFont("Helvetica-Bold", 12.5)
-    c.drawString(M_L + 8 * mm, left_y + 65 * mm, "Direzione strategica")
+    c.drawString(M_L + 8 * mm, left_y + 65 * mm, "Direzione strategica prioritaria")
 
     decisions = ctx.get("decisions") or {}
     rows = [
@@ -249,7 +263,7 @@ def _page_4_radar(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total: in
 
     c.setFillColor(DEFAULT_TEXT)
     c.setFont("Helvetica-Bold", 12.5)
-    c.drawString(right_x + 8 * mm, left_y + 65 * mm, "Benchmark & lettura comparativa")
+    c.drawString(right_x + 8 * mm, left_y + 65 * mm, "Benchmark e lettura comparativa")
 
     c.setFillColor(DEFAULT_MUTED)
     c.setFont("Helvetica", 9.4)
@@ -291,6 +305,7 @@ def _page_5_execution(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total
         f"{ctx['settore']} · {ctx['mese']}",
         ctx["overall"],
     )
+    _section_divider(c, H - M_T - 13 * mm)
 
     top_y = H - M_T - 18 * mm
     plan = (ctx.get("plan") or [])[:4]
@@ -301,7 +316,7 @@ def _page_5_execution(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total
 
     c.setFillColor(DEFAULT_TEXT)
     c.setFont("Helvetica-Bold", 12.5)
-    c.drawString(M_L + 8 * mm, card_y + card_h - 10 * mm, "Piano di esecuzione 90 giorni — priorità operative")
+    c.drawString(M_L + 8 * mm, card_y + card_h - 10 * mm, "Piano di esecuzione — prossimi 90 giorni")
 
     row_y = card_y + card_h - 18 * mm
 
@@ -342,7 +357,7 @@ def _page_5_execution(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total
         c.setLineWidth(0.6)
         c.line(M_L + 8 * mm, meta_y - 5 * mm, M_L + SAFE_W - 8 * mm, meta_y - 5 * mm)
 
-        # spazio verticale maggiore tra i blocchi
+        # spazio verticale calibrato per far rientrare 4 settimane nella card
         row_y -= 26 * mm
 
     footer(c, page_no, total)
@@ -356,6 +371,7 @@ def _one_pager_executive(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, to
         f"{ctx['settore']} · {ctx['mese']}",
         ctx["overall"],
     )
+    _section_divider(c, H - M_T - 13 * mm)
 
     top_y = H - M_T - 18 * mm
     gap = 8 * mm
