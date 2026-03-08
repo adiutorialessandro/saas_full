@@ -7,6 +7,7 @@ from flask import Blueprint, render_template
 from flask_login import login_required, current_user
 
 from ..models.scan import Scan
+from ..services.report_insights import report_header_payload
 from ..tenant import ensure_current_org_id
 
 bp = Blueprint("report", __name__, url_prefix="/report")
@@ -147,6 +148,8 @@ def view_report(scan_id: int):
         except Exception:
             delta["acq"] = None
 
+    header_payload = report_header_payload(vm, delta)
+
     return render_template(
         "report_full.html",
         scan=scan,
@@ -154,4 +157,5 @@ def view_report(scan_id: int):
         vm=vm,
         history=history,
         delta=delta,
+        header_payload=header_payload,
     )
