@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from flask import Blueprint, render_template
 from flask_login import login_required, current_user
@@ -43,6 +43,7 @@ def view_report(scan_id: int):
     vm.setdefault("alerts", [])
     vm.setdefault("decisions", {})
     vm.setdefault("action_plan", [])
+    vm.setdefault("plan_tasks", [])
 
     vm["state"].setdefault("overall", "GIALLO")
     vm["state"].setdefault("overall_score", 50)
@@ -70,9 +71,55 @@ def view_report(scan_id: int):
         "created_at": scan.created_at,
     }
 
+    # storico
+    if getattr(current_user, "is_admin", False):
+        scans = (
+            Scan.query.filter_by(org_id=scan.org_id)
+            .order_by(Scan.created_at.asc(), Scan.id.asc())
+            .all()
+        )
+    else:
+        org_id = ensure_current_org_id()
+        scans = (
+            Scan.query.filter_by(org_id=org_id)
+            .order_by(Scan.created_at.asc(), Scan.id.asc())
+            .all()
+        )
+
+    history: List[Dict[str, Any]] = []
+    for s in scans:
+        try:
+            r = json.loads(s.report_json or "{}")
+            t = r.get("triade", {}) if isinstance(r, dict) else {}
+            state = t.get("state", {}) if isinstance(t, dict) else {}
+            risks = t.get("risks", {}) if isinstance(t, dict) else {}
+
+            history.append(
+                {
+                    "id": s.id,
+                    "label": s.mese_riferimento or f"Scan {s.id}",
+                    "overall_score": state.get("overall_score", 50),
+                    "cash": round(float(risks.get("cash", 0.5)) * 100, 1),
+                    "margini": round(float(risks.get("margini", 0.5)) * 100, 1),
+                    "acq": round(float(risks.get("acq", 0.5)) * 100, 1),
+                }
+            )
+        except Exception:
+            history.append(
+                {
+                    "id": s.id,
+                    "label": s.mese_riferimento or f"Scan {s.id}",
+                    "overall_score": 50,
+                    "cash": 50.0,
+                    "margini": 50.0,
+                    "acq": 50.0,
+                }
+            )
+
     return render_template(
-        "reports/report_full.html",
+        "report_full.html",
         scan=scan,
         scan_meta=scan_meta,
         vm=vm,
+        history=history,
     )

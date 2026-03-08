@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/report.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='report.css') }}">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <div class="report-wrap">
@@ -76,37 +76,66 @@
       <div class="report-card">
         <div class="card-title">Runway</div>
         <div class="kpi-value">
-          {% if vm.kpi.runway_mesi is not none %}{{ "%.1f"|format(vm.kpi.runway_mesi) }} mesi{% else %}—{% endif %}
+          {% if vm.kpi.runway_mesi is not none %}
+            {{ "%.1f"|format(vm.kpi.runway_mesi) }} mesi
+          {% else %}
+            —
+          {% endif %}
         </div>
       </div>
+
       <div class="report-card">
         <div class="card-title">Break-even ratio</div>
         <div class="kpi-value">
-          {% if vm.kpi.break_even_ratio is not none %}{{ "%.2f"|format(vm.kpi.break_even_ratio) }}{% else %}—{% endif %}
+          {% if vm.kpi.break_even_ratio is not none %}
+            {{ "%.2f"|format(vm.kpi.break_even_ratio) }}
+          {% else %}
+            —
+          {% endif %}
         </div>
       </div>
+
       <div class="report-card">
         <div class="card-title">Conversione</div>
         <div class="kpi-value">
-          {% if vm.kpi.conversione is not none %}{{ "%.1f"|format((vm.kpi.conversione if vm.kpi.conversione <= 1 else vm.kpi.conversione / 100) * 100) }}%{% else %}—{% endif %}
+          {% if vm.kpi.conversione is not none %}
+            {{ "%.1f"|format((vm.kpi.conversione if vm.kpi.conversione <= 1 else vm.kpi.conversione / 100) * 100) }}%
+          {% else %}
+            —
+          {% endif %}
         </div>
       </div>
+
       <div class="report-card">
         <div class="card-title">Margine lordo</div>
         <div class="kpi-value">
-          {% if vm.kpi.margine_pct is not none %}{{ "%.1f"|format((vm.kpi.margine_pct if vm.kpi.margine_pct <= 1 else vm.kpi.margine_pct / 100) * 100) }}%{% else %}—{% endif %}
+          {% if vm.kpi.margine_pct is not none %}
+            {{ "%.1f"|format((vm.kpi.margine_pct if vm.kpi.margine_pct <= 1 else vm.kpi.margine_pct / 100) * 100) }}%
+          {% else %}
+            —
+          {% endif %}
         </div>
       </div>
+
       <div class="report-card">
         <div class="card-title">Burn/Cash</div>
         <div class="kpi-value">
-          {% if vm.kpi.burn_cash_ratio is not none %}{{ "%.1f"|format((vm.kpi.burn_cash_ratio if vm.kpi.burn_cash_ratio <= 1 else vm.kpi.burn_cash_ratio / 100) * 100) }}%{% else %}—{% endif %}
+          {% if vm.kpi.burn_cash_ratio is not none %}
+            {{ "%.1f"|format((vm.kpi.burn_cash_ratio if vm.kpi.burn_cash_ratio <= 1 else vm.kpi.burn_cash_ratio / 100) * 100) }}%
+          {% else %}
+            —
+          {% endif %}
         </div>
       </div>
+
       <div class="report-card">
         <div class="card-title">Incassi mese</div>
         <div class="kpi-value">
-          {% if vm.kpi.incassi_mese is not none %}€ {{ "%.0f"|format(vm.kpi.incassi_mese) }}{% else %}—{% endif %}
+          {% if vm.kpi.incassi_mese is not none %}
+            € {{ "%.0f"|format(vm.kpi.incassi_mese) }}
+          {% else %}
+            —
+          {% endif %}
         </div>
       </div>
     </div>
@@ -135,6 +164,23 @@
 
   <section class="report-section">
     <div class="section-head">
+      <h2>Trend storico</h2>
+    </div>
+
+    <div class="chart-grid">
+      <div class="report-card">
+        <div class="card-title">Business Stability Score nel tempo</div>
+        <canvas id="trendScore"></canvas>
+      </div>
+      <div class="report-card">
+        <div class="card-title">Evoluzione dei rischi</div>
+        <canvas id="trendRisks"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <section class="report-section">
+    <div class="section-head">
       <h2>Action Plan</h2>
     </div>
 
@@ -146,7 +192,9 @@
               <div class="plan-week">Settimana {{ item.week }}</div>
               <div class="plan-main">
                 <div class="plan-action">{{ item.action }}</div>
-                <div class="plan-meta">Owner: {{ item.owner }} · KPI: {{ item.target_kpi }} · Target: {{ item.target_value }}</div>
+                <div class="plan-meta">
+                  Owner: {{ item.owner }} · KPI: {{ item.target_kpi }} · Target: {{ item.target_value }}
+                </div>
               </div>
             </div>
           {% endfor %}
@@ -210,6 +258,83 @@
       plugins: {
         legend: { display: false }
       },
+      scales: {
+        y: {
+          min: 0,
+          max: 100
+        }
+      }
+    }
+  });
+
+  const historyLabels = [
+    {% for h in history %}
+      "{{ h.label }}",
+    {% endfor %}
+  ];
+
+  const historyScores = [
+    {% for h in history %}
+      {{ h.overall_score or 50 }},
+    {% endfor %}
+  ];
+
+  const historyCash = [
+    {% for h in history %}
+      {{ h.cash or 50 }},
+    {% endfor %}
+  ];
+
+  const historyMargini = [
+    {% for h in history %}
+      {{ h.margini or 50 }},
+    {% endfor %}
+  ];
+
+  const historyAcq = [
+    {% for h in history %}
+      {{ h.acq or 50 }},
+    {% endfor %}
+  ];
+
+  new Chart(document.getElementById('trendScore'), {
+    type: 'line',
+    data: {
+      labels: historyLabels,
+      datasets: [{
+        label: 'Business Stability Score',
+        data: historyScores,
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        y: {
+          min: 0,
+          max: 100
+        }
+      }
+    }
+  });
+
+  new Chart(document.getElementById('trendRisks'), {
+    type: 'line',
+    data: {
+      labels: historyLabels,
+      datasets: [
+        { label: 'Cassa', data: historyCash, tension: 0.3 },
+        { label: 'Margini', data: historyMargini, tension: 0.3 },
+        { label: 'Acquisizione', data: historyAcq, tension: 0.3 }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
       scales: {
         y: {
           min: 0,

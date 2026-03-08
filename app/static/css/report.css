@@ -156,3 +156,11 @@
     grid-template-columns:1fr;
   }
 }
+.chart-grid .report-card{
+  min-height: 340px;
+}
+
+.chart-grid canvas{
+  width: 100% !important;
+  height: 260px !important;
+}
