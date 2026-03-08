@@ -14,7 +14,7 @@ from .models.organization import Organization
 from .models.membership import Membership
 from .models.scan import Scan
 from .models.plan import Plan
-
+from .routes.orgs import bp as orgs_bp
 
 def create_app():
     app = Flask(__name__)
@@ -52,7 +52,8 @@ def create_app():
     app.register_blueprint(scans_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(billing_bp)
-
+    app.register_blueprint(orgs_bp)
+    
     @app.cli.command("seed-plans")
     def seed_plans_command():
         from .seed import seed_plans
