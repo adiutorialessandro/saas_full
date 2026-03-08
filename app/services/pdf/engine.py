@@ -94,22 +94,13 @@ def generate_scan_pdf_enterprise(
     scan_meta: Dict[str, Any],
     vm: Dict[str, Any],
 ) -> Path:
-    """
-    Genera il report completo enterprise (5 pagine)
-    """
-
     out_path = Path(out_path)
-
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     ctx = _build_ctx(scan_meta, vm)
-
     c = canvas.Canvas(str(out_path), pagesize=PAGE_SIZE)
-
     render_scan_pages(c, ctx)
-
     c.save()
-
     return out_path
 
 
@@ -118,10 +109,6 @@ def generate_scan_pdf(
     scan_meta: Dict[str, Any],
     vm: Dict[str, Any],
 ) -> Path:
-    """
-    Alias compatibilità
-    """
-
     return generate_scan_pdf_enterprise(out_path, scan_meta, vm)
 
 
@@ -130,10 +117,6 @@ def generate_report(
     scan_meta: Dict[str, Any],
     vm: Dict[str, Any],
 ) -> Path:
-    """
-    Alias legacy
-    """
-
     return generate_scan_pdf_enterprise(out_path, scan_meta, vm)
 
 
@@ -142,17 +125,11 @@ def generate_one_pager(
     scan_meta: Dict[str, Any],
     vm: Dict[str, Any],
 ) -> Path:
-    """
-    Genera versione onepager executive
-    """
-
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     ctx = _build_ctx(scan_meta, vm)
-
     c = canvas.Canvas(str(out_path), pagesize=PAGE_SIZE)
     render_one_pager(c, ctx)
     c.save()
-
     return out_path
