@@ -137,7 +137,7 @@ def generate_report(
     return generate_scan_pdf_enterprise(out_path, scan_meta, vm)
 
 
-def generate_onepager_pdf(
+def generate_one_pager(
     out_path: str | Path,
     scan_meta: Dict[str, Any],
     vm: Dict[str, Any],
@@ -147,15 +147,12 @@ def generate_onepager_pdf(
     """
 
     out_path = Path(out_path)
-
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     ctx = _build_ctx(scan_meta, vm)
 
     c = canvas.Canvas(str(out_path), pagesize=PAGE_SIZE)
-
     render_one_pager(c, ctx)
-
     c.save()
 
     return out_path
