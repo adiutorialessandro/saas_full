@@ -1,37 +1,35 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
-from reportlab.lib import colors
 from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
 
-from .config import (
-    DEFAULT_ACCENT,
-    DEFAULT_MUTED,
-    DEFAULT_SURFACE_2,
-    DEFAULT_TEXT,
-    H,
-    M_B,
-    M_L,
-    M_R,
-    M_T,
-    SAFE_W,
-)
+from .config import DEFAULT_MUTED, DEFAULT_TEXT, H, M_L, M_T, SAFE_W
 from .primitives import (
+    bullet_block,
     footer,
     header,
     kpi_card,
     page_bg,
-    progress_bar,
     risk_card,
-    section_title,
+    score_card,
     shadow_card,
 )
-from .utils import fmt_money, fmt_num, fmt_pct, risk_pct, truncate_lines, wrap_text
+from .utils import fmt_money, fmt_num, fmt_pct, truncate_lines, wrap_text
 
 
-def _draw_multiline(c: canvas.Canvas, x: float, y: float, text: str, width: float, font_name: str, font_size: float, max_lines: int, leading_mm: float = 4.2) -> None:
+def _draw_multiline(
+    c: canvas.Canvas,
+    x: float,
+    y: float,
+    text: str,
+    width: float,
+    font_name: str,
+    font_size: float,
+    max_lines: int,
+    leading_mm: float = 4.2,
+) -> None:
     lines = truncate_lines(wrap_text(text, font_name, font_size, width), max_lines)
     c.setFont(font_name, font_size)
     for i, line in enumerate(lines):
@@ -48,38 +46,35 @@ def _page_1_executive(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total
     )
 
     top_y = H - M_T - 18 * mm
-    left_w = 82 * mm
+    left_w = 84 * mm
     right_x = M_L + left_w + 10 * mm
     right_w = SAFE_W - left_w - 10 * mm
 
-    # Score card
-    card_h = 62 * mm
+    card_h = 66 * mm
     card_y = top_y - card_h
-    shadow_card(c, M_L, card_y, left_w, card_h)
+
+    score_card(
+        c,
+        M_L,
+        card_y,
+        left_w,
+        card_h,
+        "Business Stability Score",
+        f"{int(round(ctx['triad']))}/100",
+        f"Confidence score: {ctx.get('confidence', '—')}%",
+        ctx["triad"],
+    )
 
     c.setFillColor(DEFAULT_MUTED)
-    c.setFont("Helvetica", 9.5)
-    c.drawString(M_L + 8 * mm, card_y + card_h - 10 * mm, "Business Stability Score")
+    c.setFont("Helvetica", 9.2)
+    c.drawString(M_L + 8 * mm, card_y + 17 * mm, f"Profilo: {ctx.get('risk_profile') or '—'}")
+    c.drawString(M_L + 8 * mm, card_y + 10 * mm, f"Maturità: {ctx.get('maturity_label') or '—'}")
 
-    c.setFillColor(DEFAULT_TEXT)
-    c.setFont("Helvetica-Bold", 28)
-    c.drawString(M_L + 8 * mm, card_y + card_h - 24 * mm, f"{int(round(ctx['triad']))}/100")
-
-    progress_bar(c, M_L + 8 * mm, card_y + card_h - 33 * mm, left_w - 16 * mm, 5 * mm, ctx["triad"])
-
-    c.setFillColor(DEFAULT_MUTED)
-    c.setFont("Helvetica", 9.5)
-    c.drawString(M_L + 8 * mm, card_y + 18 * mm, f"Confidence score: {ctx.get('confidence', '—')}%")
-    c.drawString(M_L + 8 * mm, card_y + 12 * mm, f"Profilo: {ctx.get('risk_profile') or '—'}")
-    c.drawString(M_L + 8 * mm, card_y + 6 * mm, f"Maturità: {ctx.get('maturity_label') or '—'}")
-
-    # Summary card
     shadow_card(c, right_x, card_y, right_w, card_h)
     c.setFillColor(DEFAULT_TEXT)
     c.setFont("Helvetica-Bold", 13)
-    c.drawString(right_x + 8 * mm, card_y + card_h - 10 * mm, "Executive Strategic Summary")
+    c.drawString(right_x + 8 * mm, card_y + card_h - 10 * mm, "Lettura executive")
 
-    c.setFillColor(DEFAULT_TEXT)
     _draw_multiline(
         c,
         right_x + 8 * mm,
@@ -91,12 +86,37 @@ def _page_1_executive(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total
         7,
     )
 
-    # Board note
-    note_y = card_y - 14 * mm
+    row2_y = card_y - 42 * mm
+    row2_h = 34 * mm
+    col_gap = 8 * mm
+    col_w = (SAFE_W - 2 * col_gap) / 3
+
+    decisions = ctx.get("decisions") or {}
+
+    blocks = [
+        ("Priorità Cassa", decisions.get("cash") or "—"),
+        ("Priorità Margini", decisions.get("margini") or "—"),
+        ("Priorità Acquisizione", decisions.get("acq") or "—"),
+    ]
+
+    for idx, (title, text) in enumerate(blocks):
+        x = M_L + idx * (col_w + col_gap)
+        shadow_card(c, x, row2_y, col_w, row2_h)
+        c.setFillColor(DEFAULT_TEXT)
+        c.setFont("Helvetica-Bold", 10.7)
+        c.drawString(x + 6 * mm, row2_y + row2_h - 8 * mm, title)
+        c.setFont("Helvetica", 8.9)
+        _draw_multiline(c, x + 6 * mm, row2_y + row2_h - 15 * mm, text, col_w - 12 * mm, "Helvetica", 8.9, 3)
+
+    note_y = row2_y - 14 * mm
     shadow_card(c, M_L, note_y, SAFE_W, 12 * mm)
     c.setFillColor(DEFAULT_MUTED)
     c.setFont("Helvetica", 9.2)
-    c.drawString(M_L + 6 * mm, note_y + 4 * mm, ctx.get("board_note") or "Documento sintetico a supporto delle decisioni prioritarie del management.")
+    c.drawString(
+        M_L + 6 * mm,
+        note_y + 4 * mm,
+        ctx.get("board_note") or "Documento sintetico a supporto delle decisioni prioritarie del management.",
+    )
 
     footer(c, page_no, total)
 
@@ -111,33 +131,30 @@ def _page_2_risk_snapshot(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, t
     )
 
     top_y = H - M_T - 18 * mm
-
     gap = 8 * mm
     col_w = (SAFE_W - 2 * gap) / 3
-    card_h = 42 * mm
+    card_h = 44 * mm
     y = top_y - card_h
 
     risk_card(c, M_L, y, col_w, card_h, "Cassa", ctx["cash_r"], "Tenuta finanziaria e visibilità di breve.")
     risk_card(c, M_L + col_w + gap, y, col_w, card_h, "Margini", ctx["marg_r"], "Sostenibilità economica e protezione del margine.")
     risk_card(c, M_L + 2 * (col_w + gap), y, col_w, card_h, "Acquisizione", ctx["acq_r"], "Prevedibilità e continuità del motore commerciale.")
 
-    drv_y = y - 48 * mm
-    shadow_card(c, M_L, drv_y, SAFE_W, 40 * mm)
-    c.setFillColor(DEFAULT_TEXT)
-    c.setFont("Helvetica-Bold", 12.5)
-    c.drawString(M_L + 8 * mm, drv_y + 31 * mm, "Top driver – Sintesi")
+    drv_y = y - 50 * mm
+    shadow_card(c, M_L, drv_y, SAFE_W, 42 * mm)
 
     items = (ctx.get("drivers", {}).get("cash") or []) + (ctx.get("drivers", {}).get("margins") or []) + (ctx.get("drivers", {}).get("acquisition") or [])
     items = items[:3] if items else ["Driver non disponibili con i dati attuali."]
 
-    c.setFont("Helvetica", 10)
-    c.setFillColor(DEFAULT_TEXT)
-    for i, item in enumerate(items):
-        c.drawString(M_L + 8 * mm, drv_y + 22 * mm - i * 7 * mm, f"• {item}")
+    bullet_block(c, M_L + 8 * mm, drv_y + 31 * mm, SAFE_W - 16 * mm, "Top driver – Sintesi", items)
 
     c.setFillColor(DEFAULT_MUTED)
     c.setFont("Helvetica", 8.8)
-    c.drawString(M_L + 8 * mm, drv_y + 6 * mm, "Rischio %: trasformazione del punteggio di criticità (0–100). 0% = nessun rischio, 100% = massima criticità.")
+    c.drawString(
+        M_L + 8 * mm,
+        drv_y + 6 * mm,
+        "Rischio %: trasformazione del punteggio di criticità (0–100). 0% = nessun rischio, 100% = massima criticità.",
+    )
 
     footer(c, page_no, total)
 
@@ -201,18 +218,16 @@ def _page_4_radar(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total: in
     )
 
     top_y = H - M_T - 18 * mm
-
     left_w = 92 * mm
     gap = 8 * mm
     right_w = SAFE_W - left_w - gap
 
-    # Left: strategic decisions
-    left_y = top_y - 72 * mm
-    shadow_card(c, M_L, left_y, left_w, 72 * mm)
+    left_y = top_y - 74 * mm
+    shadow_card(c, M_L, left_y, left_w, 74 * mm)
 
     c.setFillColor(DEFAULT_TEXT)
     c.setFont("Helvetica-Bold", 12.5)
-    c.drawString(M_L + 8 * mm, left_y + 63 * mm, "Direzione strategica")
+    c.drawString(M_L + 8 * mm, left_y + 65 * mm, "Direzione strategica")
 
     decisions = ctx.get("decisions") or {}
     rows = [
@@ -221,28 +236,27 @@ def _page_4_radar(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total: in
         ("Acquisizione", decisions.get("acq") or "—"),
     ]
 
-    yy = left_y + 52 * mm
+    yy = left_y + 54 * mm
     for title, text in rows:
         c.setFont("Helvetica-Bold", 10.5)
         c.drawString(M_L + 8 * mm, yy, title)
         c.setFont("Helvetica", 9.3)
         _draw_multiline(c, M_L + 8 * mm, yy - 5 * mm, text, left_w - 16 * mm, "Helvetica", 9.3, 3)
-        yy -= 20 * mm
+        yy -= 21 * mm
 
-    # Right: benchmark note + summary
     right_x = M_L + left_w + gap
-    shadow_card(c, right_x, left_y, right_w, 72 * mm)
+    shadow_card(c, right_x, left_y, right_w, 74 * mm)
 
     c.setFillColor(DEFAULT_TEXT)
     c.setFont("Helvetica-Bold", 12.5)
-    c.drawString(right_x + 8 * mm, left_y + 63 * mm, "Benchmark & lettura comparativa")
+    c.drawString(right_x + 8 * mm, left_y + 65 * mm, "Benchmark & lettura comparativa")
 
     c.setFillColor(DEFAULT_MUTED)
     c.setFont("Helvetica", 9.4)
     _draw_multiline(
         c,
         right_x + 8 * mm,
-        left_y + 52 * mm,
+        left_y + 54 * mm,
         (ctx.get("benchmark_meta") or {}).get("note") or "Benchmark non disponibile: baseline provvisoria interna.",
         right_w - 16 * mm,
         "Helvetica",
@@ -252,13 +266,13 @@ def _page_4_radar(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total: in
 
     c.setFillColor(DEFAULT_TEXT)
     c.setFont("Helvetica-Bold", 10.5)
-    c.drawString(right_x + 8 * mm, left_y + 28 * mm, "Indicazione sintetica")
+    c.drawString(right_x + 8 * mm, left_y + 29 * mm, "Indicazione sintetica")
 
     c.setFont("Helvetica", 9.4)
     _draw_multiline(
         c,
         right_x + 8 * mm,
-        left_y + 22 * mm,
+        left_y + 23 * mm,
         ctx.get("summary") or "",
         right_w - 16 * mm,
         "Helvetica",
@@ -281,7 +295,7 @@ def _page_5_execution(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total
     top_y = H - M_T - 18 * mm
     plan = (ctx.get("plan") or [])[:4]
 
-    card_h = 88 * mm
+    card_h = 90 * mm
     card_y = top_y - card_h
     shadow_card(c, M_L, card_y, SAFE_W, card_h)
 
@@ -297,17 +311,14 @@ def _page_5_execution(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, total
         target_kpi = item.get("target_kpi", "—")
         target_value = item.get("target_value", "—")
 
-        c.setFillColor(DEFAULT_ACCENT)
-        c.circle(M_L + 10 * mm, row_y + 1.5 * mm, 2.1 * mm, fill=1, stroke=0)
-
         c.setFillColor(DEFAULT_TEXT)
-        c.setFont("Helvetica-Bold", 10.2)
-        c.drawString(M_L + 15 * mm, row_y, f"Settimana {week}")
+        c.setFont("Helvetica-Bold", 10.4)
+        c.drawString(M_L + 8 * mm, row_y, f"Settimana {week}")
 
         c.setFont("Helvetica", 9.2)
-        _draw_multiline(c, M_L + 38 * mm, row_y, action, 86 * mm, "Helvetica", 9.2, 2)
-        c.drawString(M_L + 130 * mm, row_y, f"Owner: {owner}")
-        c.drawString(M_L + 175 * mm, row_y, f"KPI: {target_kpi}")
+        _draw_multiline(c, M_L + 34 * mm, row_y, action, 88 * mm, "Helvetica", 9.2, 2)
+        c.drawString(M_L + 128 * mm, row_y, f"Owner: {owner}")
+        c.drawString(M_L + 172 * mm, row_y, f"KPI: {target_kpi}")
         c.drawRightString(M_L + SAFE_W - 8 * mm, row_y, f"Target: {target_value}")
 
         row_y -= 18 * mm
@@ -328,13 +339,11 @@ def _one_pager_executive(c: canvas.Canvas, ctx: Dict[str, Any], page_no: int, to
     gap = 8 * mm
     col_w = (SAFE_W - 2 * gap) / 3
 
-    # top row
     y = top_y - 32 * mm
     kpi_card(c, M_L, y, col_w, 30 * mm, "Triad Score", f"{int(round(ctx['triad']))}/100", "Business Stability Score", ctx["overall"])
     kpi_card(c, M_L + col_w + gap, y, col_w, 30 * mm, "Risk Profile", ctx.get("risk_profile") or "—", "Profilo dominante", "VERDE")
     kpi_card(c, M_L + 2 * (col_w + gap), y, col_w, 30 * mm, "Confidence", f"{ctx.get('confidence', '—')}%", "Affidabilità del report", "VERDE")
 
-    # bottom row
     row2_top = y - 46 * mm
     left_w = (SAFE_W - gap) / 2
 
@@ -367,11 +376,3 @@ def render_scan_pages(c: canvas.Canvas, ctx: Dict[str, Any]) -> None:
     _page_2_risk_snapshot(c, ctx, 2, total)
     c.showPage()
     _page_3_kpi(c, ctx, 3, total)
-    c.showPage()
-    _page_4_radar(c, ctx, 4, total)
-    c.showPage()
-    _page_5_execution(c, ctx, 5, total)
-
-
-def render_one_pager(c: canvas.Canvas, ctx: Dict[str, Any]) -> None:
-    _one_pager_executive(c, ctx, 1, 1)
