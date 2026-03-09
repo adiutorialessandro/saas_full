@@ -1948,3 +1948,20 @@ form .btn-secondary {
   color: #ffffff !important;
   opacity: 1 !important;
 }
+
+/* Empty dashboard state button fix */
+
+.empty-state .btn,
+.empty-state .btn-primary {
+  background: #2563eb;
+  color: #ffffff;
+  border: 1px solid #2563eb;
+  opacity: 1;
+}
+
+.empty-state .btn:hover,
+.empty-state .btn-primary:hover {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  color: #ffffff;
+}
