@@ -122,6 +122,20 @@
           </div>
         {% endif %}
       </div>
+
+      <div class="card pro-card trend-card">
+        <div class="card-head">
+          <div>
+            <h2 class="section-title">Salute aziendale nel tempo</h2>
+            <p class="section-sub">Andamento storico del Triad Index e dei punteggi principali.</p>
+          </div>
+          <div class="section-badge">Trend</div>
+        </div>
+
+        <div class="trend-chart-wrap">
+          <canvas id="triadTrendChart"></canvas>
+        </div>
+      </div>
     </div>
 
     <aside class="dash-side-col">
@@ -155,5 +169,84 @@
     </aside>
   </section>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  fetch("{{ url_for('report.triad_trend') }}")
+    .then((r) => r.json())
+    .then((data) => {
+      const canvas = document.getElementById("triadTrendChart");
+      if (!canvas || !data || !Array.isArray(data.labels) || !Array.isArray(data.values)) {
+        return;
+      }
+
+      new Chart(canvas, {
+        type: "line",
+        data: {
+          labels: data.labels,
+          datasets: [
+            {
+              label: "Triad Index",
+              data: data.values,
+              borderColor: "#2563eb",
+              backgroundColor: "rgba(37, 99, 235, 0.12)",
+              fill: true,
+              tension: 0.35,
+              pointRadius: 3,
+              pointHoverRadius: 5,
+            },
+            {
+              label: "Finance",
+              data: data.finance,
+              borderColor: "#0f172a",
+              fill: false,
+              tension: 0.35,
+              pointRadius: 0,
+              borderDash: [6, 6],
+            },
+            {
+              label: "Sales",
+              data: data.sales,
+              borderColor: "#7c3aed",
+              fill: false,
+              tension: 0.35,
+              pointRadius: 0,
+              borderDash: [6, 6],
+            },
+            {
+              label: "Operations",
+              data: data.ops,
+              borderColor: "#059669",
+              fill: false,
+              tension: 0.35,
+              pointRadius: 0,
+              borderDash: [6, 6],
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "bottom",
+            },
+          },
+          scales: {
+            y: {
+              min: 0,
+              max: 100,
+              ticks: {
+                stepSize: 20,
+              },
+            },
+          },
+        },
+      });
+    })
+    .catch(() => {
+      // fail silently to avoid breaking dashboard render
+    });
+</script>
 
 {% endblock %}
