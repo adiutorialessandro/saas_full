@@ -16,10 +16,16 @@
       <p class="dash-body-pro">
         Triad Insight raccoglie dati essenziali, legge i segnali critici del business e produce un report leggibile immediatamente convertibile in azioni concrete.
       </p>
+      <div class="dash-hero-proof">
+        <span>✓ Setup rapido</span>
+        <span>✓ Report immediato</span>
+        <span>✓ Azioni concrete</span>
+      </div>
     </div>
 
     <div class="dash-hero-actions">
       <a class="btn btn-primary" href="{{ url_for('wizard.onboarding') }}">Nuovo scan</a>
+      <a class="btn btn-secondary" href="#scans-archive">Vedi scansioni</a>
     </div>
   </section>
 
@@ -63,7 +69,7 @@
 
   <section class="dash-main-grid">
     <div class="dash-main-col">
-      <div class="card pro-card">
+      <div class="card pro-card" id="scans-archive">
         <div class="card-head">
           <div>
             <h2 class="section-title">Le tue scansioni</h2>
@@ -112,7 +118,7 @@
               Inizia con il primo scan per ottenere una diagnosi sintetica del business
               e un report operativo da consultare.
             </p>
-            <a class="btn" href="{{ url_for('wizard.onboarding') }}">Crea il primo scan</a>
+            <a class="btn btn-primary" href="{{ url_for('wizard.onboarding') }}">Crea il primo scan</a>
           </div>
         {% endif %}
       </div>
