@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from typing import Any, Dict, List
 
-from flask import Blueprint, render_template
+from flask import Blueprint, jsonify, render_template
 from flask_login import current_user, login_required
 
 from ..models.scan import Scan
@@ -94,14 +94,19 @@ def view_report(scan_id: int):
             state = t.get("state", {}) if isinstance(t, dict) else {}
             risks = t.get("risks", {}) if isinstance(t, dict) else {}
 
+            overall_score = s.triad_index if s.triad_index is not None else state.get("overall_score", 50)
+
             history.append(
                 {
                     "id": s.id,
                     "label": s.mese_riferimento or f"Scan {s.id}",
-                    "overall_score": state.get("overall_score", 50),
+                    "overall_score": overall_score,
                     "cash": round(float(risks.get("cash", 0.5)) * 100, 1),
                     "margini": round(float(risks.get("margini", 0.5)) * 100, 1),
                     "acq": round(float(risks.get("acq", 0.5)) * 100, 1),
+                    "finance_score": round(float(s.finance_score), 1) if s.finance_score is not None else None,
+                    "sales_score": round(float(s.sales_score), 1) if s.sales_score is not None else None,
+                    "ops_score": round(float(s.ops_score), 1) if s.ops_score is not None else None,
                 }
             )
         except Exception:
@@ -113,6 +118,9 @@ def view_report(scan_id: int):
                     "cash": 50.0,
                     "margini": 50.0,
                     "acq": 50.0,
+                    "finance_score": None,
+                    "sales_score": None,
+                    "ops_score": None,
                 }
             )
 
@@ -157,4 +165,54 @@ def view_report(scan_id: int):
         history=history,
         delta=delta,
         header_payload=header_payload,
+    )
+
+
+@bp.get("/api/triad-trend")
+@login_required
+def triad_trend():
+    if getattr(current_user, "is_admin", False):
+        scans = (
+            Scan.query.order_by(Scan.created_at.asc(), Scan.id.asc()).all()
+        )
+    else:
+        org_id = ensure_current_org_id()
+        scans = (
+            Scan.query.filter_by(org_id=org_id)
+            .order_by(Scan.created_at.asc(), Scan.id.asc())
+            .all()
+        )
+
+    labels: List[str] = []
+    values: List[float] = []
+    finance: List[float | None] = []
+    sales: List[float | None] = []
+    ops: List[float | None] = []
+
+    for s in scans:
+        labels.append(s.mese_riferimento or f"Scan {s.id}")
+
+        if s.triad_index is not None:
+            values.append(round(float(s.triad_index), 1))
+        else:
+            try:
+                report = json.loads(s.report_json or "{}")
+                triade = report.get("triade", {}) if isinstance(report, dict) else {}
+                state = triade.get("state", {}) if isinstance(triade, dict) else {}
+                values.append(round(float(state.get("overall_score", 50)), 1))
+            except Exception:
+                values.append(50.0)
+
+        finance.append(round(float(s.finance_score), 1) if s.finance_score is not None else None)
+        sales.append(round(float(s.sales_score), 1) if s.sales_score is not None else None)
+        ops.append(round(float(s.ops_score), 1) if s.ops_score is not None else None)
+
+    return jsonify(
+        {
+            "labels": labels,
+            "values": values,
+            "finance": finance,
+            "sales": sales,
+            "ops": ops,
+        }
     )
