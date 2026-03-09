@@ -33,7 +33,7 @@
     <span class="info-tip" tabindex="0">
       i
       <span class="info-bubble">
-        Il cash runway indica per quanti mesi la tua azienda può continuare a operare con la cassa disponibile, mantenendo l’attuale ritmo di spesa.
+        Il cash runway indica per quanti mesi la tua azienda può continuare a operare con la cassa disponibile, mantenendo l'attuale ritmo di spesa.
       </span>
     </span>
   </div>
