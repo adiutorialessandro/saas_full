@@ -14,7 +14,7 @@
       </div>
     </div>
 
-    <div class="hero-actions">
+    <div class="report-hero-actions">
       <a class="btn" href="{{ url_for('scans.scan_pdf', scan_id=scan.id) }}">Scarica PDF</a>
       <a class="btn btn-secondary" href="{{ url_for('scans.scan_onepager', scan_id=scan.id) }}">One Pager</a>
     </div>
@@ -227,9 +227,16 @@
       <h2>KPI Dashboard</h2>
     </div>
 
-    <div class="grid-3">
-      <div class="report-card">
-        <div class="card-title">Runway</div>
+    <div class="card-title card-title-inline">
+      Cash Runway
+      <span class="info-tip" tabindex="0" aria-label="Spiegazione Cash Runway">
+        i
+        <span class="info-bubble">
+          {{ header_payload.runway_explanation if header_payload and header_payload.runway_explanation else "Cash Runway indica per quanti mesi l'azienda può continuare a operare con la liquidità attuale mantenendo il ritmo di spesa corrente, senza generare nuovi incassi." }}
+        </span>
+      </span>
+    </div>
+
         <div class="kpi-value">
           {% if vm.kpi.runway_mesi is not none %}
             {{ "%.1f"|format(vm.kpi.runway_mesi) }} mesi

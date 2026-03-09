@@ -1892,6 +1892,7 @@ form .btn-secondary {
   margin:10px 0 0;
 }
 
+
 .dash-body-pro{
   font-size:15px;
   line-height:1.6;
@@ -1900,28 +1901,48 @@ form .btn-secondary {
   max-width:900px;
 }
 
+.dash-hero-proof{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:16px;
+}
+
+.dash-hero-proof span{
+  display:inline-flex;
+  align-items:center;
+  padding:8px 12px;
+  border-radius:999px;
+  background:#eff6ff;
+  color:#1d4ed8;
+  border:1px solid #dbeafe;
+  font-size:13px;
+  font-weight:700;
+}
+
+.info-tip:focus-visible{
+  outline:2px solid #2563eb;
+  outline-offset:2px;
+}
+
 /* Nuovo scan hero dashboard */
-.dash-hero-actions .btn,
 .dash-hero-actions .btn-primary,
-a.btn.btn-primary {
+.dash-hero-actions a.btn.btn-primary {
   background: #111827 !important;
   color: #ffffff !important;
   border: 1px solid #111827 !important;
   box-shadow: none !important;
 }
 
-.dash-hero-actions .btn:hover,
 .dash-hero-actions .btn-primary:hover,
-a.btn.btn-primary:hover {
+.dash-hero-actions a.btn.btn-primary:hover {
   background: #000000 !important;
   color: #ffffff !important;
   border-color: #000000 !important;
 }
 
-/* evita il tema celeste ereditato */
-.dash-hero-actions .btn:disabled,
+/* stato disabilitato del solo bottone primario */
 .dash-hero-actions .btn-primary:disabled,
-.dash-hero-actions .btn[disabled],
 .dash-hero-actions .btn-primary[disabled] {
   background: #111827 !important;
   color: #ffffff !important;
