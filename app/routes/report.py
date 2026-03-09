@@ -4,7 +4,7 @@ import json
 from typing import Any, Dict, List
 
 from flask import Blueprint, render_template
-from flask_login import login_required, current_user
+from flask_login import current_user, login_required
 
 from ..models.scan import Scan
 from ..services.report_insights import report_header_payload
@@ -72,7 +72,6 @@ def view_report(scan_id: int):
         "created_at": scan.created_at,
     }
 
-    # storico
     if getattr(current_user, "is_admin", False):
         scans = (
             Scan.query.filter_by(org_id=scan.org_id)
