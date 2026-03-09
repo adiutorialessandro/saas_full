@@ -1875,3 +1875,31 @@ a.btn.disabled {
 form .btn-secondary {
   color: #0f172a !important;
 }
+
+/* Nuovo scan hero dashboard */
+.dash-hero-actions .btn,
+.dash-hero-actions .btn-primary,
+a.btn.btn-primary {
+  background: #111827 !important;
+  color: #ffffff !important;
+  border: 1px solid #111827 !important;
+  box-shadow: none !important;
+}
+
+.dash-hero-actions .btn:hover,
+.dash-hero-actions .btn-primary:hover,
+a.btn.btn-primary:hover {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border-color: #000000 !important;
+}
+
+/* evita il tema celeste ereditato */
+.dash-hero-actions .btn:disabled,
+.dash-hero-actions .btn-primary:disabled,
+.dash-hero-actions .btn[disabled],
+.dash-hero-actions .btn-primary[disabled] {
+  background: #111827 !important;
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
