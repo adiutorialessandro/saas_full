@@ -720,9 +720,10 @@ KPI TOOLTIP (Cash Runway info)
   font-weight: 700;
 }
 
+/* updated color */
 .report-section h2,
 .section-head h2 {
-  color: #f8fafc !important;
+  color: #e5e7eb !important;
 }
 
 .grid-3 .report-card,
@@ -730,4 +731,71 @@ KPI TOOLTIP (Cash Runway info)
 .hero-grid .report-card {
   background: #ffffff !important;
   border: 1px solid #e2e8f0 !important;
+}
+
+/* ===============================
+FINAL CONTRAST TUNING
+=============================== */
+
+.report-wrap {
+  color: #0f172a !important;
+}
+
+.report-card {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+.report-card .card-title,
+.report-card .card-label,
+.report-card .kpi-value,
+.report-card .risk-value,
+.report-card .score-big,
+.report-card .plan-week,
+.report-card .plan-action,
+.report-card p,
+.report-card li,
+.report-card span,
+.report-card div {
+  color: #0f172a !important;
+}
+
+.report-card .card-label,
+.report-card .card-title,
+.report-card .muted,
+.report-card .plan-meta,
+.report-card .executive-label,
+.report-card .diagnosis-topline,
+.report-card .executive-insight-kicker {
+  color: #64748b !important;
+}
+
+.report-card .kpi-value,
+.report-card .risk-value,
+.report-card .score-big {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+
+.report-card .trend-up {
+  color: #047857 !important;
+}
+
+.report-card .trend-down {
+  color: #b91c1c !important;
+}
+
+.report-card .trend-flat {
+  color: #475569 !important;
+}
+
+.section-head h2 {
+  color: #f8fafc !important;
+  font-weight: 700 !important;
+}
+
+.chart-grid .report-card canvas,
+.report-card canvas {
+  background: transparent !important;
 }
