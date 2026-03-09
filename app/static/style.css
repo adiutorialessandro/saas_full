@@ -1876,6 +1876,30 @@ form .btn-secondary {
   color: #0f172a !important;
 }
 
+.dash-kicker{
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  font-weight:700;
+  color:#3b82f6;
+  margin-bottom:10px;
+}
+
+.dash-lead-pro{
+  font-size:20px;
+  line-height:1.4;
+  color:#475569;
+  margin:10px 0 0;
+}
+
+.dash-body-pro{
+  font-size:15px;
+  line-height:1.6;
+  color:#64748b;
+  margin-top:14px;
+  max-width:900px;
+}
+
 /* Nuovo scan hero dashboard */
 .dash-hero-actions .btn,
 .dash-hero-actions .btn-primary,
