@@ -684,3 +684,50 @@ KPI TOOLTIP (Cash Runway info)
   visibility:visible;
   transform:translateY(0);
 }
+
+/* Fix contrasto report interattivo */
+
+.report-card,
+.report-card p,
+.report-card li,
+.report-card .card-title,
+.report-card .card-label,
+.report-card .kpi-value,
+.report-card .risk-value,
+.report-card .muted,
+.report-card .plan-action,
+.report-card .plan-meta,
+.report-card .plan-week {
+  color: #0f172a !important;
+}
+
+.report-card .card-title,
+.report-card .card-label,
+.report-card .mock-label,
+.report-card .section-label {
+  color: #64748b !important;
+}
+
+.report-card .muted,
+.report-card .plan-meta {
+  color: #475569 !important;
+}
+
+.report-card .kpi-value,
+.report-card .risk-value,
+.report-card .score-big {
+  color: #0f172a !important;
+  font-weight: 700;
+}
+
+.report-section h2,
+.section-head h2 {
+  color: #f8fafc !important;
+}
+
+.grid-3 .report-card,
+.chart-grid .report-card,
+.hero-grid .report-card {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+}
