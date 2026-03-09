@@ -653,11 +653,28 @@ h3{ margin:0 0 8px; font-size:18px; }
   gap:20px;
 }
 
+.dash-main-col,
+.dash-side-col{
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+}
+
 .pro-card{
   border:1px solid #e2e8f0;
   border-radius:22px;
   background:#fff;
   box-shadow:0 10px 24px rgba(15, 23, 42, 0.04);
+}
+
+.trend-card{
+  padding:22px;
+}
+
+.trend-chart-wrap{
+  position:relative;
+  height:320px;
+  margin-top:8px;
 }
 
 .card-head{
@@ -851,6 +868,10 @@ h3{ margin:0 0 8px; font-size:18px; }
 
   .dash-title-pro{
     font-size:30px;
+  }
+
+  .trend-chart-wrap{
+    height:260px;
   }
 
   .stats-grid{
