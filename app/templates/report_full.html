@@ -50,6 +50,47 @@
     </div>
   </section>
 
+  <section class="report-section executive-insight-section">
+  <div class="report-card executive-insight executive-{{ header_payload.health.tone if header_payload and header_payload.health else 'warning' }}">
+    <div class="executive-insight-top">
+      <div>
+        <div class="executive-insight-kicker">Executive Insight</div>
+        <h2>Indicazione manageriale sintetica</h2>
+      </div>
+
+      {% if header_payload and header_payload.health %}
+        <div class="status-pill status-{{ header_payload.health.tone }}">
+          {{ header_payload.health.icon }} {{ header_payload.health.label }}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="executive-insight-body">
+      <div class="executive-line">
+        <div class="executive-label">Situazione</div>
+        <p>
+          {{ header_payload.comparative_insight if header_payload and header_payload.comparative_insight else vm.state.summary }}
+        </p>
+      </div>
+
+      <div class="executive-line">
+        <div class="executive-label">Priorità dominante</div>
+        <p>
+          {{ header_payload.priority.title if header_payload and header_payload.priority else "Priorità non disponibile" }} —
+          {{ header_payload.priority.description if header_payload and header_payload.priority else "" }}
+        </p>
+      </div>
+
+      <div class="executive-line">
+        <div class="executive-label">Punto relativamente più solido</div>
+        <p>
+          {{ header_payload.diagnosis.strength if header_payload and header_payload.diagnosis else "Punto di forza non disponibile." }}
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
   <section class="hero-grid">
     <div class="report-card score-card">
       <div class="card-label">Business Stability Score</div>
