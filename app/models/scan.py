@@ -16,3 +16,9 @@ class Scan(db.Model):
     mese_riferimento = db.Column(db.String(7), nullable=False)  # YYYY-MM
 
     report_json = db.Column(db.Text, nullable=False)
+
+    # --- Triad metrics snapshot (used for dashboard trend and analysis history) ---
+    triad_index = db.Column(db.Float)
+    finance_score = db.Column(db.Float)
+    sales_score = db.Column(db.Float)
+    ops_score = db.Column(db.Float)
