@@ -8,11 +8,11 @@ from ..extensions import db
 from ..forms import EssentialDataForm, OnboardingForm, QuizForm
 from ..models.organization import Organization
 from ..models.scan import Scan
+from ..models.benchmark import SectorBenchmark  # <--- NUOVO IMPORT
 from ..services.report_builder import Inputs, build_report
 from ..tenant import ensure_current_org_id
 
 bp = Blueprint("wizard", __name__, url_prefix="/wizard")
-
 
 
 @bp.route("/onboarding", methods=["GET", "POST"])
@@ -43,7 +43,8 @@ def data():
 
     form = EssentialDataForm()
     if form.validate_on_submit():
-        session["data"] = form.data
+        # Salviamo i dati puliti (form.data include anche campi extra come submit)
+        session["data"] = {k: v for k, v in form.data.items() if k not in ['csrf_token', 'submit']}
         return redirect(url_for("wizard.quiz"))
 
     return render_template("wizard_data.html", form=form)
@@ -65,6 +66,11 @@ def quiz():
         ob = session["onboarding"]
         data = session.get("data", {}) or {}
 
+        # 1. Recupero del Benchmark dal Database basato sul settore
+        # Cerchiamo il match esatto con il settore salvato in sessione
+        bench = SectorBenchmark.query.filter_by(sector_name=ob["settore"]).first()
+
+        # 2. Preparazione Input per il calcolo
         inp = Inputs(
             settore=ob["settore"],
             modello=ob["modello"],
@@ -79,25 +85,25 @@ def quiz():
             clienti_mese=data.get("clienti_mese"),
         )
 
-        report = build_report(inp)
+        # 3. Generazione Report con Benchmark (Passiamo l'oggetto bench)
+        report = build_report(inp, bench=bench)
 
-        # Controllo piano / limite scansioni
+        # 4. Controllo piano / limite scansioni
         org = Organization.query.get(org_id)
-
         if not org:
             flash("Organizzazione non trovata.")
             return redirect(url_for("scans.dashboard"))
-
-        current_scans = Scan.query.filter_by(org_id=org.id).count()
 
         if not org.plan:
             flash("Nessun piano associato all'azienda.")
             return redirect(url_for("scans.dashboard"))
 
+        current_scans = Scan.query.filter_by(org_id=org.id).count()
         if org.plan.scan_limit != -1 and current_scans >= org.plan.scan_limit:
             flash("Limite scansioni raggiunto per il piano attuale.")
             return redirect(url_for("scans.dashboard"))
 
+        # 5. Salvataggio Scan nel DB
         s = Scan(
             org_id=org_id,
             user_id=current_user.id,
@@ -111,7 +117,11 @@ def quiz():
         db.session.add(s)
         db.session.commit()
 
-        flash("Scan generato.")
+        # Pulizia sessione dopo la creazione dello scan
+        session.pop("onboarding", None)
+        session.pop("data", None)
+
+        flash("Analisi completata con successo.")
         return render_template("scan_processing.html", scan=s)
 
     return render_template("quiz.html", form=form)
