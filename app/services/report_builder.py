@@ -26,9 +26,6 @@ class Inputs:
 
 
 def build_report(inp: Inputs, bench: Optional[SectorBenchmark] = None) -> Dict[str, Any]:
-    # =========================
-    # KPI CALCOLATI
-    # =========================
     runway_mesi = None
     if inp.cassa_attuale and inp.burn_mensile and inp.burn_mensile > 0:
         runway_mesi = inp.cassa_attuale / inp.burn_mensile
@@ -50,9 +47,6 @@ def build_report(inp: Inputs, bench: Optional[SectorBenchmark] = None) -> Dict[s
     if inp.burn_mensile and inp.cassa_attuale and inp.cassa_attuale > 0:
         burn_cash_ratio = inp.burn_mensile / inp.cassa_attuale
 
-    # =========================
-    # DEFINIZIONE SOGLIE (BENCHMARK)
-    # =========================
     b_margin_good = (bench.margine_lordo_target / 100) if bench else 0.55
     b_margin_bad = b_margin_good * 0.5 
 
@@ -65,12 +59,8 @@ def build_report(inp: Inputs, bench: Optional[SectorBenchmark] = None) -> Dict[s
     b_runway_good = bench.runway_minima if bench else 9
     b_runway_bad = 2
 
-    # =========================
-    # NORMALIZZAZIONE KPI
-    # =========================
     def norm(value, good, bad, higher=True):
-        if value is None:
-            return None
+        if value is None: return None
         v = float(value)
         if higher:
             if v >= good: return 0
@@ -87,9 +77,6 @@ def build_report(inp: Inputs, bench: Optional[SectorBenchmark] = None) -> Dict[s
     r_be = norm(break_even_ratio, b_be_good, b_be_bad, True)
     r_burn = norm(burn_cash_ratio, 0.12, 0.25, False)
 
-    # =========================
-    # QUIZ E RISCHI
-    # =========================
     quiz = inp.quiz_risk or [0.6] * 10
     quiz = [max(0, min(1, float(q))) for q in quiz]
     quiz_avg = sum(quiz) / len(quiz)
@@ -109,9 +96,6 @@ def build_report(inp: Inputs, bench: Optional[SectorBenchmark] = None) -> Dict[s
     risk_margini = combine(marg_mix)
     risk_acq = combine(r_conv)
 
-    # =========================
-    # TRIAD INDEX E OUTPUT
-    # =========================
     base_risk = (risk_cash * 0.45 + risk_margini * 0.30 + risk_acq * 0.25)
     
     penalty = 0
@@ -143,9 +127,9 @@ def build_report(inp: Inputs, bench: Optional[SectorBenchmark] = None) -> Dict[s
         executive_summary = "Business solido. Priorità: consolidare il modello e scalare."
 
     action_plan = [
-        "Monitorare il cashflow settimanalmente", "Definire KPI chiari per vendite",
-        "Standardizzare il funnel", "Proteggere i margini", "Ridurre sprechi",
-        "Ottimizzare incassi", "Monitorare break-even", "Strutturare pipeline", "Rafforzare controllo"
+        "Monitorare il cashflow settimanalmente", "Definire KPI chiari per vendite e conversioni",
+        "Standardizzare il funnel commerciale", "Proteggere margini e politiche di prezzo", "Ridurre dispersione operativa",
+        "Ottimizzare tempi di incasso", "Monitorare break-even mensile", "Strutturare pipeline vendite", "Rafforzare controllo finanziario"
     ]
 
     return {
@@ -164,7 +148,19 @@ def build_report(inp: Inputs, bench: Optional[SectorBenchmark] = None) -> Dict[s
                 "summary": executive_summary, "maturity_score": maturity_score, "maturity_label": maturity_label
             },
             "risks": {"cash": round(risk_cash, 4), "margini": round(risk_margini, 4), "acq": round(risk_acq, 4)},
-            "kpi": {"runway_mesi": runway_mesi, "margine_pct": margine_pct, "conversione": conversione, "break_even_ratio": break_even_ratio, "burn_cash_ratio": burn_cash_ratio},
+            "kpi": {
+                "runway_mesi": runway_mesi, 
+                "margine_pct": margine_pct, 
+                "conversione": conversione, 
+                "break_even_ratio": break_even_ratio, 
+                "burn_cash_ratio": burn_cash_ratio,
+                "incassi_mese": inp.incassi_mese,
+                "costi_fissi_mese": inp.costi_fissi_mese,
+                "cassa_attuale": inp.cassa_attuale,
+                "burn_mensile": inp.burn_mensile,
+                "leads_mese": inp.leads_mese,
+                "clienti_mese": inp.clienti_mese
+            },
             "action_plan": action_plan
         }
     }
