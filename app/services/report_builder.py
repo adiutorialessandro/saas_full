@@ -45,7 +45,7 @@ def build_report(inp: Inputs, bench: Optional[SectorBenchmark] = None) -> Dict[s
             be_ricavi = inp.costi_fissi_mese / margine_pct
             break_even_ratio = inp.incassi_mese / be_ricavi
         else:
-            break_even_ratio = 999.0  # Se non hai costi fissi, il break even è garantito senza far esplodere la divisione per zero.
+            break_even_ratio = 999.0
 
     burn_cash_ratio = None
     if inp.burn_mensile is not None and inp.cassa_attuale is not None and inp.cassa_attuale > 0:
@@ -135,6 +135,39 @@ def build_report(inp: Inputs, bench: Optional[SectorBenchmark] = None) -> Dict[s
         "Ottimizzare tempi di incasso", "Monitorare break-even mensile", "Strutturare pipeline vendite", "Rafforzare controllo finanziario"
     ]
 
+    # =========================
+    # POSIZIONAMENTO COMPETITIVO (Data Analysis & Strategy)
+    # =========================
+    competitors_analysis = []
+    
+    # Valutazione Margini
+    if margine_pct is not None:
+        if margine_pct >= b_margin_good:
+            competitors_analysis.append({"title": "Marginalità Leader", "icon": "🏆", "text": "Ottimo lavoro! Trattieni più valore su ogni vendita rispetto alla media del settore. Hai un forte vantaggio sui prezzi.", "color": "#10b981"})
+        elif margine_pct >= b_margin_bad:
+            competitors_analysis.append({"title": "Marginalità in Media", "icon": "⚖️", "text": "I tuoi margini sono perfettamente in linea con le aziende concorrenti. C'è spazio per ottimizzare i costi diretti.", "color": "#f59e0b"})
+        else:
+            competitors_analysis.append({"title": "Svantaggio sui Margini", "icon": "⚠️", "text": "Attenzione: stai sostenendo costi troppo alti. I tuoi concorrenti stanno guadagnando di più a parità di fatturato.", "color": "#ef4444"})
+
+    # Valutazione Cassa (Runway)
+    if runway_mesi is not None:
+        if runway_mesi >= b_runway_good:
+            competitors_analysis.append({"title": "Cassa Superiore", "icon": "🛡️", "text": "Hai una riserva di liquidità maggiore rispetto agli standard di settore. Sei al sicuro dagli imprevisti di mercato.", "color": "#10b981"})
+        elif runway_mesi >= b_runway_bad:
+            competitors_analysis.append({"title": "Autonomia Standard", "icon": "🟡", "text": "La tua cassa è sufficiente per operare, ma inferiore alle aziende leader del tuo mercato.", "color": "#f59e0b"})
+        else:
+            competitors_analysis.append({"title": "Rischio Finanziario", "icon": "🚨", "text": "La tua autonomia finanziaria è pericolosamente inferiore alla concorrenza. Rischio elevato di crisi di liquidità.", "color": "#ef4444"})
+
+    # Valutazione Commerciale (Conversione)
+    if conversione is not None and b_conv_good > 0:
+        if conversione >= b_conv_good:
+            competitors_analysis.append({"title": "Vendite Performanti", "icon": "🎯", "text": "Il tuo motore commerciale è più efficiente della media: trasformi i contatti in clienti paganti con molta facilità.", "color": "#10b981"})
+        else:
+            competitors_analysis.append({"title": "Lentezza Commerciale", "icon": "📉", "text": "Il mercato chiude contratti più velocemente di te. Stai disperdendo troppe opportunità di vendita.", "color": "#ef4444"})
+
+    if not competitors_analysis:
+        competitors_analysis.append({"title": "Dati Insufficienti", "icon": "🔍", "text": "Inserisci i dati economici nel Wizard per scoprire come ti posizioni rispetto ai tuoi diretti concorrenti.", "color": "#64748b"})
+
     return {
         "triade": {
             "meta": {
@@ -150,7 +183,8 @@ def build_report(inp: Inputs, bench: Optional[SectorBenchmark] = None) -> Dict[s
             },
             "state": {
                 "overall": overall, "overall_score": triad_index, "confidence": confidence,
-                "summary": executive_summary, "maturity_score": triad_index, "maturity_label": maturity_label
+                "summary": executive_summary, "maturity_score": triad_index, "maturity_label": maturity_label,
+                "competitive_positioning": competitors_analysis # NUOVO CAMPO INSERITO QUI
             },
             "risks": {"cash": round(risk_cash, 4), "margini": round(risk_margini, 4), "acq": round(risk_acq, 4)},
             "kpi": {
