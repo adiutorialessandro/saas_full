@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Triad Insight — Diagnosi chiara del tuo business</title>
+  <meta name="description" content="Analizza finanza, vendite e struttura operativa. Ottieni un report chiaro con priorità e azioni concrete.">
+  <link rel="stylesheet" href="{{ url_for('static', filename='landing.css') }}">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav">
+      <a class="brand" href="{{ url_for('index') }}">
+        <span class="brand-mark">▲</span>
+        <span class="brand-text">Triad Insight</span>
+      </a>
+
+      <nav class="nav-links">
+        <a href="#prodotto">Prodotto</a>
+        <a href="#come-funziona">Come funziona</a>
+        <a href="{{ url_for('pricing') }}">Prezzi</a>
+
+        {% if current_user.is_authenticated %}
+          <a href="{{ url_for('scans.dashboard') }}">Dashboard</a>
+        {% else %}
+          <a href="{{ url_for('auth.login') }}">Login</a>
+        {% endif %}
+      </nav>
+
+      <div class="nav-actions">
+        {% if current_user.is_authenticated %}
+          <a class="btn" href="{{ url_for('scans.dashboard') }}">Vai alla dashboard</a>
+        {% else %}
+          <a class="btn btn-secondary" href="{{ url_for('auth.login') }}">Accedi</a>
+          <a class="btn" href="{{ url_for('auth.register') }}">Inizia ora</a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <div class="eyebrow">Business diagnosis platform</div>
+          <h1>Scopri cosa blocca davvero la crescita della tua azienda.</h1>
+          <p class="hero-text hero-text-lead">
+            Triad Insight analizza finanza, vendite e struttura operativa.
+          </p>
+
+          <p class="hero-text hero-text-sublead">
+            Genera un report chiaro con priorità, alert e azioni concrete.
+          </p>
+
+          <div class="hero-actions">
+            {% if current_user.is_authenticated %}
+              <a class="btn btn-lg" href="{{ url_for('scans.dashboard') }}">Vai alla dashboard</a>
+              <a class="btn btn-secondary btn-lg" href="{{ url_for('wizard.onboarding') }}">Nuovo scan</a>
+            {% else %}
+              <a class="btn btn-lg" href="{{ url_for('auth.register') }}">Prova il primo scan</a>
+              <a class="btn btn-secondary btn-lg" href="#come-funziona">Guarda come funziona</a>
+            {% endif %}
+          </div>
+
+          <div class="hero-trust">
+            <span>✓ Setup rapido</span>
+            <span>✓ Report immediato</span>
+            <span>✓ Azioni concrete</span>
+          </div>
+        </div>
+
+        <div class="hero-panel">
+          <div class="mock-card score-card">
+            <div class="mock-label">Triad Score</div>
+            <div class="score-row">
+              <div class="score-value">72</div>
+              <div class="score-meta">
+                <div class="score-over">/100</div>
+                <div class="badge badge-warning">Attenzione</div>
+              </div>
+            </div>
+            <div class="progress">
+              <div class="progress-bar" style="width:72%"></div>
+            </div>
+          </div>
+
+          <div class="mock-grid">
+            <div class="mock-card small">
+              <div class="mock-label">Cash</div>
+              <div class="metric">4.2 mesi</div>
+              <div class="metric-sub danger">Runway limitata</div>
+            </div>
+
+            <div class="mock-card small">
+              <div class="mock-label">Conversione</div>
+              <div class="metric">6.8%</div>
+              <div class="metric-sub warning">Sotto target</div>
+            </div>
+
+            <div class="mock-card small">
+              <div class="mock-label">Margine</div>
+              <div class="metric">34%</div>
+              <div class="metric-sub warning">Da proteggere</div>
+            </div>
+
+            <div class="mock-card small">
+              <div class="mock-label">Break-even</div>
+              <div class="metric">1.04</div>
+              <div class="metric-sub warning">Molto vicino</div>
+            </div>
+          </div>
+
+          <div class="mock-card alerts-card">
+            <div class="mock-label">Alert principali</div>
+            <ul class="alert-list">
+              <li><span class="dot dot-danger"></span> Burn elevato rispetto alla cassa</li>
+              <li><span class="dot dot-warning"></span> Conversione commerciale migliorabile</li>
+              <li><span class="dot dot-warning"></span> Margine sotto la soglia ottimale</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="problem">
+      <div class="container">
+        <div class="section-head center">
+          <div class="eyebrow">Il problema</div>
+          <h2>La maggior parte delle aziende ha dati. Non ha chiarezza.</h2>
+          <p>
+            Numeri sparsi, dashboard complesse e poca capacità di capire dove agire subito.
+          </p>
+        </div>
+
+        <div class="card-grid three">
+          <article class="info-card">
+            <div class="card-icon">01</div>
+            <h3>Numeri isolati</h3>
+            <p>Guardare KPI separati non basta se non capisci la relazione tra liquidità, margini e acquisizione.</p>
+          </article>
+
+          <article class="info-card">
+            <div class="card-icon">02</div>
+            <h3>Priorità confuse</h3>
+            <p>Troppi indicatori creano rumore. Serve una sintesi che evidenzi subito cosa è critico.</p>
+          </article>
+
+          <article class="info-card">
+            <div class="card-icon">03</div>
+            <h3>Azioni tardive</h3>
+            <p>Molti problemi vengono rilevati troppo tardi, quando liquidità e margini sono già sotto pressione.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="solution" id="prodotto">
+      <div class="container">
+        <div class="section-head">
+          <div class="eyebrow">La soluzione</div>
+          <h2>Una diagnosi chiara, in pochi minuti.</h2>
+          <p>
+            Triad Insight raccoglie dati essenziali, legge i segnali critici del business e produce un report leggibile e azionabile.
+          </p>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature-card">
+            <h3>Finanza</h3>
+            <p>Runway, burn, break-even e sostenibilità economica in un colpo d’occhio.</p>
+          </article>
+
+          <article class="feature-card">
+            <h3>Vendite</h3>
+            <p>Conversione, resa commerciale e capacità di trasformare domanda in ricavi.</p>
+          </article>
+
+          <article class="feature-card">
+            <h3>Struttura</h3>
+            <p>Comprensione sintetica dello stato dell’azienda e delle priorità operative.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="how-it-works" id="come-funziona">
+      <div class="container">
+        <div class="section-head center">
+          <div class="eyebrow">Come funziona</div>
+          <h2>Dal dato alla decisione, in 3 passaggi.</h2>
+        </div>
+
+        <div class="steps">
+          <article class="step">
+            <div class="step-num">1</div>
+            <h3>Inserisci i dati essenziali</h3>
+            <p>Settore, modello, mese di riferimento, KPI base e mini assessment guidato.</p>
+          </article>
+
+          <article class="step">
+            <div class="step-num">2</div>
+            <h3>Genera lo scan</h3>
+            <p>Il motore analizza i segnali principali e costruisce una lettura sintetica dello stato aziendale.</p>
+          </article>
+
+          <article class="step">
+            <div class="step-num">3</div>
+            <h3>Ricevi il report</h3>
+            <p>Ottieni Triad Score, alert chiave, indicatori e piano d’azione prioritario.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="pricing" id="prezzi">
+      <div class="container">
+        <div class="section-head center">
+          <div class="eyebrow">Prezzi</div>
+          <h2>Scegli il piano adatto al tuo ritmo di crescita.</h2>
+        </div>
+
+        <div class="card-grid three pricing-grid">
+          {% if plans %}
+            {% for plan in plans[:3] %}
+              {% set featured = (loop.index == 2) %}
+              <article class="price-card {% if featured %}featured{% endif %}">
+                {% if featured %}
+                  <div class="price-badge">Più scelto</div>
+                {% endif %}
+
+                <div class="price-name">{{ plan.name }}</div>
+                <div class="price-value">€{{ "%.0f"|format(plan.price_month or 0) }}<span>/mese</span></div>
+
+                <ul>
+                  <li>
+                    {% if plan.scan_limit == -1 %}
+                      Scan illimitati
+                    {% else %}
+                      {{ plan.scan_limit }} scan inclusi
+                    {% endif %}
+                  </li>
+                  <li>Dashboard cliente</li>
+                  <li>Report immediato</li>
+                </ul>
+
+                {% if current_user.is_authenticated %}
+                  <a class="btn btn-block" href="{{ url_for('scans.dashboard') }}">Vai alla dashboard</a>
+                {% else %}
+                  <a class="btn btn-block" href="{{ url_for('auth.register') }}">Inizia</a>
+                {% endif %}
+              </article>
+            {% endfor %}
+          {% else %}
+            <article class="price-card">
+              <div class="price-name">Piani in arrivo</div>
+              <div class="price-value">—</div>
+              <ul>
+                <li>Nessun piano attivo</li>
+                <li>Configurazione in corso</li>
+                <li>Torna presto</li>
+              </ul>
+
+              {% if current_user.is_authenticated %}
+                <a class="btn btn-block" href="{{ url_for('scans.dashboard') }}">Vai alla dashboard</a>
+              {% else %}
+                <a class="btn btn-block" href="{{ url_for('auth.register') }}">Registrati</a>
+              {% endif %}
+            </article>
+          {% endif %}
+        </div>
+
+        <div style="text-align:center; margin-top:20px;">
+          <a class="btn btn-secondary btn-lg" href="{{ url_for('pricing') }}">Vedi tutti i dettagli</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-final">
+      <div class="container cta-box">
+        <div>
+          <div class="eyebrow">Pronto a iniziare?</div>
+          <h2>Fai il primo scan e scopri dove intervenire davvero.</h2>
+          <p>
+            Registrati, completa l’onboarding e ottieni una fotografia chiara del tuo business.
+          </p>
+        </div>
+
+        <div class="cta-side">
+          {% if current_user.is_authenticated %}
+            <a class="btn btn-lg" href="{{ url_for('scans.dashboard') }}">Vai alla dashboard</a>
+            <a class="btn btn-secondary btn-lg" href="{{ url_for('wizard.onboarding') }}">Nuovo scan</a>
+          {% else %}
+            <a class="btn btn-lg" href="{{ url_for('auth.register') }}">Crea il tuo account</a>
+            <a class="btn btn-secondary btn-lg" href="{{ url_for('auth.login') }}">Ho già un account</a>
+          {% endif %}
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <div class="footer-brand">Triad Insight</div>
+        <div class="footer-copy">Diagnosi chiara del business, in pochi minuti.</div>
+      </div>
+
+      <div class="footer-links">
+        <a href="#prodotto">Prodotto</a>
+        <a href="#come-funziona">Come funziona</a>
+        <a href="{{ url_for('pricing') }}">Prezzi</a>
+
+        {% if current_user.is_authenticated %}
+          <a href="{{ url_for('scans.dashboard') }}">Dashboard</a>
+        {% else %}
+          <a href="{{ url_for('auth.login') }}">Login</a>
+        {% endif %}
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
