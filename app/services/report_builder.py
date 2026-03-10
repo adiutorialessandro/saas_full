@@ -8,19 +8,18 @@ def utc_now_iso() -> str:
 
 @dataclass
 class Inputs:
-    # 1. CAMPI OBBLIGATORI (Senza default)
+    # Obbligatori
     settore: str
     modello: str
     mese_riferimento: str
     quiz_risk: List[float]
 
-    # 2. CAMPI OPZIONALI (Con default = None)
+    # Opzionali
     dimensione: Optional[str] = None
     dipendenti: Optional[int] = None
     area_geografica: Optional[str] = None
     fatturato: Optional[str] = None
     tipologia_clienti: Optional[str] = None
-
     cassa_attuale: Optional[float] = None
     burn_mensile: Optional[float] = None
     incassi_mese: Optional[float] = None
@@ -30,9 +29,6 @@ class Inputs:
     clienti_mese: Optional[float] = None
 
 def build_report(inp: Inputs, bench: Optional[SectorBenchmark] = None) -> Dict[str, Any]:
-    # =========================
-    # KPI CALCOLATI 
-    # =========================
     runway_mesi = None
     if inp.cassa_attuale is not None and inp.burn_mensile is not None and inp.burn_mensile > 0:
         runway_mesi = inp.cassa_attuale / inp.burn_mensile

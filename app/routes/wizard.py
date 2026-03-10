@@ -20,7 +20,7 @@ def onboarding():
     
     if form.validate_on_submit():
         session["onboarding"] = {
-            "settore": form.tipologia_impresa.data,  # Lo mappiamo come 'settore' per non rompere il Database
+            "settore": form.tipologia_impresa.data,
             "modello": form.modello.data,
             "dimensione": form.dimensione.data,
             "dipendenti": form.dipendenti.data,
@@ -40,10 +40,12 @@ def data():
     ensure_current_org_id()
     if "onboarding" not in session:
         return redirect(url_for("wizard.onboarding"))
+        
     form = EssentialDataForm()
     if form.validate_on_submit():
         session["data"] = {k: v for k, v in form.data.items() if k not in ['csrf_token', 'submit']}
         return redirect(url_for("wizard.quiz"))
+
     return render_template("wizard_data.html", form=form)
 
 @bp.route("/quiz", methods=["GET", "POST"])
@@ -52,7 +54,7 @@ def quiz():
     org_id = ensure_current_org_id()
     if "onboarding" not in session:
         return redirect(url_for("wizard.onboarding"))
-    
+
     form = QuizForm()
     if form.validate_on_submit():
         raw = [int(getattr(form, f"q{i}").data) for i in range(1, 11)]
@@ -61,21 +63,18 @@ def quiz():
         ob = session["onboarding"]
         data = session.get("data", {}) or {}
 
-        bench = SectorBenchmark.query.filter_by(sector_name=ob["settore"]).first()
+        bench = SectorBenchmark.query.filter_by(sector_name=ob.get("settore")).first()
 
         inp = Inputs(
-            settore=ob["settore"],
-            modello=ob["modello"],
-            mese_riferimento=ob["mese_riferimento"],
+            settore=ob.get("settore", "Generico"),
+            modello=ob.get("modello", "B2B"),
+            mese_riferimento=ob.get("mese_riferimento", ""),
             quiz_risk=quiz_risk,
-            
-            # Passiamo i nuovi campi al builder
             dimensione=ob.get("dimensione"),
             dipendenti=ob.get("dipendenti"),
             area_geografica=ob.get("area_geografica"),
             fatturato=ob.get("fatturato"),
             tipologia_clienti=ob.get("tipologia_clienti"),
-
             cassa_attuale=data.get("cassa_attuale"),
             burn_mensile=data.get("burn_mensile"),
             incassi_mese=data.get("incassi_mese"),
@@ -86,16 +85,23 @@ def quiz():
         )
 
         report = build_report(inp, bench=bench)
+
         org = Organization.query.get(org_id)
+        if not org or not org.plan:
+            flash("Organizzazione o piano non trovati.")
+            return redirect(url_for("scans.dashboard"))
 
         current_scans = Scan.query.filter_by(org_id=org.id).count()
+        if org.plan.scan_limit != -1 and current_scans >= org.plan.scan_limit:
+            flash("Limite scansioni raggiunto per il piano attuale.")
+            return redirect(url_for("scans.dashboard"))
 
         s = Scan(
             org_id=org_id,
             user_id=current_user.id,
-            settore=ob["settore"],
-            modello=ob["modello"],
-            mese_riferimento=ob["mese_riferimento"],
+            settore=ob.get("settore", "Generico"),
+            modello=ob.get("modello", "B2B"),
+            mese_riferimento=ob.get("mese_riferimento", ""),
             report_json=json.dumps(report, ensure_ascii=False),
             created_at=datetime.utcnow(),
         )
