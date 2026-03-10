@@ -1,4 +1,3 @@
-cat << 'EOF' > app/forms.py
 from flask_wtf import FlaskForm
 from wtforms import (
     StringField,
@@ -159,4 +158,3 @@ class CreatePlanForm(FlaskForm):
 class UpdateOrganizationPlanForm(FlaskForm):
     plan_id = SelectField("Piano", coerce=int, validators=[DataRequired()])
     submit = SubmitField("Aggiorna piano")
-EOF
