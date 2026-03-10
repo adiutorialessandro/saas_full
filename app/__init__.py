@@ -1,64 +1,72 @@
-from flask import Flask, redirect, url_for, render_template
+import os
+from flask import Flask
+from .extensions import db, migrate, login_manager, mail
 from .config import Config
-from .extensions import db, login_manager, migrate
 
-from .routes.auth import bp as auth_bp
-from .routes.wizard import bp as wizard_bp
-from .routes.scans import bp as scans_bp
-from .routes.admin import bp as admin_bp
-from .routes.billing import bp as billing_bp
-from .routes.report import bp as report_bp
-
-# importa i model per SQLAlchemy / Alembic
-from .models.user import User
-from .models.organization import Organization
-from .models.membership import Membership
-from .models.scan import Scan
-from .models.plan import Plan
-from .routes.orgs import bp as orgs_bp
-
-def create_app():
+def create_app(config_class=Config):
     app = Flask(__name__)
-    app.config.from_object(Config)
+    app.config.from_object(config_class)
 
+    # Inizializzazione estensioni
     db.init_app(app)
-    login_manager.init_app(app)
     migrate.init_app(app, db)
+    login_manager.init_app(app)
+    mail.init_app(app)
 
-    @app.template_filter("fmt_dt")
-    def fmt_dt(value):
-        if not value:
-            return ""
-        try:
-            return value.strftime("%d/%m/%Y %H:%M")
-        except Exception:
-            return str(value)
+    login_manager.login_view = "auth.login"
 
-    @app.route("/")
-    def home():
-        plans = Plan.query.filter_by(is_active=True).order_by(Plan.price_month.asc()).all()
-        return render_template("landing.html", plans=plans)
-
-    @app.route("/pricing")
-    def pricing():
-        plans = Plan.query.filter_by(is_active=True).order_by(Plan.price_month.asc()).all()
-        return render_template("pricing.html", plans=plans)
-
-    @app.route("/health")
-    def health():
-        return "ok", 200
+    # Registrazione Blueprint
+    from .routes.auth import bp as auth_bp
+    from .routes.admin import bp as admin_bp
+    from .routes.orgs import bp as orgs_bp
+    from .routes.invites import bp as invites_bp
+    from .routes.billing import bp as billing_bp
+    from .routes.wizard import bp as wizard_bp
+    from .routes.scans import bp as scans_bp
+    from .routes.report import bp as report_bp
 
     app.register_blueprint(auth_bp)
+    app.register_blueprint(admin_bp)
+    app.register_blueprint(orgs_bp)
+    app.register_blueprint(invites_bp)
+    app.register_blueprint(billing_bp)
     app.register_blueprint(wizard_bp)
     app.register_blueprint(scans_bp)
-    app.register_blueprint(admin_bp)
-    app.register_blueprint(billing_bp)
-    app.register_blueprint(orgs_bp)
     app.register_blueprint(report_bp)
-    
-    @app.cli.command("seed-plans")
-    def seed_plans_command():
-        from .seed import seed_plans
-        seed_plans()
+
+    @app.route("/")
+    def index():
+        from flask import render_template
+        return render_template("landing.html")
+
+    # ========================================================
+    # AUTO-RISOLUZIONE DEL DATABASE AL LANCIO
+    # ========================================================
+    with app.app_context():
+        # Questo forza la creazione di TUTTE le tabelle mancanti (incluso sector_benchmarks)
+        db.create_all()
+        
+        # Inserimento automatico dei Benchmark se la tabella è vuota
+        from .models.benchmark import SectorBenchmark
+        if SectorBenchmark.query.count() == 0:
+            benchmarks = [
+                {"sector_name": "Consulenza B2B", "margine_lordo_target": 62.0, "conversione_target": 26.0, "break_even_sano": 1.10, "runway_minima": 6},
+                {"sector_name": "Retail", "margine_lordo_target": 33.0, "conversione_target": 5.0, "break_even_sano": 1.05, "runway_minima": 3},
+                {"sector_name": "Manifattura", "margine_lordo_target": 37.0, "conversione_target": 20.0, "break_even_sano": 1.08, "runway_minima": 4},
+                {"sector_name": "SaaS / Tech", "margine_lordo_target": 72.0, "conversione_target": 10.0, "break_even_sano": 1.20, "runway_minima": 12},
+                {"sector_name": "Ho.Re.Ca.", "margine_lordo_target": 61.0, "conversione_target": 0.0, "break_even_sano": 1.05, "runway_minima": 2},
+                {"sector_name": "Immobiliare", "margine_lordo_target": 42.0, "conversione_target": 13.0, "break_even_sano": 1.10, "runway_minima": 6},
+                {"sector_name": "Sanità / Studi medici", "margine_lordo_target": 52.0, "conversione_target": 50.0, "break_even_sano": 1.15, "runway_minima": 4}
+            ]
+            for b in benchmarks:
+                db.session.add(SectorBenchmark(**b))
+            try:
+                db.session.commit()
+                print(">>> TABELLA BENCHMARK CREATA E POPOLATA CON SUCCESSO <<<")
+            except Exception as e:
+                db.session.rollback()
+                print("Errore durante il popolamento automatico:", e)
 
     return app
+
+from .models import user, organization, scan, plan, invite, membership

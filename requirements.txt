@@ -11,3 +11,4 @@ psycopg[binary]==3.2.9
 Flask-Migrate==4.0.7
 alembic==1.13.2
 stripe==11.6.0python-dotenv
+python-dotenv
