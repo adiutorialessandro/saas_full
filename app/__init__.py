@@ -1,17 +1,16 @@
 import os
 from flask import Flask
-from .extensions import db, migrate, login_manager, mail
+from .extensions import db, migrate, login_manager
 from .config import Config
 
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
-    # Inizializzazione estensioni
+    # Inizializzazione estensioni (Senza 'mail' che causava l'errore)
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
-    mail.init_app(app)
 
     login_manager.login_view = "auth.login"
 
@@ -43,7 +42,7 @@ def create_app(config_class=Config):
     # AUTO-RISOLUZIONE DEL DATABASE AL LANCIO
     # ========================================================
     with app.app_context():
-        # Questo forza la creazione di TUTTE le tabelle mancanti (incluso sector_benchmarks)
+        # Questo forza la creazione di TUTTE le tabelle mancanti
         db.create_all()
         
         # Inserimento automatico dei Benchmark se la tabella è vuota
