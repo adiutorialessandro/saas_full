@@ -1,3 +1,4 @@
+cat << 'EOF' > app/forms.py
 from flask_wtf import FlaskForm
 from wtforms import (
     StringField,
@@ -6,6 +7,7 @@ from wtforms import (
     FloatField,
     RadioField,
     SelectField,
+    IntegerField
 )
 from wtforms.validators import (
     DataRequired,
@@ -17,208 +19,144 @@ from wtforms.validators import (
     EqualTo,
 )
 
-
 class RegisterForm(FlaskForm):
     email = StringField("Email", validators=[DataRequired(), Email()])
     password = PasswordField("Password", validators=[DataRequired(), Length(min=6)])
-    password2 = PasswordField(
-        "Ripeti Password",
-        validators=[DataRequired(), EqualTo("password", message="Le password non coincidono")],
-    )
+    password2 = PasswordField("Ripeti Password", validators=[DataRequired(), EqualTo("password", message="Le password non coincidono")])
     submit = SubmitField("Registrati")
-
 
 class LoginForm(FlaskForm):
     email = StringField("Email", validators=[DataRequired(), Email()])
     password = PasswordField("Password", validators=[DataRequired()])
     submit = SubmitField("Accedi")
 
-
 class OnboardingForm(FlaskForm):
-    settore = StringField(
-        "Settore Merceologico", 
-        validators=[DataRequired(), Length(min=2, max=100)],
-        description="Indica il mercato principale in cui opera l'azienda (es. Manifatturiero, SaaS, Retail)."
+    tipologia_impresa = SelectField(
+        "Tipologia di impresa",
+        choices=[
+            ('', 'Seleziona...'), 
+            ('Consulenza B2B', 'Consulenza B2B'), 
+            ('Retail', 'Retail'), 
+            ('Manifattura', 'Manifattura'), 
+            ('SaaS / Tech', 'SaaS / Tech'), 
+            ('Ho.Re.Ca.', 'Ho.Re.Ca.'), 
+            ('Immobiliare', 'Immobiliare'), 
+            ('Sanità / Studi medici', 'Sanità / Studi medici'), 
+            ('Generico', 'Altro (Generico)')
+        ],
+        validators=[DataRequired()],
+        description="Seleziona il mercato principale per confrontare i tuoi dati con i benchmark."
     )
-    modello = StringField(
-        "Business Model", 
+    modello = SelectField(
+        "Modello di business",
+        choices=[
+            ('', 'Seleziona...'),
+            ('B2B', 'B2B (Business to Business)'),
+            ('B2C', 'B2C (Business to Consumer)'),
+            ('SaaS', 'SaaS (Software as a Service)'),
+            ('E-commerce', 'E-commerce'),
+            ('Agenzia', 'Agenzia di servizi')
+        ],
+        validators=[DataRequired()],
+        description="Come l'azienda genera valore e vende i propri prodotti/servizi."
+    )
+    dimensione = SelectField(
+        "Dimensione dell'impresa",
+        choices=[
+            ('', 'Seleziona...'),
+            ('Micro', 'Microimpresa (0-9 dipendenti)'),
+            ('Piccola', 'Piccola impresa (10-49 dipendenti)'),
+            ('Media', 'Media impresa (50-249 dipendenti)'),
+            ('Grande', 'Grande impresa (Oltre 250 dipendenti)')
+        ],
+        validators=[DataRequired()]
+    )
+    dipendenti = IntegerField(
+        "Numero di dipendenti",
+        validators=[DataRequired(), NumberRange(min=0)],
+        description="Numero esatto o approssimativo di collaboratori."
+    )
+    area_geografica = StringField(
+        "Area geografica",
         validators=[DataRequired(), Length(min=2, max=100)],
-        description="Come l'azienda genera valore (es. B2B a commessa, Abbonamento ricorrente, E-commerce)."
+        description="Es. Nord Italia, Lombardia, Estero."
+    )
+    fatturato = StringField(
+        "Fatturato indicativo annuo (€)",
+        validators=[DataRequired()],
+        description="Fatturato annuo stimato (es. 500000)."
+    )
+    tipologia_clienti = SelectField(
+        "Tipologia di clienti",
+        choices=[
+            ('', 'Seleziona...'),
+            ('PMI', 'Aziende PMI'),
+            ('Corporate', 'Grandi Aziende (Corporate)'),
+            ('Privati', 'Consumatori finali (Privati)'),
+            ('PA', 'Pubblica Amministrazione')
+        ],
+        validators=[DataRequired()],
+        description="Il tuo target di clientela principale."
     )
     mese_riferimento = StringField(
-        "Periodo di Analisi (YYYY-MM)",
-        validators=[DataRequired(), Regexp(r"^\d{4}-\d{2}$", message="Formato richiesto: AAAA-MM")],
-        description="Il mese e l'anno a cui si riferiscono i dati che stai per inserire."
+        "Mese riferimento (YYYY-MM)",
+        validators=[DataRequired(), Regexp(r"^\d{4}-\d{2}$", message="Formato: YYYY-MM")],
+        description="Il periodo a cui si riferiscono i dati che inserirai."
     )
     submit = SubmitField("Continua")
-
 
 class EssentialDataForm(FlaskForm):
-    cassa_attuale = FloatField(
-        "Disponibilità Liquide (€)", 
-        validators=[Optional(), NumberRange(min=0)],
-        description="La somma totale di denaro immediatamente disponibile sui conti correnti e in cassa oggi."
-    )
-    burn_mensile = FloatField(
-        "Burn Rate Mensile (€)", 
-        validators=[Optional(), NumberRange(min=0)],
-        description="L'ammontare medio di liquidità che l'azienda 'brucia' ogni mese per coprire le proprie spese operative."
-    )
-    incassi_mese = FloatField(
-        "Cash-In del Mese (€)", 
-        validators=[Optional(), NumberRange(min=0)],
-        description="Il totale del denaro effettivamente incassato dai clienti nel periodo di riferimento (non il fatturato emesso)."
-    )
-    costi_fissi_mese = FloatField(
-        "Costi Operativi Fissi (€)", 
-        validators=[Optional(), NumberRange(min=0)],
-        description="Spese che non variano al variare delle vendite, come affitti, stipendi del personale fisso e software."
-    )
-    margine_lordo_pct = FloatField(
-        "Margine di Contribuzione (%)", 
-        validators=[Optional(), NumberRange(min=0, max=100)],
-        description="La percentuale di guadagno che resta dopo aver pagato solo i costi diretti per produrre il bene o servizio."
-    )
-    leads_mese = FloatField(
-        "Volume Nuove Opportunità (#)", 
-        validators=[Optional(), NumberRange(min=0)],
-        description="Il numero di potenziali clienti (Lead) che hanno manifestato interesse o sono entrati nel funnel di vendita."
-    )
-    clienti_mese = FloatField(
-        "Nuove Conversioni (#)", 
-        validators=[Optional(), NumberRange(min=0)],
-        description="Il numero di nuovi clienti che hanno effettuato il primo acquisto o firmato un contratto nel mese."
-    )
+    cassa_attuale = FloatField("Disponibilità Liquide (€)", validators=[Optional(), NumberRange(min=0)])
+    burn_mensile = FloatField("Burn Rate Mensile (€)", validators=[Optional(), NumberRange(min=0)])
+    incassi_mese = FloatField("Cash-In del Mese (€)", validators=[Optional(), NumberRange(min=0)])
+    costi_fissi_mese = FloatField("Costi Operativi Fissi (€)", validators=[Optional(), NumberRange(min=0)])
+    margine_lordo_pct = FloatField("Margine di Contribuzione (%)", validators=[Optional(), NumberRange(min=0, max=100)])
+    leads_mese = FloatField("Volume Nuove Opportunità (#)", validators=[Optional(), NumberRange(min=0)])
+    clienti_mese = FloatField("Nuove Conversioni (#)", validators=[Optional(), NumberRange(min=0)])
     submit = SubmitField("Continua")
 
-
 class QuizForm(FlaskForm):
-    # Scala di valutazione:
-    # 1 = Criticità elevata / Assenza di controllo
-    # 5 = Eccellenza operativa / Controllo totale
     _choices = [(1, "1"), (2, "2"), (3, "3"), (4, "4"), (5, "5")]
-
-    q1 = RadioField(
-        "Financial Runway & Visibility",
-        choices=_choices,
-        coerce=int,
-        validators=[DataRequired()],
-        description="Valuta quanto chiaramente riesci a prevedere se la cassa sarà sufficiente a coprire i debiti nei prossimi 3 mesi."
-    )
-
-    q2 = RadioField(
-        "Cash Flow Stability",
-        choices=_choices,
-        coerce=int,
-        validators=[DataRequired()],
-        description="Valuta la regolarità degli incassi: arrivano puntuali o soffri di ritardi che mettono a rischio i pagamenti?"
-    )
-
-    q3 = RadioField(
-        "Analisi della Marginalità",
-        choices=_choices,
-        coerce=int,
-        validators=[DataRequired()],
-        description="Indica quanto sei consapevole del guadagno reale netto per ogni singolo prodotto o servizio venduto."
-    )
-
-    q4 = RadioField(
-        "Sostenibilità della Struttura",
-        choices=_choices,
-        coerce=int,
-        validators=[DataRequired()],
-        description="Valuta se il volume d'affari attuale è ampiamente superiore ai costi fissi o se sei pericolosamente vicino al punto di pareggio."
-    )
-
-    q5 = RadioField(
-        "Pipeline di Vendita",
-        choices=_choices,
-        coerce=int,
-        validators=[DataRequired()],
-        description="Valuta se l'arrivo di nuovi potenziali clienti è frutto di una strategia costante o se dipende dal caso/passaparola."
-    )
-
-    q6 = RadioField(
-        "Efficienza Commerciale (Conversion Rate)",
-        choices=_choices,
-        coerce=int,
-        validators=[DataRequired()],
-        description="Quanto sei efficace nel trasformare un preventivo o un interesse iniziale in un contratto firmato?"
-    )
-
-    q7 = RadioField(
-        "Risk Diversification",
-        choices=_choices,
-        coerce=int,
-        validators=[DataRequired()],
-        description="Valuta il rischio di concentrazione: se perdessi il tuo cliente principale domani, l'azienda sopravviverebbe?"
-    )
-
-    q8 = RadioField(
-        "Data-Driven Management (KPI)",
-        choices=_choices,
-        coerce=int,
-        validators=[DataRequired()],
-        description="Valuta quanto le tue decisioni si basano su numeri certi e dashboard aggiornate piuttosto che sull'intuizione."
-    )
-
-    q9 = RadioField(
-        "Efficienza Operativa",
-        choices=_choices,
-        coerce=int,
-        validators=[DataRequired()],
-        description="Valuta la presenza di sprechi di tempo o denaro nei processi interni e nella gestione dei fornitori."
-    )
-
-    q10 = RadioField(
-        "Execution & Agility",
-        choices=_choices,
-        coerce=int,
-        validators=[DataRequired()],
-        description="Valuta la velocità con cui l'azienda riesce a mettere in pratica un nuovo progetto o una correzione di rotta."
-    )
-
+    q1 = RadioField("Financial Runway & Visibility", choices=_choices, coerce=int, validators=[DataRequired()])
+    q2 = RadioField("Cash Flow Stability", choices=_choices, coerce=int, validators=[DataRequired()])
+    q3 = RadioField("Analisi della Marginalità", choices=_choices, coerce=int, validators=[DataRequired()])
+    q4 = RadioField("Sostenibilità della Struttura", choices=_choices, coerce=int, validators=[DataRequired()])
+    q5 = RadioField("Pipeline di Vendita", choices=_choices, coerce=int, validators=[DataRequired()])
+    q6 = RadioField("Efficienza Commerciale", choices=_choices, coerce=int, validators=[DataRequired()])
+    q7 = RadioField("Risk Diversification", choices=_choices, coerce=int, validators=[DataRequired()])
+    q8 = RadioField("Data-Driven Management", choices=_choices, coerce=int, validators=[DataRequired()])
+    q9 = RadioField("Efficienza Operativa", choices=_choices, coerce=int, validators=[DataRequired()])
+    q10 = RadioField("Execution & Agility", choices=_choices, coerce=int, validators=[DataRequired()])
     submit = SubmitField("Genera Analisi Strategica")
 
-
 class CreateOrganizationForm(FlaskForm):
-    name = StringField("Denominazione Sociale", validators=[DataRequired(), Length(min=2, max=120)])
-    email = StringField("Email Referente (Owner)", validators=[DataRequired(), Email()])
-    password = PasswordField("Password Temporanea", validators=[DataRequired(), Length(min=6)])
-    submit = SubmitField("Crea Profilo Aziendale")
-
+    name = StringField("Nome azienda", validators=[DataRequired()])
+    email = StringField("Email owner", validators=[DataRequired(), Email()])
+    password = PasswordField("Password iniziale", validators=[DataRequired()])
+    submit = SubmitField("Crea azienda")
 
 class CreateOrgUserForm(FlaskForm):
-    email = StringField("Email Utente", validators=[DataRequired(), Email()])
-    password = PasswordField("Password di Accesso", validators=[DataRequired(), Length(min=6)])
-    role = StringField("Qualifica/Ruolo", validators=[DataRequired(), Length(min=2, max=20)])
-    submit = SubmitField("Abilita Utente")
-
+    email = StringField("Email utente", validators=[DataRequired(), Email()])
+    password = PasswordField("Password iniziale", validators=[DataRequired()])
+    role = StringField("Ruolo", validators=[DataRequired()])
+    submit = SubmitField("Aggiungi utente")
 
 class UpdateOrgUserRoleForm(FlaskForm):
-    role = StringField("Nuova Qualifica", validators=[DataRequired(), Length(min=2, max=20)])
-    submit = SubmitField("Aggiorna Ruolo")
-
+    role = StringField("Ruolo", validators=[DataRequired()])
+    submit = SubmitField("Aggiorna ruolo")
 
 class ResetUserPasswordForm(FlaskForm):
-    password = PasswordField(
-        "Nuova Password",
-        validators=[DataRequired(), Length(min=6)],
-    )
-    password2 = PasswordField(
-        "Conferma Password",
-        validators=[DataRequired(), EqualTo("password", message="Le password non coincidono")],
-    )
-    submit = SubmitField("Ripristina Credenziali")
-
+    password = PasswordField("Nuova password", validators=[DataRequired()])
+    password2 = PasswordField("Ripeti password", validators=[DataRequired(), EqualTo("password")])
+    submit = SubmitField("Aggiorna password")
 
 class CreatePlanForm(FlaskForm):
-    name = StringField("Nome Piano Tariffario", validators=[DataRequired(), Length(min=2, max=50)])
-    scan_limit = StringField("Soglia Scansioni Mensili", validators=[DataRequired()])
-    price_month = StringField("Canone Mensile (€)", validators=[DataRequired()])
-    submit = SubmitField("Salva Piano")
-
+    name = StringField("Nome piano", validators=[DataRequired()])
+    scan_limit = StringField("Limite scansioni", validators=[DataRequired()])
+    price_month = StringField("Prezzo mensile", validators=[DataRequired()])
+    submit = SubmitField("Crea piano")
 
 class UpdateOrganizationPlanForm(FlaskForm):
-    plan_id = SelectField("Seleziona Piano", coerce=int, validators=[DataRequired()])
-    submit = SubmitField("Applica Modifiche Piano")
+    plan_id = SelectField("Piano", coerce=int, validators=[DataRequired()])
+    submit = SubmitField("Aggiorna piano")
+EOF

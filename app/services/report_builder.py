@@ -11,6 +11,12 @@ class Inputs:
     settore: str
     modello: str
     mese_riferimento: str
+    dimensione: Optional[str] = None
+    dipendenti: Optional[int] = None
+    area_geografica: Optional[str] = None
+    fatturato: Optional[str] = None
+    tipologia_clienti: Optional[str] = None
+
     quiz_risk: List[float]
 
     cassa_attuale: Optional[float] = None
