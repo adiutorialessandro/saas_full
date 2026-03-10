@@ -16,15 +16,15 @@
     <div class="wizard-head">
       <h1>Valuta il livello di controllo e solidità del business</h1>
       <p>
-        Questo assessment aiuta il sistema a interpretare meglio qualità della gestione,
-        prevedibilità dei risultati e capacità dell’azienda di sostenere la crescita.
+        Questo assessment aiuta il sistema a interpretare meglio la qualità della gestione,
+        la prevedibilità dei risultati e la capacità dell’azienda di sostenere la crescita.
       </p>
     </div>
 
     <div class="wizard-tip">
       <b>Scala di valutazione:</b>
-      1 = situazione critica / fragile / poco controllata ·
-      5 = situazione solida / stabile / ben controllata
+      1 = criticità elevata / assenza di controllo ·
+      5 = eccellenza operativa / controllo totale
     </div>
 
     <form method="post" class="wizard-form">
@@ -37,7 +37,13 @@
             <div class="quiz-question">
               <div class="quiz-number">{{ i }}</div>
               <div>
-                <div class="quiz-title">{{ field.label.text }}</div>
+                <div class="quiz-title">
+                  {{ field.label.text }}
+                  {% if field.description %}
+                    <span title="{{ field.description }}" data-bs-toggle="tooltip" style="cursor: help; color: #888; margin-left: 8px; font-size: 0.9em; border-bottom: 1px dotted #888; padding-bottom: 1px;">
+                      &#9416; </span>
+                  {% endif %}
+                  </div>
                 <div class="quiz-sub">
                   Seleziona il valore che rappresenta meglio la situazione attuale dell’azienda.
                 </div>
@@ -67,5 +73,16 @@
     </form>
   </div>
 </div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function(){
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    if (typeof bootstrap !== 'undefined') {
+      var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+      });
+    }
+  });
+</script>
 
 {% endblock %}
