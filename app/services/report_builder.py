@@ -8,13 +8,11 @@ def utc_now_iso() -> str:
 
 @dataclass
 class Inputs:
-    # Obbligatori
     settore: str
     modello: str
     mese_riferimento: str
     quiz_risk: List[float]
 
-    # Opzionali
     dimensione: Optional[str] = None
     dipendenti: Optional[int] = None
     area_geografica: Optional[str] = None
@@ -43,23 +41,26 @@ def build_report(inp: Inputs, bench: Optional[SectorBenchmark] = None) -> Dict[s
 
     break_even_ratio = None
     if inp.incassi_mese is not None and inp.costi_fissi_mese is not None and margine_pct is not None and margine_pct > 0:
-        be_ricavi = inp.costi_fissi_mese / margine_pct
-        break_even_ratio = inp.incassi_mese / be_ricavi
+        if inp.costi_fissi_mese > 0:
+            be_ricavi = inp.costi_fissi_mese / margine_pct
+            break_even_ratio = inp.incassi_mese / be_ricavi
+        else:
+            break_even_ratio = 999.0  # Se non hai costi fissi, il break even è garantito senza far esplodere la divisione per zero.
 
     burn_cash_ratio = None
     if inp.burn_mensile is not None and inp.cassa_attuale is not None and inp.cassa_attuale > 0:
         burn_cash_ratio = inp.burn_mensile / inp.cassa_attuale
 
-    b_margin_good = (bench.margine_lordo_target / 100) if bench and bench.margine_lordo_target else 0.55
+    b_margin_good = (bench.margine_lordo_target / 100) if bench and getattr(bench, 'margine_lordo_target', None) is not None else 0.55
     b_margin_bad = b_margin_good * 0.5 
 
-    b_conv_good = (bench.conversione_target / 100) if (bench and bench.conversione_target > 0) else 0.12
+    b_conv_good = (bench.conversione_target / 100) if bench and getattr(bench, 'conversione_target', None) is not None and bench.conversione_target > 0 else 0.12
     b_conv_bad = b_conv_good * 0.4
 
-    b_be_good = bench.break_even_sano if bench and bench.break_even_sano else 1.2
+    b_be_good = bench.break_even_sano if bench and getattr(bench, 'break_even_sano', None) is not None else 1.2
     b_be_bad = 0.95
 
-    b_runway_good = bench.runway_minima if bench and bench.runway_minima else 9
+    b_runway_good = bench.runway_minima if bench and getattr(bench, 'runway_minima', None) is not None else 9
     b_runway_bad = 2
 
     def norm(value, good, bad, higher=True):
@@ -68,11 +69,11 @@ def build_report(inp: Inputs, bench: Optional[SectorBenchmark] = None) -> Dict[s
         if higher:
             if v >= good: return 0
             if v <= bad: return 1
-            return (good - v) / (good - bad)
+            return (good - v) / (good - bad) if good != bad else 0
         else:
             if v <= good: return 0
             if v >= bad: return 1
-            return (v - good) / (bad - good)
+            return (v - good) / (bad - good) if good != bad else 0
 
     r_runway = norm(runway_mesi, b_runway_good, b_runway_bad, True)
     r_margin = norm(margine_pct, b_margin_good, b_margin_bad, True)
