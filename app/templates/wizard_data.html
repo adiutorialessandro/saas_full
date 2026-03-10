@@ -1,52 +1,34 @@
 {% extends "base.html" %}
 {% block content %}
-
+<style>
+  .info-icon { cursor: help; margin-left: 6px; background: #e2e8f0; color: #1e293b; border-radius: 50%; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; border: 1px solid #cbd5e1; }
+</style>
 <div class="wizard-shell">
   <div class="wizard-progress-wrap">
     <div class="wizard-progress-top">
       <div class="eyebrow-ui">Step 2 di 3</div>
-      <div class="wizard-progress-label">Dati essenziali</div>
+      <div class="wizard-progress-label">Dati Gestionali Essenziali</div>
     </div>
-    <div class="wizard-progress">
-      <div class="wizard-progress-bar" style="width: 66%"></div>
-    </div>
+    <div class="wizard-progress"><div class="wizard-progress-bar" style="width: 66%"></div></div>
   </div>
-
   <div class="wizard-card">
     <div class="wizard-head">
-      <h1>Inserisci i KPI principali</h1>
-      <p>
-        Bastano pochi numeri per produrre una diagnosi più utile, leggibile e operativa.
-      </p>
+      <h1>Numeri principali dell'azienda</h1>
+      <p>Inserisci i dati richiesti. Passa il mouse sull'icona "i" per leggere una spiegazione semplificata del dato economico.</p>
     </div>
-
     <form method="post" class="wizard-form">
       {{ form.hidden_tag() }}
-
       <div class="form-grid two">
-        {# Cicliamo i campi per rendere il codice pulito e iniettare le descrizioni automaticamente #}
-        {% for field in [form.cassa_attuale, form.burn_mensile, form.incassi_mese, form.costi_fissi_mese, form.margine_lordo_pct, form.leads_mese, form.clienti_mese] %}
+        {% for field in form %}
+          {% if field.name not in ['csrf_token', 'submit'] %}
           <div class="field">
-            <label>
-              {{ field.label.text }}
-              {% if field.description %}
-                <span class="info-icon" title="{{ field.description }}" data-bs-toggle="tooltip" style="cursor: help; margin-left: 5px; opacity: 0.8;">
-                  <small>❓</small>
-                </span>
-              {% endif %}
-            </label>
-            {{ field(class_="input", placeholder="Inserisci valore...") }}
-            {% for e in field.errors %}
-              <div class="field-error">{{ e }}</div>
-            {% endfor %}
+            <label>{{ field.label.text }}{% if field.description %}<span class="info-icon" title="{{ field.description }}" data-bs-toggle="tooltip">i</span>{% endif %}</label>
+            {{ field(class_="input", placeholder="0") }}
+            {% for e in field.errors %}<div class="field-error" style="color: red; font-size: 0.85em; margin-top: 5px;">{{ e }}</div>{% endfor %}
           </div>
+          {% endif %}
         {% endfor %}
       </div>
-
-      <div class="wizard-tip">
-        <b>Consiglio:</b> Più dati inserisci, più il report sarà preciso e utile per la tua strategia.
-      </div>
-
       <div class="wizard-actions">
         <a class="btn btn-secondary" href="{{ url_for('wizard.onboarding') }}">Indietro</a>
         <button class="btn" type="submit">{{ form.submit.label.text }}</button>
@@ -54,17 +36,12 @@
     </form>
   </div>
 </div>
-
-{# Script per attivare i tooltip (se usi Bootstrap) #}
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
     if (typeof bootstrap !== 'undefined') {
-        tooltipTriggerList.map(function (tooltipTriggerEl) {
-          return new bootstrap.Tooltip(tooltipTriggerEl)
-        });
+        tooltipTriggerList.map(function (tooltipTriggerEl) { return new bootstrap.Tooltip(tooltipTriggerEl) });
     }
   });
 </script>
-
 {% endblock %}

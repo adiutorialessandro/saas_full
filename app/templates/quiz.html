@@ -1,88 +1,53 @@
 {% extends "base.html" %}
 {% block content %}
-
+<style>
+  .quiz-question { margin-bottom: 25px; padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; }
+  .quiz-label { font-weight: 600; margin-bottom: 15px; display: flex; align-items: center; font-size: 1.05rem; }
+  .quiz-choices { display: flex; gap: 15px; }
+  .quiz-choices label { font-weight: normal; margin-left: 5px; cursor: pointer; }
+  .info-icon { cursor: help; margin-left: 8px; background: #e2e8f0; color: #1e293b; border-radius: 50%; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; border: 1px solid #cbd5e1; }
+</style>
 <div class="wizard-shell">
   <div class="wizard-progress-wrap">
     <div class="wizard-progress-top">
       <div class="eyebrow-ui">Step 3 di 3</div>
-      <div class="wizard-progress-label">Assessment manageriale finale</div>
+      <div class="wizard-progress-label">Valutazione Qualitativa</div>
     </div>
-    <div class="wizard-progress">
-      <div class="wizard-progress-bar" style="width: 100%"></div>
-    </div>
+    <div class="wizard-progress"><div class="wizard-progress-bar" style="width: 100%"></div></div>
   </div>
-
   <div class="wizard-card">
     <div class="wizard-head">
-      <h1>Valuta il livello di controllo e solidità del business</h1>
-      <p>
-        Questo assessment aiuta il sistema a interpretare meglio la qualità della gestione,
-        la prevedibilità dei risultati e la capacità dell’azienda di sostenere la crescita.
-      </p>
+      <h1>Assessment dello stato di salute</h1>
+      <p>Valuta questi aspetti da 1 (Critico/Basso) a 5 (Ottimo/Alto). Clicca o passa il mouse sull'icona "i" per leggere la domanda esplicativa chiara.</p>
     </div>
-
-    <div class="wizard-tip">
-      <b>Scala di valutazione:</b>
-      1 = criticità elevata / assenza di controllo ·
-      5 = eccellenza operativa / controllo totale
-    </div>
-
     <form method="post" class="wizard-form">
       {{ form.hidden_tag() }}
-
-      <div class="quiz-stack">
-        {% for i in range(1, 11) %}
-          {% set field = form['q' ~ i] %}
-          <div class="quiz-card">
-            <div class="quiz-question">
-              <div class="quiz-number">{{ i }}</div>
-              <div>
-                <div class="quiz-title">
-                  {{ field.label.text }}
-                  {% if field.description %}
-                    <span title="{{ field.description }}" data-bs-toggle="tooltip" style="cursor: help; color: #888; margin-left: 8px; font-size: 0.9em; border-bottom: 1px dotted #888; padding-bottom: 1px;">
-                      &#9416; </span>
-                  {% endif %}
-                  </div>
-                <div class="quiz-sub">
-                  Seleziona il valore che rappresenta meglio la situazione attuale dell’azienda.
-                </div>
-              </div>
+      <div class="quiz-grid">
+        {% for field in form %}
+          {% if field.name not in ['csrf_token', 'submit'] %}
+          <div class="quiz-question">
+            <div class="quiz-label">{{ field.label.text }}{% if field.description %}<span class="info-icon" title="{{ field.description }}" data-bs-toggle="tooltip">i</span>{% endif %}</div>
+            <div class="quiz-choices">
+              {% for subfield in field %}<div>{{ subfield() }} {{ subfield.label }}</div>{% endfor %}
             </div>
-
-            <div class="quiz-options">
-              {% for subfield in field %}
-                <label class="quiz-option">
-                  {{ subfield }}
-                  <span>{{ subfield.label.text }}</span>
-                </label>
-              {% endfor %}
-            </div>
-
-            {% for e in field.errors %}
-              <div class="field-error">{{ e }}</div>
-            {% endfor %}
+            {% for e in field.errors %}<div class="field-error" style="color: red; font-size: 0.85em; margin-top: 5px;">{{ e }}</div>{% endfor %}
           </div>
+          {% endif %}
         {% endfor %}
       </div>
-
-      <div class="wizard-actions">
+      <div class="wizard-actions" style="margin-top: 30px;">
         <a class="btn btn-secondary" href="{{ url_for('wizard.data') }}">Indietro</a>
         <button class="btn" type="submit">{{ form.submit.label.text }}</button>
       </div>
     </form>
   </div>
 </div>
-
 <script>
-  document.addEventListener("DOMContentLoaded", function(){
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  document.addEventListener('DOMContentLoaded', function () {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
     if (typeof bootstrap !== 'undefined') {
-      var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-      });
+        tooltipTriggerList.map(function (tooltipTriggerEl) { return new bootstrap.Tooltip(tooltipTriggerEl) });
     }
   });
 </script>
-
 {% endblock %}

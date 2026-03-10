@@ -1,50 +1,32 @@
 {% extends "base.html" %}
 {% block content %}
-
+<style>
+  .info-icon { cursor: help; margin-left: 6px; background: #e2e8f0; color: #1e293b; border-radius: 50%; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; border: 1px solid #cbd5e1; }
+</style>
 <div class="wizard-shell">
   <div class="wizard-progress-wrap">
     <div class="wizard-progress-top">
       <div class="eyebrow-ui">Step 1 di 3</div>
       <div class="wizard-progress-label">Profilazione dell'impresa</div>
     </div>
-    <div class="wizard-progress">
-      <div class="wizard-progress-bar" style="width: 33%"></div>
-    </div>
+    <div class="wizard-progress"><div class="wizard-progress-bar" style="width: 33%"></div></div>
   </div>
-
   <div class="wizard-card">
     <div class="wizard-head">
       <h1>Iniziamo con una fotografia chiara della tua azienda</h1>
-      <p>
-        Inserisci le informazioni essenziali per contestualizzare correttamente lo scan e attivare i benchmark di mercato.
-      </p>
+      <p>Inserisci le informazioni essenziali. Passa il mouse sull'icona "i" per visualizzare una spiegazione del campo.</p>
     </div>
-
     <form method="post" class="wizard-form">
       {{ form.hidden_tag() }}
-
       <div class="form-grid two">
         {% for field in [form.tipologia_impresa, form.modello, form.dimensione, form.dipendenti, form.area_geografica, form.fatturato, form.tipologia_clienti, form.mese_riferimento] %}
           <div class="field">
-            <label>
-              {{ field.label.text }}
-              {% if field.description %}
-                <span class="info-icon" title="{{ field.description }}" data-bs-toggle="tooltip" style="cursor: help; margin-left: 5px; opacity: 0.7;">
-                  <small>❓</small>
-                </span>
-              {% endif %}
-            </label>
-            
-            {# Disegna la tendina o il campo di testo a seconda del tipo #}
+            <label>{{ field.label.text }}{% if field.description %}<span class="info-icon" title="{{ field.description }}" data-bs-toggle="tooltip">i</span>{% endif %}</label>
             {{ field(class_="input" ~ (" form-select" if field.type == "SelectField" else ""), placeholder="Seleziona o inserisci...") }}
-            
-            {% for e in field.errors %}
-              <div class="field-error" style="color: red; font-size: 0.85em; margin-top: 5px;">{{ e }}</div>
-            {% endfor %}
+            {% for e in field.errors %}<div class="field-error" style="color: red; font-size: 0.85em; margin-top: 5px;">{{ e }}</div>{% endfor %}
           </div>
         {% endfor %}
       </div>
-
       <div class="wizard-actions">
         <a class="btn btn-secondary" href="{{ url_for('scans.dashboard') }}">Annulla</a>
         <button class="btn" type="submit">{{ form.submit.label.text }}</button>
@@ -52,16 +34,12 @@
     </form>
   </div>
 </div>
-
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
     if (typeof bootstrap !== 'undefined') {
-        tooltipTriggerList.map(function (tooltipTriggerEl) {
-          return new bootstrap.Tooltip(tooltipTriggerEl)
-        });
+        tooltipTriggerList.map(function (tooltipTriggerEl) { return new bootstrap.Tooltip(tooltipTriggerEl) });
     }
   });
 </script>
-
 {% endblock %}

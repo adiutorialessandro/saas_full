@@ -8,18 +8,10 @@ def utc_now_iso() -> str:
 
 @dataclass
 class Inputs:
-    # 1. CAMPI OBBLIGATORI (Senza default)
     settore: str
     modello: str
     mese_riferimento: str
     quiz_risk: List[float]
-
-    # 2. CAMPI OPZIONALI (Con default = None)
-    dimensione: Optional[str] = None
-    dipendenti: Optional[int] = None
-    area_geografica: Optional[str] = None
-    fatturato: Optional[str] = None
-    tipologia_clienti: Optional[str] = None
 
     cassa_attuale: Optional[float] = None
     burn_mensile: Optional[float] = None
@@ -31,7 +23,7 @@ class Inputs:
 
 def build_report(inp: Inputs, bench: Optional[SectorBenchmark] = None) -> Dict[str, Any]:
     # =========================
-    # KPI CALCOLATI 
+    # KPI CALCOLATI (Fix per gli Zeri e i valori Nulli)
     # =========================
     runway_mesi = None
     if inp.cassa_attuale is not None and inp.burn_mensile is not None and inp.burn_mensile > 0:
@@ -143,8 +135,6 @@ def build_report(inp: Inputs, bench: Optional[SectorBenchmark] = None) -> Dict[s
             "meta": {
                 "settore": inp.settore, "modello": inp.modello,
                 "mese_riferimento": inp.mese_riferimento, "created_at": utc_now_iso(),
-                "dimensione": inp.dimensione, "dipendenti": inp.dipendenti, "area_geografica": inp.area_geografica,
-                "fatturato": inp.fatturato, "tipologia_clienti": inp.tipologia_clienti,
                 "benchmark_settore": {
                     "settore_riferimento": bench.sector_name if bench else "Media Standard",
                     "margine_target": b_margin_good, "conversione_target": b_conv_good,
