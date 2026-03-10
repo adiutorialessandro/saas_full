@@ -24,44 +24,27 @@
       {{ form.hidden_tag() }}
 
       <div class="form-grid two">
-        <div class="field">
-          <label>Cassa attuale (€)</label>
-          {{ form.cassa_attuale(class_="input", placeholder="Es. 25000") }}
-        </div>
-
-        <div class="field">
-          <label>Burn mensile (€)</label>
-          {{ form.burn_mensile(class_="input", placeholder="Es. 5000") }}
-        </div>
-
-        <div class="field">
-          <label>Incassi mese (€)</label>
-          {{ form.incassi_mese(class_="input", placeholder="Es. 18000") }}
-        </div>
-
-        <div class="field">
-          <label>Costi fissi mese (€)</label>
-          {{ form.costi_fissi_mese(class_="input", placeholder="Es. 12000") }}
-        </div>
-
-        <div class="field">
-          <label>Margine lordo (%)</label>
-          {{ form.margine_lordo_pct(class_="input", placeholder="Es. 35") }}
-        </div>
-
-        <div class="field">
-          <label>Lead mese (#)</label>
-          {{ form.leads_mese(class_="input", placeholder="Es. 120") }}
-        </div>
-
-        <div class="field">
-          <label>Clienti mese (#)</label>
-          {{ form.clienti_mese(class_="input", placeholder="Es. 9") }}
-        </div>
+        {# Cicliamo i campi per rendere il codice pulito e iniettare le descrizioni automaticamente #}
+        {% for field in [form.cassa_attuale, form.burn_mensile, form.incassi_mese, form.costi_fissi_mese, form.margine_lordo_pct, form.leads_mese, form.clienti_mese] %}
+          <div class="field">
+            <label>
+              {{ field.label.text }}
+              {% if field.description %}
+                <span class="info-icon" title="{{ field.description }}" data-bs-toggle="tooltip" style="cursor: help; margin-left: 5px; opacity: 0.8;">
+                  <small>❓</small>
+                </span>
+              {% endif %}
+            </label>
+            {{ field(class_="input", placeholder="Inserisci valore...") }}
+            {% for e in field.errors %}
+              <div class="field-error">{{ e }}</div>
+            {% endfor %}
+          </div>
+        {% endfor %}
       </div>
 
       <div class="wizard-tip">
-        Più dati inserisci, più il report sarà preciso e utile.
+        <b>Consiglio:</b> Più dati inserisci, più il report sarà preciso e utile per la tua strategia.
       </div>
 
       <div class="wizard-actions">
@@ -71,5 +54,17 @@
     </form>
   </div>
 </div>
+
+{# Script per attivare i tooltip (se usi Bootstrap) #}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    if (typeof bootstrap !== 'undefined') {
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+    }
+  });
+</script>
 
 {% endblock %}

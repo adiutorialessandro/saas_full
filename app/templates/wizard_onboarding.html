@@ -25,7 +25,14 @@
 
       <div class="form-grid two">
         <div class="field">
-          <label>Settore</label>
+          <label>
+            {{ form.settore.label.text }}
+            {% if form.settore.description %}
+              <span class="info-icon" title="{{ form.settore.description }}" data-bs-toggle="tooltip" style="cursor: help; margin-left: 5px; opacity: 0.7;">
+                <small>❓</small>
+              </span>
+            {% endif %}
+          </label>
           {{ form.settore(class_="input", placeholder="Es. Consulenza, eCommerce, Manifattura") }}
           {% for e in form.settore.errors %}
             <div class="field-error">{{ e }}</div>
@@ -33,7 +40,14 @@
         </div>
 
         <div class="field">
-          <label>Modello</label>
+          <label>
+            {{ form.modello.label.text }}
+            {% if form.modello.description %}
+              <span class="info-icon" title="{{ form.modello.description }}" data-bs-toggle="tooltip" style="cursor: help; margin-left: 5px; opacity: 0.7;">
+                <small>❓</small>
+              </span>
+            {% endif %}
+          </label>
           {{ form.modello(class_="input", placeholder="Es. B2B, B2C, SaaS, Agenzia") }}
           {% for e in form.modello.errors %}
             <div class="field-error">{{ e }}</div>
@@ -43,7 +57,14 @@
 
       <div class="form-grid one">
         <div class="field">
-          <label>Mese di riferimento</label>
+          <label>
+            {{ form.mese_riferimento.label.text }}
+            {% if form.mese_riferimento.description %}
+              <span class="info-icon" title="{{ form.mese_riferimento.description }}" data-bs-toggle="tooltip" style="cursor: help; margin-left: 5px; opacity: 0.7;">
+                <small>❓</small>
+              </span>
+            {% endif %}
+          </label>
           {{ form.mese_riferimento(class_="input", placeholder="YYYY-MM") }}
           {% for e in form.mese_riferimento.errors %}
             <div class="field-error">{{ e }}</div>
@@ -58,5 +79,17 @@
     </form>
   </div>
 </div>
+
+{# Script per attivare i tooltip (se usi Bootstrap) #}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    if (typeof bootstrap !== 'undefined') {
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+    }
+  });
+</script>
 
 {% endblock %}
