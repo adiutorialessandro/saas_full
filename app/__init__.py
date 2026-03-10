@@ -7,14 +7,12 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
-    # Inizializzazione estensioni (Senza 'mail' che causava l'errore)
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
 
     login_manager.login_view = "auth.login"
 
-    # Registrazione Blueprint
     from .routes.auth import bp as auth_bp
     from .routes.admin import bp as admin_bp
     from .routes.orgs import bp as orgs_bp
@@ -36,16 +34,16 @@ def create_app(config_class=Config):
     @app.route("/")
     def index():
         from flask import render_template
-        return render_template("landing.html")
+        from .models.plan import Plan
+        plans = Plan.query.all()
+        return render_template("landing.html", plans=plans)
 
     # ========================================================
     # AUTO-RISOLUZIONE DEL DATABASE AL LANCIO
     # ========================================================
     with app.app_context():
-        # Questo forza la creazione di TUTTE le tabelle mancanti
         db.create_all()
         
-        # Inserimento automatico dei Benchmark se la tabella è vuota
         from .models.benchmark import SectorBenchmark
         if SectorBenchmark.query.count() == 0:
             benchmarks = [
@@ -59,12 +57,25 @@ def create_app(config_class=Config):
             ]
             for b in benchmarks:
                 db.session.add(SectorBenchmark(**b))
-            try:
-                db.session.commit()
-                print(">>> TABELLA BENCHMARK CREATA E POPOLATA CON SUCCESSO <<<")
-            except Exception as e:
-                db.session.rollback()
-                print("Errore durante il popolamento automatico:", e)
+            db.session.commit()
+
+        # CREAZIONE PIANI AUTOMATICA
+        from .models.plan import Plan
+        if Plan.query.count() == 0:
+            p1 = Plan(name="Starter", scan_limit=1, price_month=0.0)
+            p2 = Plan(name="Pro", scan_limit=10, price_month=49.0)
+            p3 = Plan(name="Enterprise", scan_limit=-1, price_month=199.0)
+            db.session.add_all([p1, p2, p3])
+            db.session.commit()
+
+        # FIX PER UTENTI ESISTENTI SENZA PIANO (Sblocca il Wizard)
+        from .models.organization import Organization
+        default_plan = Plan.query.filter_by(name="Starter").first()
+        if default_plan:
+            orgs = Organization.query.filter_by(plan_id=None).all()
+            for o in orgs:
+                o.plan_id = default_plan.id
+            db.session.commit()
 
     return app
 
