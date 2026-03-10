@@ -31,6 +31,18 @@ def create_app(config_class=Config):
     app.register_blueprint(scans_bp)
     app.register_blueprint(report_bp)
 
+    # ========================================================
+    # FIX: REINSERITO IL FILTRO JINJA PER LE DATE (EVITA CRASH DASHBOARD)
+    # ========================================================
+    @app.template_filter('fmt_dt')
+    def fmt_dt(value):
+        if value is None:
+            return ""
+        try:
+            return value.strftime("%d/%m/%Y")
+        except Exception:
+            return str(value)
+
     @app.route("/")
     def index():
         from flask import render_template
@@ -68,7 +80,7 @@ def create_app(config_class=Config):
             db.session.add_all([p1, p2, p3])
             db.session.commit()
 
-        # FIX PER UTENTI ESISTENTI SENZA PIANO (Sblocca il Wizard)
+        # FIX PER UTENTI ESISTENTI SENZA PIANO
         from .models.organization import Organization
         default_plan = Plan.query.filter_by(name="Starter").first()
         if default_plan:
