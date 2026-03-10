@@ -15,19 +15,18 @@ class Inputs:
 
     cassa_attuale: Optional[float] = None
     burn_mensile: Optional[float] = None
-
     incassi_mese: Optional[float] = None
     costi_fissi_mese: Optional[float] = None
-
     margine_lordo_pct: Optional[float] = None
-
     leads_mese: Optional[float] = None
     clienti_mese: Optional[float] = None
 
-
 def build_report(inp: Inputs, bench: Optional[SectorBenchmark] = None) -> Dict[str, Any]:
+    # =========================
+    # KPI CALCOLATI (Fix per gli Zeri e i valori Nulli)
+    # =========================
     runway_mesi = None
-    if inp.cassa_attuale and inp.burn_mensile and inp.burn_mensile > 0:
+    if inp.cassa_attuale is not None and inp.burn_mensile is not None and inp.burn_mensile > 0:
         runway_mesi = inp.cassa_attuale / inp.burn_mensile
 
     margine_pct = None
@@ -35,28 +34,28 @@ def build_report(inp: Inputs, bench: Optional[SectorBenchmark] = None) -> Dict[s
         margine_pct = inp.margine_lordo_pct / 100
 
     conversione = None
-    if inp.leads_mese and inp.clienti_mese and inp.leads_mese > 0:
+    if inp.leads_mese is not None and inp.clienti_mese is not None and inp.leads_mese > 0:
         conversione = inp.clienti_mese / inp.leads_mese
 
     break_even_ratio = None
-    if inp.incassi_mese and inp.costi_fissi_mese and margine_pct and margine_pct > 0:
+    if inp.incassi_mese is not None and inp.costi_fissi_mese is not None and margine_pct is not None and margine_pct > 0:
         be_ricavi = inp.costi_fissi_mese / margine_pct
         break_even_ratio = inp.incassi_mese / be_ricavi
 
     burn_cash_ratio = None
-    if inp.burn_mensile and inp.cassa_attuale and inp.cassa_attuale > 0:
+    if inp.burn_mensile is not None and inp.cassa_attuale is not None and inp.cassa_attuale > 0:
         burn_cash_ratio = inp.burn_mensile / inp.cassa_attuale
 
-    b_margin_good = (bench.margine_lordo_target / 100) if bench else 0.55
+    b_margin_good = (bench.margine_lordo_target / 100) if bench and bench.margine_lordo_target else 0.55
     b_margin_bad = b_margin_good * 0.5 
 
     b_conv_good = (bench.conversione_target / 100) if (bench and bench.conversione_target > 0) else 0.12
     b_conv_bad = b_conv_good * 0.4
 
-    b_be_good = bench.break_even_sano if bench else 1.2
+    b_be_good = bench.break_even_sano if bench and bench.break_even_sano else 1.2
     b_be_bad = 0.95
 
-    b_runway_good = bench.runway_minima if bench else 9
+    b_runway_good = bench.runway_minima if bench and bench.runway_minima else 9
     b_runway_bad = 2
 
     def norm(value, good, bad, higher=True):
@@ -88,10 +87,11 @@ def build_report(inp: Inputs, bench: Optional[SectorBenchmark] = None) -> Dict[s
     risk_cash = combine(r_runway)
     if r_burn: risk_cash = max(risk_cash, r_burn * 0.8)
 
+    marg_mix = None
     if r_margin is not None and r_be is not None:
         marg_mix = (r_margin * 0.6) + (r_be * 0.4)
     else:
-        marg_mix = r_margin or r_be or quiz_avg
+        marg_mix = r_margin if r_margin is not None else (r_be if r_be is not None else quiz_avg)
 
     risk_margini = combine(marg_mix)
     risk_acq = combine(r_conv)
@@ -99,10 +99,10 @@ def build_report(inp: Inputs, bench: Optional[SectorBenchmark] = None) -> Dict[s
     base_risk = (risk_cash * 0.45 + risk_margini * 0.30 + risk_acq * 0.25)
     
     penalty = 0
-    if runway_mesi and runway_mesi < b_runway_bad: penalty += 0.12
-    if break_even_ratio and break_even_ratio < b_be_bad: penalty += 0.08
-    if margine_pct and margine_pct < b_margin_bad: penalty += 0.06
-    if conversione and b_conv_bad > 0 and conversione < b_conv_bad: penalty += 0.05
+    if runway_mesi is not None and runway_mesi < b_runway_bad: penalty += 0.12
+    if break_even_ratio is not None and break_even_ratio < b_be_bad: penalty += 0.08
+    if margine_pct is not None and margine_pct < b_margin_bad: penalty += 0.06
+    if conversione is not None and b_conv_bad > 0 and conversione < b_conv_bad: penalty += 0.05
 
     overall_risk = min(1, base_risk + penalty)
     triad_index = round((1 - overall_risk) * 100, 2)
@@ -114,10 +114,8 @@ def build_report(inp: Inputs, bench: Optional[SectorBenchmark] = None) -> Dict[s
     else:
         overall, maturity_label = "ROSSO", "Maturità: Fragile"
 
-    maturity_score = triad_index
-
     kpi_count = sum([runway_mesi is not None, margine_pct is not None, conversione is not None, break_even_ratio is not None])
-    confidence = round((kpi_count / 4) * 100)
+    confidence = round((kpi_count / 4) * 100) if kpi_count > 0 else 50
 
     if overall == "ROSSO":
         executive_summary = "Struttura esposta a rischio elevato. Priorità su liquidità e stabilizzazione."
@@ -145,7 +143,7 @@ def build_report(inp: Inputs, bench: Optional[SectorBenchmark] = None) -> Dict[s
             },
             "state": {
                 "overall": overall, "overall_score": triad_index, "confidence": confidence,
-                "summary": executive_summary, "maturity_score": maturity_score, "maturity_label": maturity_label
+                "summary": executive_summary, "maturity_score": triad_index, "maturity_label": maturity_label
             },
             "risks": {"cash": round(risk_cash, 4), "margini": round(risk_margini, 4), "acq": round(risk_acq, 4)},
             "kpi": {
