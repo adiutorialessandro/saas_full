@@ -1989,3 +1989,31 @@ form .btn-secondary {
 .empty-state .btn-primary:disabled{
   opacity:.65;
 }
+/* Fix per il contrasto dei valori nei campi del form del Wizard */
+.wizard-form input,
+.wizard-form select,
+.wizard-form textarea,
+input[type="text"],
+input[type="number"] {
+    color: #111827 !important; /* Testo scuro (quasi nero) per la massima leggibilità */
+    background-color: #f9fafb !important; /* Sfondo leggermente grigio per far risaltare il campo */
+    border: 1px solid #d1d5db !important; /* Bordo grigio per definire il perimetro */
+}
+
+/* Per rendere leggibili anche i testi segnaposto (placeholder) */
+.wizard-form input::placeholder,
+.wizard-form textarea::placeholder,
+input::placeholder {
+    color: #6b7280 !important; /* Grigio medio per i suggerimenti */
+    opacity: 1;
+}
+
+/* Effetto quando si clicca/seleziona il campo (Focus) */
+.wizard-form input:focus,
+input[type="number"]:focus,
+input[type="text"]:focus {
+    background-color: #ffffff !important;
+    border-color: #3b82f6 !important; /* Bordo azzurro/blu al focus */
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
