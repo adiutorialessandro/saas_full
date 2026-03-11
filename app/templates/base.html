@@ -3,44 +3,98 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>SaaS Full</title>
+  <title>SaaS Full - Dashboard</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
-  <div class="navbar">
-    <div class="container nav-inner">
-      <a href="{{ url_for('scans.dashboard') }}" class="logo">SaaS Full</a>
+<body class="dark-theme">
+  <div class="app-layout">
+    
+    <aside class="app-sidebar">
+      <div class="sidebar-brand">
+        <span class="logo-icon">A</span>
+        <span class="logo-text">SaaS Full</span>
+      </div>
 
-      <nav>
-        {% if current_user.is_authenticated and current_user.is_admin %}
-          <a href="{{ url_for('admin.organizations') }}">Clienti</a>
-          <a href="{{ url_for('admin.index') }}">Admin</a>
-        {% endif %}
+      {% if current_user.is_authenticated %}
+      <div class="sidebar-quota">
+        <div class="quota-text"><span>Scans disponibili:</span> <span>10/100</span></div>
+        <div class="quota-bar"><div class="quota-fill"></div></div>
+      </div>
+      {% endif %}
 
+      <nav class="sidebar-nav">
         {% if current_user.is_authenticated %}
-          <a href="{{ url_for('scans.dashboard') }}">Dashboard</a>
-          <a href="{{ url_for('wizard.onboarding') }}">Nuovo scan</a>
-          <a href="{{ url_for('auth.logout') }}">Logout</a>
+          <a href="{{ url_for('scans.dashboard') }}" class="nav-item">📊 Dashboard</a>
+          <a href="{{ url_for('wizard.onboarding') }}" class="nav-item">✨ Nuovo scan</a>
+          
+          {% if current_user.is_admin %}
+            <div class="nav-divider"></div>
+            <a href="{{ url_for('admin.organizations') }}" class="nav-item">👥 Clienti</a>
+            <a href="{{ url_for('admin.index') }}" class="nav-item">⚙️ Admin</a>
+          {% endif %}
         {% else %}
-          <a href="{{ url_for('auth.login') }}">Login</a>
-          <a href="{{ url_for('auth.register') }}">Registrati</a>
+          <a href="{{ url_for('auth.login') }}" class="nav-item">🔑 Login</a>
+          <a href="{{ url_for('auth.register') }}" class="nav-item">📝 Registrati</a>
         {% endif %}
       </nav>
-    </div>
-  </div>
 
-  <div class="container main-content">
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <div class="flash">
-          {% for m in messages %}
-            <div class="flash-message">{{ m }}</div>
-          {% endfor %}
+      {% if current_user.is_authenticated %}
+      <div class="sidebar-bottom">
+        <div class="info-group">
+          <label>Account</label>
+          <div class="info-box" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ current_user.email }}">
+            {{ current_user.email }}
+          </div> 
         </div>
+        <div class="info-group">
+          <label>Workspace</label>
+          <div class="info-box">
+            {% if current_user.memberships and current_user.memberships|length > 0 %}
+              Azienda #{{ current_user.memberships[0].org_id }}
+            {% else %}
+              Spazio Personale
+            {% endif %}
+          </div>
+        </div>
+        <a href="{{ url_for('wizard.onboarding') }}" class="btn-sidebar-cta">
+          📝 Crea Scan
+        </a>
+      </div>
       {% endif %}
-    {% endwith %}
+    </aside>
 
-    {% block content %}{% endblock %}
+    <div class="app-main">
+      <header class="app-topbar">
+        <div class="search-box">
+          🔍 <input type="text" placeholder="Cerca scansioni, documenti, organizzazioni...">
+        </div>
+        <div class="topbar-actions">
+          <button class="btn-upgrade">Upgrade Now</button>
+          <div class="notifications">🔔 <span class="badge">10</span></div>
+          
+          {% if current_user.is_authenticated %}
+            <a href="{{ url_for('auth.logout') }}" class="avatar" title="Logout: {{ current_user.email }}">
+              {{ current_user.email[:2] | upper }}
+            </a>
+          {% endif %}
+        </div>
+      </header>
+
+      <main class="app-content">
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <div class="flash-messages">
+              {% for m in messages %}
+                <div class="flash-message">{{ m }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+
   </div>
 </body>
 </html>

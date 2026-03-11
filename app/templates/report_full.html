@@ -1,529 +1,537 @@
-{% extends "base.html" %}
-{% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/report.css') }}">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SaaS Full - Business Report</title>
+  
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/report.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
 
-<div class="report-wrap">
-  <div class="report-hero">
-    <div>
-      <div class="report-kicker">SaaS Full · Business Report</div>
-      <h1>{{ scan_meta.settore }}</h1>
-      <div class="report-sub">
-        {{ scan_meta.modello }} · {{ scan_meta.mese }}
-        {% if scan_meta.created_at %} · {{ scan_meta.created_at }}{% endif %}
-      </div>
-    </div>
-
-    <div class="report-hero-actions">
-      <a class="btn" href="{{ url_for('scans.scan_pdf', scan_id=scan.id) }}">Scarica PDF</a>
-      <a class="btn btn-secondary" href="{{ url_for('scans.scan_onepager', scan_id=scan.id) }}">One Pager</a>
-    </div>
-  </div>
-
-  <section class="report-section diagnosis-section">
-    <div class="report-card diagnosis-card diagnosis-{{ header_payload.diagnosis.status_tone if header_payload and header_payload.diagnosis else 'warning' }}">
-      <div class="diagnosis-topline">Strategic Diagnosis</div>
-      <div class="diagnosis-headline">{{ header_payload.diagnosis.headline if header_payload and header_payload.diagnosis else '🟡 Watchlist' }}</div>
-      <p class="diagnosis-summary">{{ header_payload.diagnosis.summary if header_payload and header_payload.diagnosis else vm.state.summary }}</p>
-
-      <div class="diagnosis-grid">
-        <div class="diagnosis-block">
-          <div class="card-label">Diagnosi</div>
-          <p>{{ header_payload.diagnosis.diagnosis if header_payload and header_payload.diagnosis else vm.state.summary }}</p>
-        </div>
-        <div class="diagnosis-block">
-          <div class="card-label">Trend</div>
-          <p>{{ header_payload.diagnosis.trend if header_payload and header_payload.diagnosis else 'Trend non disponibile.' }}</p>
+  <div class="report-wrap">
+    <div class="report-hero">
+      <div>
+        <div class="report-kicker">SaaS Full · Business Report</div>
+        <h1>{{ scan_meta.settore }}</h1>
+        <div class="report-sub">
+          {{ scan_meta.modello }} · {{ scan_meta.mese }}
+          {% if scan_meta.created_at %} · {{ scan_meta.created_at }}{% endif %}
         </div>
       </div>
 
-      <div class="diagnosis-grid diagnosis-grid-bottom">
-        <div class="diagnosis-block">
-          <div class="card-label">Priorità</div>
-          <p>{{ header_payload.diagnosis.priority if header_payload and header_payload.diagnosis else 'Priorità non disponibile.' }}</p>
-        </div>
-        <div class="diagnosis-block">
-          <div class="card-label">Punto forte relativo</div>
-          <p>{{ header_payload.diagnosis.strength if header_payload and header_payload.diagnosis else 'Punto di forza non disponibile.' }}</p>
-        </div>
+      <div class="report-hero-actions">
+        <a class="btn btn-secondary" href="{{ url_for('scans.dashboard') }}">Torna all'App</a>
+        <a class="btn" href="{{ url_for('scans.scan_pdf', scan_id=scan.id) }}">Scarica PDF</a>
+        <a class="btn btn-secondary" href="{{ url_for('scans.scan_onepager', scan_id=scan.id) }}">One Pager</a>
       </div>
     </div>
-  </section>
 
-  <section class="report-section executive-insight-section">
-    <div class="report-card executive-insight executive-{{ header_payload.health.tone if header_payload and header_payload.health else 'warning' }}">
-      <div class="executive-insight-top">
-        <div>
-          <div class="executive-insight-kicker">Executive Insight</div>
-          <h2>Indicazione manageriale sintetica</h2>
+    <section class="report-section diagnosis-section">
+      <div class="report-card diagnosis-card diagnosis-{{ header_payload.diagnosis.status_tone if header_payload and header_payload.diagnosis else 'warning' }}">
+        <div class="diagnosis-topline">Strategic Diagnosis</div>
+        <div class="diagnosis-headline">{{ header_payload.diagnosis.headline if header_payload and header_payload.diagnosis else '🟡 Watchlist' }}</div>
+        <p class="diagnosis-summary">{{ header_payload.diagnosis.summary if header_payload and header_payload.diagnosis else vm.state.summary }}</p>
+
+        <div class="diagnosis-grid">
+          <div class="diagnosis-block">
+            <div class="card-label">Diagnosi</div>
+            <p>{{ header_payload.diagnosis.diagnosis if header_payload and header_payload.diagnosis else vm.state.summary }}</p>
+          </div>
+          <div class="diagnosis-block">
+            <div class="card-label">Trend</div>
+            <p>{{ header_payload.diagnosis.trend if header_payload and header_payload.diagnosis else 'Trend non disponibile.' }}</p>
+          </div>
         </div>
+
+        <div class="diagnosis-grid diagnosis-grid-bottom">
+          <div class="diagnosis-block">
+            <div class="card-label">Priorità</div>
+            <p>{{ header_payload.diagnosis.priority if header_payload and header_payload.diagnosis else 'Priorità non disponibile.' }}</p>
+          </div>
+          <div class="diagnosis-block">
+            <div class="card-label">Punto forte relativo</div>
+            <p>{{ header_payload.diagnosis.strength if header_payload and header_payload.diagnosis else 'Punto di forza non disponibile.' }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="report-section executive-insight-section">
+      <div class="report-card executive-insight executive-{{ header_payload.health.tone if header_payload and header_payload.health else 'warning' }}">
+        <div class="executive-insight-top">
+          <div>
+            <div class="executive-insight-kicker">Executive Insight</div>
+            <h2>Indicazione manageriale sintetica</h2>
+          </div>
+
+          {% if header_payload and header_payload.health %}
+            <div class="status-pill status-{{ header_payload.health.tone }}">
+              {{ header_payload.health.icon }} {{ header_payload.health.label }}
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="executive-insight-body">
+          <div class="executive-line">
+            <div class="executive-label">Situazione</div>
+            <p>
+              {{ header_payload.comparative_insight if header_payload and header_payload.comparative_insight else vm.state.summary }}
+            </p>
+          </div>
+
+          <div class="executive-line">
+            <div class="executive-label">Priorità dominante</div>
+            <p>
+              {{ header_payload.priority.title if header_payload and header_payload.priority else "Priorità non disponibile" }} —
+              {{ header_payload.priority.description if header_payload and header_payload.priority else "" }}
+            </p>
+          </div>
+
+          <div class="executive-line">
+            <div class="executive-label">Punto relativamente più solido</div>
+            <p>
+              {{ header_payload.diagnosis.strength if header_payload and header_payload.diagnosis else "Punto di forza non disponibile." }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="hero-grid">
+      <div class="report-card score-card">
+        <div class="card-label">Business Stability Score</div>
+        <div class="score-big">{{ vm.state.overall_score or 50 }}/100</div>
 
         {% if header_payload and header_payload.health %}
           <div class="status-pill status-{{ header_payload.health.tone }}">
             {{ header_payload.health.icon }} {{ header_payload.health.label }}
           </div>
         {% endif %}
+
+        {% if header_payload and header_payload.score_trend %}
+          <div class="trend-badge trend-{{ header_payload.score_trend.tone }}">
+            {{ header_payload.score_trend.icon }} {{ header_payload.score_trend.value }}
+            {{ header_payload.score_trend.label }}
+          </div>
+        {% elif delta and delta.score is not none %}
+          <div class="trend-badge {% if delta.score > 0 %}trend-up{% elif delta.score < 0 %}trend-down{% else %}trend-flat{% endif %}">
+            {% if delta.score > 0 %}
+              ↑ +{{ delta.score }}
+            {% elif delta.score < 0 %}
+              ↓ {{ delta.score }}
+            {% else %}
+              → {{ delta.score }}
+            {% endif %}
+            vs scan precedente
+          </div>
+        {% endif %}
+
+        <div class="muted">Confidence {{ vm.state.confidence or 50 }}%</div>
+        <div class="muted">{{ vm.state.risk_profile }}</div>
+        <div class="muted">{{ vm.state.maturity_label }}</div>
       </div>
 
-      <div class="executive-insight-body">
-        <div class="executive-line">
-          <div class="executive-label">Situazione</div>
-          <p>
-            {{ header_payload.comparative_insight if header_payload and header_payload.comparative_insight else vm.state.summary }}
-          </p>
-        </div>
-
-        <div class="executive-line">
-          <div class="executive-label">Priorità dominante</div>
-          <p>
-            {{ header_payload.priority.title if header_payload and header_payload.priority else "Priorità non disponibile" }} —
-            {{ header_payload.priority.description if header_payload and header_payload.priority else "" }}
-          </p>
-        </div>
-
-        <div class="executive-line">
-          <div class="executive-label">Punto relativamente più solido</div>
-          <p>
-            {{ header_payload.diagnosis.strength if header_payload and header_payload.diagnosis else "Punto di forza non disponibile." }}
-          </p>
-        </div>
+      <div class="report-card">
+        <div class="card-title">Executive Summary</div>
+        <p>{{ vm.state.summary }}</p>
+        {% if header_payload and header_payload.comparative_insight %}
+          <div class="insight-box">
+            <div class="card-label">Comparative Insight</div>
+            <p>{{ header_payload.comparative_insight }}</p>
+          </div>
+        {% endif %}
       </div>
-    </div>
-  </section>
+    </section>
 
-  <section class="hero-grid">
-    <div class="report-card score-card">
-      <div class="card-label">Business Stability Score</div>
-      <div class="score-big">{{ vm.state.overall_score or 50 }}/100</div>
+    <section class="report-section">
+      <div class="section-head">
+        <h2>Business Risk Snapshot</h2>
+      </div>
 
-      {% if header_payload and header_payload.health %}
-        <div class="status-pill status-{{ header_payload.health.tone }}">
-          {{ header_payload.health.icon }} {{ header_payload.health.label }}
-        </div>
-      {% endif %}
-
-      {% if header_payload and header_payload.score_trend %}
-        <div class="trend-badge trend-{{ header_payload.score_trend.tone }}">
-          {{ header_payload.score_trend.icon }} {{ header_payload.score_trend.value }}
-          {{ header_payload.score_trend.label }}
-        </div>
-      {% elif delta and delta.score is not none %}
-        <div class="trend-badge {% if delta.score > 0 %}trend-up{% elif delta.score < 0 %}trend-down{% else %}trend-flat{% endif %}">
-          {% if delta.score > 0 %}
-            ↑ +{{ delta.score }}
-          {% elif delta.score < 0 %}
-            ↓ {{ delta.score }}
-          {% else %}
-            → {{ delta.score }}
+      <div class="grid-3">
+        <div class="report-card risk-card">
+          <div class="card-title">Cassa</div>
+          <div class="risk-value">{{ ((vm.risks.cash or 0) * 100)|round|int }}%</div>
+          {% if header_payload and header_payload.cash_trend %}
+            <div class="trend-badge trend-{{ header_payload.cash_trend.tone }}">
+              {{ header_payload.cash_trend.icon }} {{ header_payload.cash_trend.value }}
+              {{ header_payload.cash_trend.label }}
+            </div>
+          {% elif delta and delta.cash is not none %}
+            <div class="trend-badge {% if delta.cash < 0 %}trend-up{% elif delta.cash > 0 %}trend-down{% else %}trend-flat{% endif %}">
+              {% if delta.cash < 0 %}↑ {{ delta.cash|abs }}{% elif delta.cash > 0 %}↓ +{{ delta.cash }}{% else %}→ {{ delta.cash }}{% endif %}
+              vs precedente
+            </div>
           {% endif %}
-          vs scan precedente
         </div>
-      {% endif %}
 
-      <div class="muted">Confidence {{ vm.state.confidence or 50 }}%</div>
-      <div class="muted">{{ vm.state.risk_profile }}</div>
-      <div class="muted">{{ vm.state.maturity_label }}</div>
-    </div>
-
-    <div class="report-card">
-      <div class="card-title">Executive Summary</div>
-      <p>{{ vm.state.summary }}</p>
-      {% if header_payload and header_payload.comparative_insight %}
-        <div class="insight-box">
-          <div class="card-label">Comparative Insight</div>
-          <p>{{ header_payload.comparative_insight }}</p>
+        <div class="report-card risk-card">
+          <div class="card-title">Margini</div>
+          <div class="risk-value">{{ ((vm.risks.margini or 0) * 100)|round|int }}%</div>
+          {% if header_payload and header_payload.margini_trend %}
+            <div class="trend-badge trend-{{ header_payload.margini_trend.tone }}">
+              {{ header_payload.margini_trend.icon }} {{ header_payload.margini_trend.value }}
+              {{ header_payload.margini_trend.label }}
+            </div>
+          {% elif delta and delta.margini is not none %}
+            <div class="trend-badge {% if delta.margini < 0 %}trend-up{% elif delta.margini > 0 %}trend-down{% else %}trend-flat{% endif %}">
+              {% if delta.margini < 0 %}↑ {{ delta.margini|abs }}{% elif delta.margini > 0 %}↓ +{{ delta.margini }}{% else %}→ {{ delta.margini }}{% endif %}
+              vs precedente
+            </div>
+          {% endif %}
         </div>
-      {% endif %}
-    </div>
-  </section>
 
-  <section class="report-section">
-    <div class="section-head">
-      <h2>Business Risk Snapshot</h2>
-    </div>
+        <div class="report-card risk-card">
+          <div class="card-title">Acquisizione</div>
+          <div class="risk-value">{{ ((vm.risks.acq or 0) * 100)|round|int }}%</div>
+          {% if header_payload and header_payload.acq_trend %}
+            <div class="trend-badge trend-{{ header_payload.acq_trend.tone }}">
+              {{ header_payload.acq_trend.icon }} {{ header_payload.acq_trend.value }}
+              {{ header_payload.acq_trend.label }}
+            </div>
+          {% elif delta and delta.acq is not none %}
+            <div class="trend-badge {% if delta.acq < 0 %}trend-up{% elif delta.acq > 0 %}trend-down{% else %}trend-flat{% endif %}">
+              {% if delta.acq < 0 %}↑ {{ delta.acq|abs }}{% elif delta.acq > 0 %}↓ +{{ delta.acq }}{% else %}→ {{ delta.acq }}{% endif %}
+              vs precedente
+            </div>
+          {% endif %}
+        </div>
+      </div>
 
-    <div class="grid-3">
-      <div class="report-card risk-card">
-        <div class="card-title">Cassa</div>
-        <div class="risk-value">{{ ((vm.risks.cash or 0) * 100)|round|int }}%</div>
-        {% if header_payload and header_payload.cash_trend %}
-          <div class="trend-badge trend-{{ header_payload.cash_trend.tone }}">
-            {{ header_payload.cash_trend.icon }} {{ header_payload.cash_trend.value }}
-            {{ header_payload.cash_trend.label }}
-          </div>
-        {% elif delta and delta.cash is not none %}
-          <div class="trend-badge {% if delta.cash < 0 %}trend-up{% elif delta.cash > 0 %}trend-down{% else %}trend-flat{% endif %}">
-            {% if delta.cash < 0 %}↑ {{ delta.cash|abs }}{% elif delta.cash > 0 %}↓ +{{ delta.cash }}{% else %}→ {{ delta.cash }}{% endif %}
-            vs precedente
-          </div>
+      <div class="chart-grid">
+        <div class="report-card">
+          <div class="card-title">Radar Rischi</div>
+          <canvas id="riskRadar"></canvas>
+        </div>
+        <div class="report-card">
+          <div class="card-title">Confronto Rischi</div>
+          <canvas id="riskBars"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <section class="report-section">
+      <div class="section-head">
+        <h2>KPI Dashboard & Benchmark di Settore</h2>
+        {% if vm.meta and vm.meta.benchmark_settore %}
+          <p class="muted" style="margin-top:-10px; margin-bottom: 20px;">
+            Confronto calcolato sulle medie per il settore: <strong>{{ vm.meta.benchmark_settore.settore_riferimento }}</strong>
+          </p>
         {% endif %}
       </div>
 
-      <div class="report-card risk-card">
-        <div class="card-title">Margini</div>
-        <div class="risk-value">{{ ((vm.risks.margini or 0) * 100)|round|int }}%</div>
-        {% if header_payload and header_payload.margini_trend %}
-          <div class="trend-badge trend-{{ header_payload.margini_trend.tone }}">
-            {{ header_payload.margini_trend.icon }} {{ header_payload.margini_trend.value }}
-            {{ header_payload.margini_trend.label }}
-          </div>
-        {% elif delta and delta.margini is not none %}
-          <div class="trend-badge {% if delta.margini < 0 %}trend-up{% elif delta.margini > 0 %}trend-down{% else %}trend-flat{% endif %}">
-            {% if delta.margini < 0 %}↑ {{ delta.margini|abs }}{% elif delta.margini > 0 %}↓ +{{ delta.margini }}{% else %}→ {{ delta.margini }}{% endif %}
-            vs precedente
-          </div>
-        {% endif %}
-      </div>
-
-      <div class="report-card risk-card">
-        <div class="card-title">Acquisizione</div>
-        <div class="risk-value">{{ ((vm.risks.acq or 0) * 100)|round|int }}%</div>
-        {% if header_payload and header_payload.acq_trend %}
-          <div class="trend-badge trend-{{ header_payload.acq_trend.tone }}">
-            {{ header_payload.acq_trend.icon }} {{ header_payload.acq_trend.value }}
-            {{ header_payload.acq_trend.label }}
-          </div>
-        {% elif delta and delta.acq is not none %}
-          <div class="trend-badge {% if delta.acq < 0 %}trend-up{% elif delta.acq > 0 %}trend-down{% else %}trend-flat{% endif %}">
-            {% if delta.acq < 0 %}↑ {{ delta.acq|abs }}{% elif delta.acq > 0 %}↓ +{{ delta.acq }}{% else %}→ {{ delta.acq }}{% endif %}
-            vs precedente
-          </div>
-        {% endif %}
-      </div>
-    </div>
-
-    <div class="chart-grid">
-      <div class="report-card">
-        <div class="card-title">Radar Rischi</div>
-        <canvas id="riskRadar"></canvas>
-      </div>
-      <div class="report-card">
-        <div class="card-title">Confronto Rischi</div>
-        <canvas id="riskBars"></canvas>
-      </div>
-    </div>
-  </section>
-
-  <section class="report-section">
-    <div class="section-head">
-      <h2>KPI Dashboard & Benchmark di Settore</h2>
-      {% if vm.meta and vm.meta.benchmark_settore %}
-        <p class="muted" style="margin-top:-10px; margin-bottom: 20px;">
-          Confronto calcolato sulle medie per il settore: <strong>{{ vm.meta.benchmark_settore.settore_riferimento }}</strong>
-        </p>
-      {% endif %}
-    </div>
-
-    <div class="grid-3">
-      
-      <div class="report-card">
-        <div class="card-title card-title-inline">
-          Cash Runway
-          <span class="info-tip" tabindex="0" aria-label="Spiegazione Cash Runway">
-            i
-            <span class="info-bubble">
-              {{ header_payload.runway_explanation if header_payload and header_payload.runway_explanation else "Indica per quanti mesi l'azienda può operare senza incassi." }}
+      <div class="grid-3">
+        <div class="report-card">
+          <div class="card-title card-title-inline">
+            Cash Runway
+            <span class="info-tip" tabindex="0" aria-label="Spiegazione Cash Runway">
+              i
+              <span class="info-bubble">
+                {{ header_payload.runway_explanation if header_payload and header_payload.runway_explanation else "Indica per quanti mesi l'azienda può operare senza incassi." }}
+              </span>
             </span>
-          </span>
-        </div>
-        <div class="kpi-value">
-          {% if vm.kpi.runway_mesi is not none %}
-            {{ "%.1f"|format(vm.kpi.runway_mesi) }} mesi
-          {% else %}
-            —
-          {% endif %}
-        </div>
-        {% if vm.meta and vm.meta.benchmark_settore %}
-          <div class="muted" style="font-size: 0.85em; margin-top: 8px; border-top: 1px solid #eee; padding-top: 5px;">
-            Target Settore: <strong>{{ vm.meta.benchmark_settore.runway_target }} mesi</strong>
           </div>
-        {% endif %}
-      </div>
-
-      <div class="report-card">
-        <div class="card-title">Break-even ratio</div>
-        <div class="kpi-value">
-          {% if vm.kpi.break_even_ratio is not none %}
-            {{ "%.2f"|format(vm.kpi.break_even_ratio) }}
-          {% else %}
-            —
-          {% endif %}
-        </div>
-        {% if vm.meta and vm.meta.benchmark_settore %}
-          <div class="muted" style="font-size: 0.85em; margin-top: 8px; border-top: 1px solid #eee; padding-top: 5px;">
-            Target Settore: <strong>> {{ "%.2f"|format(vm.meta.benchmark_settore.be_target) }}</strong>
+          <div class="kpi-value">
+            {% if vm.kpi.runway_mesi is not none %}
+              {{ "%.1f"|format(vm.kpi.runway_mesi) }} mesi
+            {% else %}
+              —
+            {% endif %}
           </div>
-        {% endif %}
-      </div>
-
-      <div class="report-card">
-        <div class="card-title">Conversione</div>
-        <div class="kpi-value">
-          {% if vm.kpi.conversione is not none %}
-            {{ "%.1f"|format((vm.kpi.conversione if vm.kpi.conversione <= 1 else vm.kpi.conversione / 100) * 100) }}%
-          {% else %}
-            —
+          {% if vm.meta and vm.meta.benchmark_settore %}
+            <div class="muted" style="font-size: 0.85em; margin-top: 8px; border-top: 1px solid #eee; padding-top: 5px;">
+              Target Settore: <strong>{{ vm.meta.benchmark_settore.runway_target }} mesi</strong>
+            </div>
           {% endif %}
         </div>
-        {% if vm.meta and vm.meta.benchmark_settore %}
-          <div class="muted" style="font-size: 0.85em; margin-top: 8px; border-top: 1px solid #eee; padding-top: 5px;">
-            Target Settore: <strong>{{ "%.1f"|format(vm.meta.benchmark_settore.conversione_target * 100) }}%</strong>
+
+        <div class="report-card">
+          <div class="card-title">Break-even ratio</div>
+          <div class="kpi-value">
+            {% if vm.kpi.break_even_ratio is not none %}
+              {{ "%.2f"|format(vm.kpi.break_even_ratio) }}
+            {% else %}
+              —
+            {% endif %}
           </div>
-        {% endif %}
-      </div>
-
-      <div class="report-card">
-        <div class="card-title">Margine lordo</div>
-        <div class="kpi-value">
-          {% if vm.kpi.margine_pct is not none %}
-            {{ "%.1f"|format((vm.kpi.margine_pct if vm.kpi.margine_pct <= 1 else vm.kpi.margine_pct / 100) * 100) }}%
-          {% else %}
-            —
+          {% if vm.meta and vm.meta.benchmark_settore %}
+            <div class="muted" style="font-size: 0.85em; margin-top: 8px; border-top: 1px solid #eee; padding-top: 5px;">
+              Target Settore: <strong>> {{ "%.2f"|format(vm.meta.benchmark_settore.be_target) }}</strong>
+            </div>
           {% endif %}
         </div>
-        {% if vm.meta and vm.meta.benchmark_settore %}
-          <div class="muted" style="font-size: 0.85em; margin-top: 8px; border-top: 1px solid #eee; padding-top: 5px;">
-            Target Settore: <strong>{{ "%.1f"|format(vm.meta.benchmark_settore.margine_target * 100) }}%</strong>
+
+        <div class="report-card">
+          <div class="card-title">Conversione</div>
+          <div class="kpi-value">
+            {% if vm.kpi.conversione is not none %}
+              {{ "%.1f"|format((vm.kpi.conversione if vm.kpi.conversione <= 1 else vm.kpi.conversione / 100) * 100) }}%
+            {% else %}
+              —
+            {% endif %}
           </div>
-        {% endif %}
-      </div>
-
-      <div class="report-card">
-        <div class="card-title">Burn/Cash</div>
-        <div class="kpi-value">
-          {% if vm.kpi.burn_cash_ratio is not none %}
-            {{ "%.1f"|format((vm.kpi.burn_cash_ratio if vm.kpi.burn_cash_ratio <= 1 else vm.kpi.burn_cash_ratio / 100) * 100) }}%
-          {% else %}
-            —
+          {% if vm.meta and vm.meta.benchmark_settore %}
+            <div class="muted" style="font-size: 0.85em; margin-top: 8px; border-top: 1px solid #eee; padding-top: 5px;">
+              Target Settore: <strong>{{ "%.1f"|format(vm.meta.benchmark_settore.conversione_target * 100) }}%</strong>
+            </div>
           {% endif %}
         </div>
-      </div>
 
-      <div class="report-card">
-        <div class="card-title">Incassi mese</div>
-        <div class="kpi-value">
-          {% if vm.kpi.incassi_mese is not none %}
-            € {{ "%.0f"|format(vm.kpi.incassi_mese) }}
-          {% else %}
-            —
+        <div class="report-card">
+          <div class="card-title">Margine lordo</div>
+          <div class="kpi-value">
+            {% if vm.kpi.margine_pct is not none %}
+              {{ "%.1f"|format((vm.kpi.margine_pct if vm.kpi.margine_pct <= 1 else vm.kpi.margine_pct / 100) * 100) }}%
+            {% else %}
+              —
+            {% endif %}
+          </div>
+          {% if vm.meta and vm.meta.benchmark_settore %}
+            <div class="muted" style="font-size: 0.85em; margin-top: 8px; border-top: 1px solid #eee; padding-top: 5px;">
+              Target Settore: <strong>{{ "%.1f"|format(vm.meta.benchmark_settore.margine_target * 100) }}%</strong>
+            </div>
           {% endif %}
         </div>
+
+        <div class="report-card">
+          <div class="card-title">Burn/Cash</div>
+          <div class="kpi-value">
+            {% if vm.kpi.burn_cash_ratio is not none %}
+              {{ "%.1f"|format((vm.kpi.burn_cash_ratio if vm.kpi.burn_cash_ratio <= 1 else vm.kpi.burn_cash_ratio / 100) * 100) }}%
+            {% else %}
+              —
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="report-card">
+          <div class="card-title">Incassi mese</div>
+          <div class="kpi-value">
+            {% if vm.kpi.incassi_mese is not none %}
+              € {{ "%.0f"|format(vm.kpi.incassi_mese) }}
+            {% else %}
+              —
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="report-section">
+      <div class="section-head">
+        <h2>Direzione Strategica</h2>
       </div>
 
-    </div> </section>
+      <div class="grid-3">
+        <div class="report-card">
+          <div class="card-title">Cassa</div>
+          <p>{{ vm.decisions.cash or "—" }}</p>
+        </div>
+        <div class="report-card">
+          <div class="card-title">Margini</div>
+          <p>{{ vm.decisions.margini or "—" }}</p>
+        </div>
+        <div class="report-card">
+          <div class="card-title">Acquisizione</div>
+          <p>{{ vm.decisions.acq or "—" }}</p>
+        </div>
+      </div>
+    </section>
 
-  <section class="report-section">
-    <div class="section-head">
-      <h2>Direzione Strategica</h2>
-    </div>
+    <section class="report-section">
+      <div class="section-head">
+        <h2>Trend storico</h2>
+      </div>
 
-    <div class="grid-3">
+      <div class="chart-grid">
+        <div class="report-card">
+          <div class="card-title">Business Stability Score nel tempo</div>
+          <canvas id="trendScore"></canvas>
+        </div>
+        <div class="report-card">
+          <div class="card-title">Evoluzione dei rischi</div>
+          <canvas id="trendRisks"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <section class="report-section">
+      <div class="section-head">
+        <h2>Action Plan</h2>
+      </div>
+
       <div class="report-card">
-        <div class="card-title">Cassa</div>
-        <p>{{ vm.decisions.cash or "—" }}</p>
-      </div>
-      <div class="report-card">
-        <div class="card-title">Margini</div>
-        <p>{{ vm.decisions.margini or "—" }}</p>
-      </div>
-      <div class="report-card">
-        <div class="card-title">Acquisizione</div>
-        <p>{{ vm.decisions.acq or "—" }}</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="report-section">
-    <div class="section-head">
-      <h2>Trend storico</h2>
-    </div>
-
-    <div class="chart-grid">
-      <div class="report-card">
-        <div class="card-title">Business Stability Score nel tempo</div>
-        <canvas id="trendScore"></canvas>
-      </div>
-      <div class="report-card">
-        <div class="card-title">Evoluzione dei rischi</div>
-        <canvas id="trendRisks"></canvas>
-      </div>
-    </div>
-  </section>
-
-  <section class="report-section">
-    <div class="section-head">
-      <h2>Action Plan</h2>
-    </div>
-
-    <div class="report-card">
-      {% if vm.plan_tasks %}
-        <div class="plan-list">
-          {% for item in vm.plan_tasks %}
-            <div class="plan-row">
-              <div class="plan-week">Settimana {{ item.week }}</div>
-              <div class="plan-main">
-                <div class="plan-action">{{ item.action }}</div>
-                <div class="plan-meta">
-                  Owner: {{ item.owner }} · KPI: {{ item.target_kpi }} · Target: {{ item.target_value }}
+        {% if vm.plan_tasks %}
+          <div class="plan-list">
+            {% for item in vm.plan_tasks %}
+              <div class="plan-row">
+                <div class="plan-week">Settimana {{ item.week }}</div>
+                <div class="plan-main">
+                  <div class="plan-action">{{ item.action }}</div>
+                  <div class="plan-meta">
+                    Owner: {{ item.owner }} · KPI: {{ item.target_kpi }} · Target: {{ item.target_value }}
+                  </div>
                 </div>
               </div>
-            </div>
-          {% endfor %}
-        </div>
-      {% elif vm.action_plan %}
-        <ol class="action-plan-pro">
-          {% for item in vm.action_plan %}
-            <li>{{ item }}</li>
-          {% endfor %}
-        </ol>
-      {% else %}
-        <p>Nessun piano disponibile.</p>
-      {% endif %}
-    </div>
-  </section>
-</div>
+            {% endfor %}
+          </div>
+        {% elif vm.action_plan %}
+          <ol class="action-plan-pro">
+            {% for item in vm.action_plan %}
+              <li>{{ item }}</li>
+            {% endfor %}
+          </ol>
+        {% else %}
+          <p>Nessun piano disponibile.</p>
+        {% endif %}
+      </div>
+    </section>
+  </div>
 
-<script>
-  const riskValues = [
-    {{ ((vm.risks.cash or 0) * 100)|round(1) }},
-    {{ ((vm.risks.margini or 0) * 100)|round(1) }},
-    {{ ((vm.risks.acq or 0) * 100)|round(1) }}
-  ];
+  <script>
+    const riskValues = [
+      {{ ((vm.risks.cash or 0) * 100)|round(1) }},
+      {{ ((vm.risks.margini or 0) * 100)|round(1) }},
+      {{ ((vm.risks.acq or 0) * 100)|round(1) }}
+    ];
 
-  new Chart(document.getElementById('riskRadar'), {
-    type: 'radar',
-    data: {
-      labels: ['Cassa', 'Margini', 'Acquisizione'],
-      datasets: [{
-        label: 'Rischio %',
-        data: riskValues,
-        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-        borderColor: 'rgba(54, 162, 235, 1)',
-        pointBackgroundColor: 'rgba(54, 162, 235, 1)'
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        r: {
-          min: 0,
-          max: 100
-        }
+    new Chart(document.getElementById('riskRadar'), {
+      type: 'radar',
+      data: {
+        labels: ['Cassa', 'Margini', 'Acquisizione'],
+        datasets: [{
+          label: 'Rischio %',
+          data: riskValues,
+          backgroundColor: 'rgba(54, 162, 235, 0.2)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+          pointBackgroundColor: 'rgba(54, 162, 235, 1)'
+        }]
       },
-      plugins: {
-        legend: { display: false }
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          r: {
+            min: 0,
+            max: 100
+          }
+        },
+        plugins: {
+          legend: { display: false }
+        }
       }
-    }
-  });
+    });
 
-  new Chart(document.getElementById('riskBars'), {
-    type: 'bar',
-    data: {
-      labels: ['Cassa', 'Margini', 'Acquisizione'],
-      datasets: [{
-        label: 'Rischio %',
-        data: riskValues,
-        backgroundColor: [
-          'rgba(255, 99, 132, 0.6)',
-          'rgba(255, 205, 86, 0.6)',
-          'rgba(75, 192, 192, 0.6)'
+    new Chart(document.getElementById('riskBars'), {
+      type: 'bar',
+      data: {
+        labels: ['Cassa', 'Margini', 'Acquisizione'],
+        datasets: [{
+          label: 'Rischio %',
+          data: riskValues,
+          backgroundColor: [
+            'rgba(255, 99, 132, 0.6)',
+            'rgba(255, 205, 86, 0.6)',
+            'rgba(75, 192, 192, 0.6)'
+          ]
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: {
+            min: 0,
+            max: 100
+          }
+        }
+      }
+    });
+
+    const historyLabels = [
+      {% for h in history %}
+        "{{ h.label }}",
+      {% endfor %}
+    ];
+
+    const historyScores = [
+      {% for h in history %}
+        {{ h.overall_score or 50 }},
+      {% endfor %}
+    ];
+
+    const historyCash = [
+      {% for h in history %}
+        {{ h.cash or 50 }},
+      {% endfor %}
+    ];
+
+    const historyMargini = [
+      {% for h in history %}
+        {{ h.margini or 50 }},
+      {% endfor %}
+    ];
+
+    const historyAcq = [
+      {% for h in history %}
+        {{ h.acq or 50 }},
+      {% endfor %}
+    ];
+
+    new Chart(document.getElementById('trendScore'), {
+      type: 'line',
+      data: {
+        labels: historyLabels,
+        datasets: [{
+          label: 'Business Stability Score',
+          data: historyScores,
+          tension: 0.3,
+          borderColor: '#4bc0c0',
+          backgroundColor: 'rgba(75, 192, 192, 0.1)',
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: {
+            min: 0,
+            max: 100
+          }
+        }
+      }
+    });
+
+    new Chart(document.getElementById('trendRisks'), {
+      type: 'line',
+      data: {
+        labels: historyLabels,
+        datasets: [
+          { label: 'Cassa', data: historyCash, tension: 0.3, borderColor: '#ff6384' },
+          { label: 'Margini', data: historyMargini, tension: 0.3, borderColor: '#ffcd56' },
+          { label: 'Acquisizione', data: historyAcq, tension: 0.3, borderColor: '#36a2eb' }
         ]
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false }
       },
-      scales: {
-        y: {
-          min: 0,
-          max: 100
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            min: 0,
+            max: 100
+          }
         }
       }
-    }
-  });
-
-  const historyLabels = [
-    {% for h in history %}
-      "{{ h.label }}",
-    {% endfor %}
-  ];
-
-  const historyScores = [
-    {% for h in history %}
-      {{ h.overall_score or 50 }},
-    {% endfor %}
-  ];
-
-  const historyCash = [
-    {% for h in history %}
-      {{ h.cash or 50 }},
-    {% endfor %}
-  ];
-
-  const historyMargini = [
-    {% for h in history %}
-      {{ h.margini or 50 }},
-    {% endfor %}
-  ];
-
-  const historyAcq = [
-    {% for h in history %}
-      {{ h.acq or 50 }},
-    {% endfor %}
-  ];
-
-  new Chart(document.getElementById('trendScore'), {
-    type: 'line',
-    data: {
-      labels: historyLabels,
-      datasets: [{
-        label: 'Business Stability Score',
-        data: historyScores,
-        tension: 0.3,
-        borderColor: '#4bc0c0',
-        backgroundColor: 'rgba(75, 192, 192, 0.1)',
-        fill: true
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false }
-      },
-      scales: {
-        y: {
-          min: 0,
-          max: 100
-        }
-      }
-    }
-  });
-
-  new Chart(document.getElementById('trendRisks'), {
-    type: 'line',
-    data: {
-      labels: historyLabels,
-      datasets: [
-        { label: 'Cassa', data: historyCash, tension: 0.3, borderColor: '#ff6384' },
-        { label: 'Margini', data: historyMargini, tension: 0.3, borderColor: '#ffcd56' },
-        { label: 'Acquisizione', data: historyAcq, tension: 0.3, borderColor: '#36a2eb' }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        y: {
-          min: 0,
-          max: 100
-        }
-      }
-    }
-  });
-</script>
-{% endblock %}
+    });
+  </script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, render_template
 from .extensions import db, migrate, login_manager
 from .config import Config
 
@@ -45,10 +45,15 @@ def create_app(config_class=Config):
 
     @app.route("/")
     def index():
-        from flask import render_template
         from .models.plan import Plan
         plans = Plan.query.all()
         return render_template("landing.html", plans=plans)
+    
+    @app.route('/pricing')
+    def pricing():
+        from .models.plan import Plan
+        plans = Plan.query.all()
+        return render_template('pricing.html', plans=plans)
 
     # ========================================================
     # AUTO-RISOLUZIONE DEL DATABASE AL LANCIO
@@ -71,10 +76,10 @@ def create_app(config_class=Config):
                 db.session.add(SectorBenchmark(**b))
             db.session.commit()
 
-        # CREAZIONE PIANI AUTOMATICA
+        # CREAZIONE PIANI AUTOMATICA CON LIMITE SBLOCCATO
         from .models.plan import Plan
         if Plan.query.count() == 0:
-            p1 = Plan(name="Starter", scan_limit=1, price_month=0.0)
+            p1 = Plan(name="Starter", scan_limit=100, price_month=0.0)
             p2 = Plan(name="Pro", scan_limit=10, price_month=49.0)
             p3 = Plan(name="Enterprise", scan_limit=-1, price_month=199.0)
             db.session.add_all([p1, p2, p3])

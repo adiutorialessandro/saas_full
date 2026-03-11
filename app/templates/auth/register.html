@@ -1,29 +1,82 @@
-{% extends "base.html" %}
-{% block content %}
-<div class="card" style="max-width:520px; margin: 0 auto;">
-  <h1>Registrazione</h1>
-  <p class="muted">Crea un account per iniziare.</p>
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Registrati - SaaS Full</title>
+  
+  <link rel="stylesheet" href="{{ url_for('static', filename='landing.css') }}">
+</head>
+<body style="display: flex; flex-direction: column; min-height: 100vh; background-color: var(--bg);">
 
-  <form method="post">
-    {{ form.hidden_tag() }}
+  <header class="site-header">
+    <div class="container nav" style="min-height: 70px;">
+      <a href="{{ url_for('index') }}" class="brand">
+        <div class="brand-mark">A</div> SaaS Full
+      </a>
+      <div class="nav-actions">
+        <span class="muted" style="font-size: 14px; font-weight: 600;">Hai già un account?</span>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-secondary">Accedi</a>
+      </div>
+    </div>
+  </header>
 
-    <label>Email</label>
-    {{ form.email(class_="input", placeholder="es. admin@demo.it") }}
+  <main style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 20px;">
+    <div class="info-card" style="width: 100%; max-width: 440px; padding: 40px;">
+      
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          <div style="margin-bottom: 20px;">
+            {% for m in messages %}
+              <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: var(--danger); padding: 12px 16px; border-radius: 8px; font-size: 14px; font-weight: 600;">
+                {{ m }}
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
 
-    <label>Password</label>
-    {{ form.password(class_="input", placeholder="Min 6 caratteri") }}
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="font-size: 28px; margin-bottom: 8px;">Crea il tuo account</h1>
+        <p class="muted" style="margin: 0; font-size: 15px;">Inizia subito la tua prima analisi aziendale.</p>
+      </div>
 
-    <label>Conferma password</label>
-    {{ form.password2(class_="input", placeholder="Ripeti password") }}
+      <form method="post" style="display: flex; flex-direction: column; gap: 20px;">
+        {{ form.hidden_tag() }}
 
-    <div style="height:12px"></div>
-    <button class="btn" type="submit">{{ form.submit.label.text }}</button>
-  </form>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <label style="font-size: 14px; font-weight: 700;">Email</label>
+          {{ form.email(style="width: 100%; padding: 12px 14px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; font-family: inherit; outline: none;", placeholder="es. admin@demo.it") }}
+          {% for error in form.email.errors %}
+            <span style="color: var(--danger); font-size: 12px; font-weight: 600;">{{ error }}</span>
+          {% endfor %}
+        </div>
 
-  <div style="height:14px"></div>
-  <p class="muted">
-    Hai già un account?
-    <a href="{{ url_for('auth.login') }}">Accedi</a>
-  </p>
-</div>
-{% endblock %}
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <label style="font-size: 14px; font-weight: 700;">Password</label>
+          {{ form.password(style="width: 100%; padding: 12px 14px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; font-family: inherit; outline: none;", placeholder="Minimo 6 caratteri") }}
+          {% for error in form.password.errors %}
+            <span style="color: var(--danger); font-size: 12px; font-weight: 600;">{{ error }}</span>
+          {% endfor %}
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <label style="font-size: 14px; font-weight: 700;">Conferma password</label>
+          {{ form.password2(style="width: 100%; padding: 12px 14px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; font-family: inherit; outline: none;", placeholder="Ripeti password") }}
+          {% for error in form.password2.errors %}
+            <span style="color: var(--danger); font-size: 12px; font-weight: 600;">{{ error }}</span>
+          {% endfor %}
+        </div>
+
+        <button class="btn" type="submit" style="width: 100%; padding: 14px; margin-top: 10px; font-size: 16px;">Crea account</button>
+      </form>
+      
+      <div style="margin-top: 24px; text-align: center;">
+          <p class="muted" style="font-size: 12px; margin: 0;">Creando un account accetti i nostri <a href="#" style="color: var(--primary); font-weight: 600;">Termini di Servizio</a> e la <a href="#" style="color: var(--primary); font-weight: 600;">Privacy Policy</a>.</p>
+      </div>
+
+    </div>
+  </main>
+
+</body>
+</html>

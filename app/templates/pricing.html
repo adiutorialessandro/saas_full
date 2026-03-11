@@ -1,151 +1,136 @@
-{% extends "base.html" %}
-{% block content %}
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Piani e Prezzi - SaaS Full</title>
+  
+  <link rel="stylesheet" href="{{ url_for('static', filename='landing.css') }}">
+</head>
+<body>
 
-<div class="pricing-page">
-
-  <section class="pricing-hero">
-    <div class="pricing-hero-inner">
-      <div class="eyebrow-ui">Pricing</div>
-      <h1>Scegli il piano giusto per il tuo modo di lavorare</h1>
-      <p>
-        Dalla prima diagnosi aziendale fino a un utilizzo continuativo con storico scan,
-        gestione clienti e workflow più strutturati.
-      </p>
-    </div>
-  </section>
-
-  <section class="pricing-switch-note">
-    <div class="pricing-note-card">
-      <strong>Trasparente e semplice.</strong>
-      I piani vengono caricati direttamente dalla piattaforma, così prezzi e limiti sono sempre aggiornati.
-    </div>
-  </section>
-
-  <section class="pricing-grid-pro">
-    {% if plans %}
-      {% for plan in plans %}
-        {% set featured = (loop.index == 2) %}
-        <article class="price-card-pro {% if featured %}featured{% endif %}">
-
-          {% if featured %}
-            <div class="featured-tag">Più scelto</div>
-          {% endif %}
-
-          <div class="price-card-top">
-            <div class="price-plan">{{ plan.name }}</div>
-
-            <div class="price-desc">
-              {% if plan.name|lower == 'starter' %}
-                Per professionisti e micro-imprese che vogliono iniziare con una diagnosi chiara.
-              {% elif plan.name|lower == 'growth' %}
-                Per chi usa lo strumento in modo continuativo e vuole più capacità operativa.
-              {% elif plan.name|lower == 'pro' %}
-                Per consulenti, team e utilizzo intensivo con workflow più evoluti.
-              {% else %}
-                Piano disponibile nella piattaforma, adatto a un utilizzo coerente con il tuo livello di attività.
-              {% endif %}
-            </div>
-          </div>
-
-          <div class="price-amount">
-            €{{ "%.0f"|format(plan.price_month or 0) }}<span>/mese</span>
-          </div>
-
-          <ul class="price-features">
-            <li>
-              {% if plan.scan_limit == -1 %}
-                Scan illimitati
-              {% else %}
-                {{ plan.scan_limit }} scan inclusi
-              {% endif %}
-            </li>
-            <li>Dashboard cliente</li>
-            <li>Storico report</li>
-            <li>Download PDF</li>
-            <li>Workflow operativo</li>
-
-            {% if plan.name|lower == 'growth' %}
-              <li>Gestione più ampia dei clienti</li>
-            {% elif plan.name|lower == 'pro' %}
-              <li>Volume elevato e uso continuativo</li>
-            {% endif %}
-          </ul>
-
-          <div class="price-actions">
-            {% if current_user.is_authenticated %}
-              <a class="btn btn-block" href="{{ url_for('scans.dashboard') }}">Vai alla dashboard</a>
-            {% else %}
-              <a class="btn btn-block" href="{{ url_for('auth.register') }}">Scegli {{ plan.name }}</a>
-            {% endif %}
-          </div>
-        </article>
-      {% endfor %}
-    {% else %}
-      <div class="card pro-card" style="grid-column: 1 / -1; text-align:center; padding:32px;">
-        <h2 class="section-title">Nessun piano disponibile</h2>
-        <p class="section-sub">
-          Al momento non ci sono piani attivi configurati nella piattaforma.
-        </p>
-
-        <div style="margin-top:16px;">
-          {% if current_user.is_authenticated %}
-            <a class="btn" href="{{ url_for('scans.dashboard') }}">Vai alla dashboard</a>
-          {% else %}
-            <a class="btn" href="{{ url_for('auth.register') }}">Crea account</a>
-          {% endif %}
-        </div>
-      </div>
-    {% endif %}
-  </section>
-
-  <section class="pricing-faq">
-    <div class="faq-card">
-      <h2>Domande frequenti</h2>
-
-      <div class="faq-item">
-        <h3>Posso cambiare piano più avanti?</h3>
-        <p>Sì. La struttura della piattaforma è già predisposta per upgrade e downgrade del piano.</p>
-      </div>
-
-      <div class="faq-item">
-        <h3>Cosa succede se raggiungo il limite scansioni?</h3>
-        <p>Il sistema blocca i nuovi scan oltre la soglia prevista dal piano assegnato.</p>
-      </div>
-
-      <div class="faq-item">
-        <h3>Il PDF è incluso?</h3>
-        <p>Sì, il report PDF è disponibile nel flusso di lavoro previsto dalla piattaforma.</p>
-      </div>
-
-      <div class="faq-item">
-        <h3>Il billing è già attivo?</h3>
-        <p>La base tecnica è pronta. L’attivazione completa può essere collegata a Stripe quando deciderai di andare live.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="pricing-cta-final">
-    <div class="pricing-cta-box">
-      <div>
-        <div class="eyebrow-ui">Pronto a iniziare?</div>
-        <h2>Fai il primo passo verso una diagnosi più chiara del business.</h2>
-        <p>
-          Registrati ora e accedi al workflow completo di analisi.
-        </p>
-      </div>
-
-      <div class="pricing-cta-actions">
+  <header class="site-header">
+    <div class="container nav">
+      <a href="{{ url_for('index') }}" class="brand">
+        <div class="brand-mark">A</div> SaaS Full
+      </a>
+      
+      <div class="nav-actions">
         {% if current_user.is_authenticated %}
-          <a class="btn btn-lg" href="{{ url_for('scans.dashboard') }}">Vai alla dashboard</a>
-          <a class="btn btn-secondary btn-lg" href="{{ url_for('wizard.onboarding') }}">Nuovo scan</a>
+          <a href="{{ url_for('scans.dashboard') }}" class="btn btn-secondary">Dashboard</a>
         {% else %}
-          <a class="btn btn-lg" href="{{ url_for('auth.register') }}">Crea account</a>
-          <a class="btn btn-secondary btn-lg" href="{{ url_for('auth.login') }}">Accedi</a>
+          <a href="{{ url_for('auth.login') }}" class="btn btn-secondary">Accedi</a>
+          <a href="{{ url_for('auth.register') }}" class="btn">Registrati</a>
         {% endif %}
       </div>
     </div>
-  </section>
+  </header>
 
-</div>
+  <main class="container">
+    <div class="pricing-page">
 
-{% endblock %}
+      <section class="pricing-hero">
+        <div class="pricing-hero-inner" style="margin-top: 40px; text-align: center;">
+          <div class="eyebrow" style="margin-bottom: 12px;">Pricing</div>
+          <h1 style="margin-bottom: 16px;">Scegli il piano giusto per il tuo modo di lavorare</h1>
+          <p class="muted" style="max-width: 600px; margin: 0 auto; font-size: 18px;">
+            Dalla prima diagnosi aziendale fino a un utilizzo continuativo con storico scan, gestione clienti e workflow strutturati.
+          </p>
+        </div>
+      </section>
+
+      <section class="pricing-grid-pro" style="margin-top: 60px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
+        {% if plans %}
+          {% for plan in plans %}
+            {% set featured = (plan.name|lower == 'pro') %}
+            <article class="price-card {% if featured %}featured{% endif %}" style="display: flex; flex-direction: column; height: 100%;">
+
+              {% if featured %}
+                <div class="price-badge">Più scelto</div>
+              {% endif %}
+
+              <div class="price-card-top">
+                <h3 class="price-name" style="font-size: 24px; margin-bottom: 8px;">{{ plan.name }}</h3>
+
+                <p class="price-desc" style="color: var(--muted); line-height: 1.5; margin-bottom: 24px; min-height: 65px;">
+                  {% if plan.name|lower == 'starter' %}
+                    Il piano perfetto per provare la piattaforma. Scopri il valore del report con la tua prima analisi gratuita.
+                  {% elif plan.name|lower == 'pro' %}
+                    Per professionisti e consulenti che vogliono monitorare i clienti con continuità.
+                  {% elif plan.name|lower == 'agency' %}
+                    Per agenzie e team strutturati. Scansioni illimitate e gestione avanzata del portafoglio clienti.
+                  {% else %}
+                    Piano disponibile nella piattaforma.
+                  {% endif %}
+                </p>
+              </div>
+
+              <div class="price-value" style="margin-bottom: 24px;">
+                €{{ "%.0f"|format(plan.price_month or 0) }}<span style="font-size: 16px; color: var(--muted);">/mese</span>
+              </div>
+
+              <ul style="margin-top: auto; margin-bottom: 30px;">
+                <li>
+                  {% if plan.scan_limit == -1 %}
+                    Scan <strong>illimitati</strong>
+                  {% else %}
+                    <strong>{{ plan.scan_limit }}</strong> scan inclusi
+                  {% endif %}
+                </li>
+                <li>Dashboard interattiva</li>
+                <li>Download Report PDF</li>
+                <li>Storico delle analisi</li>
+
+                {% if plan.name|lower == 'pro' %}
+                  <li>Gestione clienti base</li>
+                  <li>Supporto prioritario</li>
+                {% elif plan.name|lower == 'agency' %}
+                  <li>Gestione multi-account</li>
+                  <li>Onboarding dedicato</li>
+                {% endif %}
+              </ul>
+
+              <div class="price-actions" style="margin-top: auto;">
+                {% if current_user.is_authenticated %}
+                  <a class="btn {% if not featured %}btn-secondary{% endif %}" style="width: 100%;" href="{{ url_for('scans.dashboard') }}">Vai alla dashboard</a>
+                {% else %}
+                  <a class="btn {% if not featured %}btn-secondary{% endif %}" style="width: 100%;" href="{{ url_for('auth.register') }}">Scegli {{ plan.name }}</a>
+                {% endif %}
+              </div>
+            </article>
+          {% endfor %}
+        {% endif %}
+      </section>
+
+      <section class="cta-final">
+        <div class="cta-box">
+          <div>
+            <div class="eyebrow" style="margin-bottom: 12px; background: rgba(255,255,255,.1); color: #fff; border: 1px solid rgba(255,255,255,.2);">Senza impegno</div>
+            <h2 style="font-size: 32px; margin-bottom: 12px;">Fai il primo passo verso una diagnosi più chiara.</h2>
+            <p style="color: rgba(255,255,255,.8);">Registrati ora e accedi al workflow completo di analisi.</p>
+          </div>
+
+          <div class="cta-side">
+            {% if current_user.is_authenticated %}
+              <a class="btn btn-secondary" style="width: 100%;" href="{{ url_for('wizard.onboarding') }}">Nuovo scan</a>
+            {% else %}
+              <a class="btn btn-secondary" style="width: 100%;" href="{{ url_for('auth.register') }}">Inizia gratis</a>
+            {% endif %}
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+  
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <div class="footer-brand">SaaS Full</div>
+        <div class="footer-copy">© 2026 SaaS Full. Tutti i diritti riservati.</div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

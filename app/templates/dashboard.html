@@ -1,173 +1,60 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="dash-shell">
-  <section class="dash-hero-pro">
-    <div class="dash-hero-copy">
-      <div class="eyebrow-ui">Dashboard Cliente</div>
-      <div class="dash-kicker">TRIAD INSIGHT</div>
-      <h1 class="dash-title-pro">Scopri cosa blocca davvero la crescita della tua azienda.</h1>
-      <p class="dash-lead-pro">
-        Triad Insight analizza finanza, vendite e struttura operativa.
-      </p>
-      <p class="dash-sub-pro">
-        Genera un report chiaro con priorità, alert e azioni concrete.
-      </p>
-      <p class="dash-body-pro">
-        Triad Insight raccoglie dati essenziali, legge i segnali critici del business e produce un report leggibile immediatamente convertibile in azioni concrete.
-      </p>
-      <div class="dash-hero-proof">
-        <span>✓ Setup rapido</span>
-        <span>✓ Report immediato</span>
-        <span>✓ Azioni concrete</span>
-      </div>
+<div class="page-header">
+    <h1 class="page-title">Dashboard Analisi</h1>
+</div>
+
+<div class="dark-card">
+    <div class="card-header">
+        <h2>Triad Insight — Le tue scansioni</h2>
     </div>
-
-    <div class="dash-hero-actions">
-      <a class="btn btn-primary" href="{{ url_for('wizard.onboarding') }}">Nuovo scan</a>
-      <a class="btn btn-secondary" href="#scans-archive">Vedi scansioni</a>
+    
+    <div class="table-container">
+        <table class="dark-table">
+            <thead>
+                <tr>
+                    <th>Settore</th>
+                    <th>Modello</th>
+                    <th>Mese Rif.</th>
+                    <th>Creazione</th>
+                    <th>Azioni</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if scans %}
+                    {% for s in scans %}
+                    <tr>
+                        <td>{{ s.settore }}</td>
+                        <td>{{ s.modello }}</td>
+                        <td>{{ s.mese_riferimento }}</td>
+                        <td>{{ s.created_at|fmt_dt if s.created_at else 'N/A' }}</td>
+                        <td class="table-actions">
+                            <a href="{{ url_for('scans.view_scan', scan_id=s.id) }}" title="Visualizza">👁️</a>
+                            <a href="{{ url_for('report.view_report', scan_id=s.id) }}" title="Report Interattivo">📊</a>
+                            <a href="{{ url_for('scans.scan_pdf', scan_id=s.id) }}" title="Scarica PDF">📄</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="empty-state">
+                            Nessuna scansione disponibile. <a href="{{ url_for('wizard.onboarding') }}">Inizia il tuo primo scan!</a>
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
     </div>
-  </section>
+</div>
 
-  <section class="stats-grid">
-    <article class="stat-card primary">
-      <div class="stat-label">Totale scansioni</div>
-      <div class="stat-value">{{ scans|length }}</div>
-      <div class="stat-sub">Report generati sulla tua azienda</div>
-    </article>
-
-    <article class="stat-card">
-      <div class="stat-label">Ultimo scan</div>
-      <div class="stat-value">
-        {% if scans and scans[0].mese_riferimento %}
-          {{ scans[0].mese_riferimento }}
-        {% else %}
-          —
-        {% endif %}
-      </div>
-      <div class="stat-sub">Ultimo mese analizzato</div>
-    </article>
-
-    <article class="stat-card">
-      <div class="stat-label">Stato archivio</div>
-      <div class="stat-value">
-        {% if scans and scans|length > 0 %}
-          Attivo
-        {% else %}
-          Vuoto
-        {% endif %}
-      </div>
-      <div class="stat-sub">Disponibilità report</div>
-    </article>
-
-    <article class="stat-card">
-      <div class="stat-label">Workspace</div>
-      <div class="stat-value">Operativo</div>
-      <div class="stat-sub">Area cliente pronta all’uso</div>
-    </article>
-  </section>
-
-  <section class="dash-main-grid">
-    <div class="dash-main-col">
-      <div class="card pro-card" id="scans-archive">
-        <div class="card-head">
-          <div>
-            <h2 class="section-title">Le tue scansioni</h2>
-            <p class="section-sub">Apri, consulta e gestisci i report generati.</p>
-          </div>
-
-          {% if scans and scans|length > 0 %}
-            <div class="section-badge ok">Archivio attivo</div>
-          {% endif %}
-        </div>
-
-        {% if scans %}
-          <div class="scan-list-pro">
-            {% for s in scans %}
-              <div class="scan-row-pro">
-                <div class="scan-row-main">
-                  <div class="scan-row-top">
-                    <span class="scan-pill">#{{ s.id }}</span>
-                    <h3>{{ s.settore }}</h3>
-                  </div>
-
-                  <div class="scan-row-meta">
-                    <span>{{ s.modello }}</span>
-                    <span>•</span>
-                    <span>{{ s.mese_riferimento }}</span>
-                    {% if s.created_at %}
-                      <span>•</span>
-                      <span>{{ s.created_at|fmt_dt }}</span>
-                    {% endif %}
-                  </div>
-                </div>
-
-                <div class="scan-row-actions">
-                  <a class="btn btn-secondary" href="{{ url_for('scans.view_scan', scan_id=s.id) }}">Apri</a>
-                  <a class="btn btn-secondary" href="{{ url_for('report.view_report', scan_id=s.id) }}">Interattivo</a>
-                  <a class="btn btn-secondary" href="{{ url_for('scans.scan_pdf', scan_id=s.id) }}">PDF</a>
-                </div>
-              </div>
-            {% endfor %}
-          </div>
-        {% else %}
-          <div class="empty-pro">
-            <div class="empty-icon">△</div>
-            <h3>Nessuna scansione disponibile</h3>
-            <p>
-              Inizia con il primo scan per ottenere una diagnosi sintetica del business
-              e un report operativo da consultare.
-            </p>
-            <a class="btn btn-primary" href="{{ url_for('wizard.onboarding') }}">Crea il primo scan</a>
-          </div>
-        {% endif %}
-      </div>
-
-      <div class="card pro-card trend-card">
-        <div class="card-head">
-          <div>
-            <h2 class="section-title">Salute aziendale nel tempo</h2>
-            <p class="section-sub">Andamento storico del Triad Index e dei punteggi principali.</p>
-          </div>
-          <div class="section-badge">Trend</div>
-        </div>
-
-        <div class="trend-chart-wrap">
-          <canvas id="triadTrendChart"></canvas>
-        </div>
-      </div>
+<div class="dark-card mt-4">
+    <div class="card-header">
+        <h2>Trend Salute Aziendale</h2>
     </div>
-
-    <aside class="dash-side-col">
-      <div class="card pro-card side-card">
-        <h2 class="section-title">Cosa puoi fare ora</h2>
-        <div class="action-stack">
-          <a class="action-link-card" href="{{ url_for('wizard.onboarding') }}">
-            <div class="action-link-title">Nuovo scan</div>
-            <div class="action-link-sub">Avvia una nuova analisi del business</div>
-          </a>
-
-          <div class="action-link-card muted-card">
-            <div class="action-link-title">Storico report</div>
-            <div class="action-link-sub">Consulta i report già salvati nell’archivio</div>
-          </div>
-
-          <div class="action-link-card muted-card">
-            <div class="action-link-title">Monitoraggio continuo</div>
-            <div class="action-link-sub">Ripeti gli scan per confrontare l’evoluzione aziendale</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card pro-card side-card">
-        <h2 class="section-title">Suggerimento</h2>
-        <p class="helper-copy">
-          Mantieni uno storico mensile degli scan: ti aiuterà a vedere con chiarezza
-          come cambiano rischio, margini e stabilità del business nel tempo.
-        </p>
-      </div>
-    </aside>
-  </section>
+    <div class="trend-chart-wrap" style="height: 300px; padding: 20px;">
+        <canvas id="triadTrendChart"></canvas>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -176,9 +63,7 @@
     .then((r) => r.json())
     .then((data) => {
       const canvas = document.getElementById("triadTrendChart");
-      if (!canvas || !data || !Array.isArray(data.labels) || !Array.isArray(data.values)) {
-        return;
-      }
+      if (!canvas || !data || !Array.isArray(data.labels) || !Array.isArray(data.values)) return;
 
       new Chart(canvas, {
         type: "line",
@@ -188,65 +73,24 @@
             {
               label: "Triad Index",
               data: data.values,
-              borderColor: "#2563eb",
-              backgroundColor: "rgba(37, 99, 235, 0.12)",
+              borderColor: "#fae8b4", /* Giallo crema del tema */
+              backgroundColor: "rgba(250, 232, 180, 0.1)",
               fill: true,
-              tension: 0.35,
-              pointRadius: 3,
-              pointHoverRadius: 5,
-            },
-            {
-              label: "Finance",
-              data: data.finance,
-              borderColor: "#0f172a",
-              fill: false,
-              tension: 0.35,
-              pointRadius: 0,
-              borderDash: [6, 6],
-            },
-            {
-              label: "Sales",
-              data: data.sales,
-              borderColor: "#7c3aed",
-              fill: false,
-              tension: 0.35,
-              pointRadius: 0,
-              borderDash: [6, 6],
-            },
-            {
-              label: "Operations",
-              data: data.ops,
-              borderColor: "#059669",
-              fill: false,
-              tension: 0.35,
-              pointRadius: 0,
-              borderDash: [6, 6],
-            },
-          ],
+              tension: 0.35
+            }
+          ]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: "bottom",
-            },
-          },
+          color: "#94a3b8",
           scales: {
-            y: {
-              min: 0,
-              max: 100,
-              ticks: {
-                stepSize: 20,
-              },
-            },
-          },
-        },
+            x: { grid: { color: "#2d3748" }, ticks: { color: "#94a3b8" } },
+            y: { grid: { color: "#2d3748" }, ticks: { color: "#94a3b8" }, min: 0, max: 100 }
+          }
+        }
       });
-    })
-    .catch(() => {
-      // fail silently to avoid breaking dashboard render
-    });
+    }).catch(() => {});
 </script>
 
 {% endblock %}
