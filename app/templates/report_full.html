@@ -9,6 +9,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+  {% set benchmarks = vm.get("benchmark_results", {}) %}
 
   <div class="report-wrap">
     <div class="report-hero">
@@ -215,9 +216,10 @@
     <section class="report-section">
       <div class="section-head">
         <h2>KPI Dashboard & Benchmark di Settore</h2>
-        {% if vm.meta and vm.meta.benchmark_settore %}
+        {% if benchmarks %}
           <p class="muted" style="margin-top:-10px; margin-bottom: 20px;">
-            Confronto calcolato sulle medie per il settore: <strong>{{ vm.meta.benchmark_settore.settore_riferimento }}</strong>
+            Confronto calcolato sulle medie per il settore:
+            <strong>{{ vm.meta.benchmark_settore.settore_riferimento if vm.meta and vm.meta.benchmark_settore else (scan_meta.settore or "Media Standard") }}</strong>
           </p>
         {% endif %}
       </div>
@@ -240,9 +242,9 @@
               —
             {% endif %}
           </div>
-          {% if vm.meta and vm.meta.benchmark_settore %}
+          {% if benchmarks %}
             <div class="muted" style="font-size: 0.85em; margin-top: 8px; border-top: 1px solid #eee; padding-top: 5px;">
-              Target Settore: <strong>{{ vm.meta.benchmark_settore.runway_target }} mesi</strong>
+              Target Settore: <strong>{{ benchmarks.runway.target if benchmarks.runway else "—" }} mesi</strong>
             </div>
           {% endif %}
         </div>
@@ -256,9 +258,9 @@
               —
             {% endif %}
           </div>
-          {% if vm.meta and vm.meta.benchmark_settore %}
+          {% if benchmarks %}
             <div class="muted" style="font-size: 0.85em; margin-top: 8px; border-top: 1px solid #eee; padding-top: 5px;">
-              Target Settore: <strong>> {{ "%.2f"|format(vm.meta.benchmark_settore.be_target) }}</strong>
+              Target Settore: <strong>{{ "%.2f"|format(benchmarks.break_even.target) if benchmarks.break_even else "—" }}</strong>
             </div>
           {% endif %}
         </div>
@@ -272,9 +274,9 @@
               —
             {% endif %}
           </div>
-          {% if vm.meta and vm.meta.benchmark_settore %}
+          {% if benchmarks %}
             <div class="muted" style="font-size: 0.85em; margin-top: 8px; border-top: 1px solid #eee; padding-top: 5px;">
-              Target Settore: <strong>{{ "%.1f"|format(vm.meta.benchmark_settore.conversione_target * 100) }}%</strong>
+              Target Settore: <strong>{{ "%.1f"|format((benchmarks.conversione.target * 100)) if benchmarks.conversione else "—" }}%</strong>
             </div>
           {% endif %}
         </div>
@@ -288,9 +290,9 @@
               —
             {% endif %}
           </div>
-          {% if vm.meta and vm.meta.benchmark_settore %}
+          {% if benchmarks %}
             <div class="muted" style="font-size: 0.85em; margin-top: 8px; border-top: 1px solid #eee; padding-top: 5px;">
-              Target Settore: <strong>{{ "%.1f"|format(vm.meta.benchmark_settore.margine_target * 100) }}%</strong>
+              Target Settore: <strong>{{ "%.1f"|format((benchmarks.margine.target * 100)) if benchmarks.margine else "—" }}%</strong>
             </div>
           {% endif %}
         </div>

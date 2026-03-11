@@ -6,61 +6,98 @@ from typing import Any, Dict
 
 from flask import (
     Blueprint,
-    current_app,
-    flash,
-    redirect,
     render_template,
+    redirect,
+    url_for,
+    flash,
     request,
     send_file,
-    url_for,
+    current_app,
 )
-from flask_login import current_user, login_required
+
+from flask_login import login_required, current_user
 
 from ..extensions import db
 from ..models.scan import Scan
-from ..services.pdf.engine import generate_one_pager, generate_scan_pdf_enterprise
+from ..services.pdf.engine import (
+    generate_scan_pdf_enterprise,
+    generate_one_pager,
+)
 from ..tenant import ensure_current_org_id
+from ..utils.benchmarks import get_benchmark_analysis
 
+
+# Blueprint
 bp = Blueprint("scans", __name__)
 
 
+# ---------------------------------------------------------
+# Utility
+# ---------------------------------------------------------
+
 def get_accessible_scan_or_404(scan_id: int) -> Scan:
+    """
+    Restituisce la scan se accessibile all'utente.
+    Admin vede tutto, utente solo la propria organization.
+    """
+
     user = current_user._get_current_object()
 
     if getattr(user, "is_admin", False):
         return Scan.query.filter_by(id=scan_id).first_or_404()
 
     org_id = ensure_current_org_id()
-    return Scan.query.filter_by(id=scan_id, org_id=org_id).first_or_404()
 
+    return Scan.query.filter_by(
+        id=scan_id,
+        org_id=org_id
+    ).first_or_404()
+
+
+# ---------------------------------------------------------
+# Dashboard
+# ---------------------------------------------------------
 
 @bp.get("/dashboard")
 @login_required
 def dashboard():
+
     org_id = ensure_current_org_id()
 
     scans = (
-        Scan.query.filter_by(org_id=org_id)
+        Scan.query
+        .filter_by(org_id=org_id)
         .order_by(Scan.id.desc())
         .all()
     )
-    return render_template("dashboard.html", scans=scans)
 
+    return render_template(
+        "dashboard.html",
+        scans=scans
+    )
+
+
+# ---------------------------------------------------------
+# View scan
+# ---------------------------------------------------------
 
 @bp.get("/scan/<int:scan_id>")
 @login_required
 def view_scan(scan_id: int):
+
     scan = get_accessible_scan_or_404(scan_id)
 
     report: Dict[str, Any] = {}
+
     try:
         report = json.loads(scan.report_json or "{}")
     except Exception:
         report = {}
 
-    triade = report.get("triade", {}) if isinstance(report, dict) else {}
+    triade = report.get("triade", {})
     vm = triade if isinstance(triade, dict) else {}
 
+    # fallback sicurezza struttura
     vm.setdefault("state", {})
     vm.setdefault("risks", {})
     vm.setdefault("kpi", {})
@@ -69,129 +106,206 @@ def view_scan(scan_id: int):
     vm.setdefault("alerts", [])
     vm.setdefault("decisions", {})
 
-    vm["state"].setdefault("overall", "GIALLO")
-    vm["state"].setdefault("overall_score", 50)
-    vm["state"].setdefault("confidenza", "MEDIA")
-    vm["state"].setdefault("confidence", 50)
-    vm["state"].setdefault("summary", "Report disponibile in modalità compatibile.")
-    vm["state"].setdefault("risk_profile", "Profilo di rischio: Non disponibile")
-    vm["state"].setdefault("maturity_label", "Maturità: Non disponibile")
-    vm["state"].setdefault(
-        "board_note",
-        "Documento sintetico a supporto delle decisioni prioritarie del management.",
+    # --------------------------------
+    # Benchmark
+    # --------------------------------
+
+    settore = scan.settore
+    kpi_data = vm.get("kpi", {})
+
+    try:
+        analysis = get_benchmark_analysis(settore, kpi_data)
+
+        if isinstance(analysis, dict):
+            vm["benchmark_results"] = (
+                analysis.get("results")
+                or analysis.get("benchmarks")
+                or {}
+            )
+
+            vm["benchmark_raw"] = (
+                analysis.get("benchmark")
+                or analysis.get("raw")
+                or {}
+            )
+        else:
+            vm["benchmark_results"] = {}
+            vm["benchmark_raw"] = {}
+
+    except Exception:
+        vm["benchmark_results"] = {}
+        vm["benchmark_raw"] = {}
+
+    return render_template(
+        "scans/view_scan.html",
+        scan=scan,
+        vm=vm
     )
 
-    vm["risks"].setdefault("cash", 0.5)
-    vm["risks"].setdefault("margini", 0.5)
-    vm["risks"].setdefault("acq", 0.5)
 
-    vm["decisions"].setdefault("cash", "Nessuna indicazione disponibile per questo report.")
-    vm["decisions"].setdefault("margini", "Nessuna indicazione disponibile per questo report.")
-    vm["decisions"].setdefault("acq", "Nessuna indicazione disponibile per questo report.")
-
-    return render_template("scans/view_scan.html", scan=scan, vm=vm)
-
+# ---------------------------------------------------------
+# Delete scan
+# ---------------------------------------------------------
 
 @bp.post("/scan/<int:scan_id>/delete")
 @login_required
 def delete_scan(scan_id: int):
+
     scan = get_accessible_scan_or_404(scan_id)
 
     db.session.delete(scan)
     db.session.commit()
 
     flash(f"Scan #{scan_id} eliminato.")
-    return redirect(url_for("scans.dashboard"))
+
+    return redirect(
+        url_for("scans.dashboard")
+    )
 
 
-@bp.post("/scans/bulk-delete", endpoint="bulk_delete")
+# ---------------------------------------------------------
+# Bulk delete
+# ---------------------------------------------------------
+
+@bp.post("/scans/bulk-delete")
 @login_required
 def bulk_delete():
+
     org_id = ensure_current_org_id()
 
     ids = request.form.getlist("scan_ids")
+
     if not ids:
         flash("Nessuna scansione selezionata.")
         return redirect(url_for("scans.dashboard"))
 
     clean_ids = []
-    for item in ids:
+
+    for i in ids:
         try:
-            clean_ids.append(int(item))
+            clean_ids.append(int(i))
         except Exception:
             pass
 
     if not clean_ids:
-        flash("Nessuna scansione valida selezionata.")
+        flash("Nessuna scansione valida.")
         return redirect(url_for("scans.dashboard"))
 
     if getattr(current_user, "is_admin", False):
-        q = Scan.query.filter(Scan.id.in_(clean_ids))
-    else:
-        q = Scan.query.filter(Scan.org_id == org_id, Scan.id.in_(clean_ids))
 
-    n = q.count()
-    q.delete(synchronize_session=False)
+        q = Scan.query.filter(
+            Scan.id.in_(clean_ids)
+        )
+
+    else:
+
+        q = Scan.query.filter(
+            Scan.org_id == org_id,
+            Scan.id.in_(clean_ids)
+        )
+
+    deleted = q.count()
+
+    q.delete(
+        synchronize_session=False
+    )
+
     db.session.commit()
 
-    flash(f"Eliminate {n} scansioni.")
-    return redirect(url_for("scans.dashboard"))
+    flash(f"Eliminate {deleted} scansioni.")
 
+    return redirect(
+        url_for("scans.dashboard")
+    )
+
+
+# ---------------------------------------------------------
+# PDF completo
+# ---------------------------------------------------------
 
 @bp.get("/scan/<int:scan_id>/pdf")
 @login_required
 def scan_pdf(scan_id: int):
+
     scan = get_accessible_scan_or_404(scan_id)
 
     report: Dict[str, Any] = {}
+
     try:
         report = json.loads(scan.report_json or "{}")
     except Exception:
         report = {}
 
-    triade = report.get("triade", {}) if isinstance(report, dict) else {}
+    triade = report.get("triade", {})
     vm = triade if isinstance(triade, dict) else {}
 
+    # sicurezza struttura dati
     vm.setdefault("state", {})
     vm.setdefault("risks", {})
     vm.setdefault("kpi", {})
     vm.setdefault("indicators", [])
-    vm.setdefault("action_plan", triade.get("action_plan", []))
-    vm.setdefault("alerts", triade.get("alerts", []))
-    vm.setdefault("decisions", triade.get("decisions", {}))
+    vm.setdefault("action_plan", [])
+    vm.setdefault("alerts", [])
+    vm.setdefault("decisions", {})
 
-    vm["state"].setdefault("overall", "GIALLO")
-    vm["state"].setdefault("overall_score", 50)
-    vm["state"].setdefault("confidenza", "MEDIA")
-    vm["state"].setdefault("confidence", 50)
-    vm["state"].setdefault("summary", "Report disponibile in modalità compatibile.")
-    vm["state"].setdefault("risk_profile", "Profilo di rischio: Non disponibile")
-    vm["state"].setdefault("maturity_label", "Maturità: Non disponibile")
-    vm["state"].setdefault(
-        "board_note",
-        "Documento sintetico a supporto delle decisioni prioritarie del management.",
+    settore = scan.settore
+    kpi_data = vm.get("kpi", {})
+
+    try:
+        analysis = get_benchmark_analysis(settore, kpi_data)
+
+        if isinstance(analysis, dict):
+            vm["benchmark_results"] = (
+                analysis.get("results")
+                or analysis.get("benchmarks")
+                or {}
+            )
+
+            vm["benchmark_raw"] = (
+                analysis.get("benchmark")
+                or analysis.get("raw")
+                or {}
+            )
+        else:
+            vm["benchmark_results"] = {}
+            vm["benchmark_raw"] = {}
+
+    except Exception:
+        vm["benchmark_results"] = {}
+        vm["benchmark_raw"] = {}
+
+    out_path = (
+        Path(current_app.instance_path)
+        / f"scan_{scan.id}.pdf"
     )
 
-    vm["risks"].setdefault("cash", 0.5)
-    vm["risks"].setdefault("margini", 0.5)
-    vm["risks"].setdefault("acq", 0.5)
+    out_path.parent.mkdir(
+        parents=True,
+        exist_ok=True
+    )
 
-    vm["decisions"].setdefault("cash", "Nessuna indicazione disponibile per questo report.")
-    vm["decisions"].setdefault("margini", "Nessuna indicazione disponibile per questo report.")
-    vm["decisions"].setdefault("acq", "Nessuna indicazione disponibile per questo report.")
-
-    out_path = Path(current_app.instance_path) / f"scan_{scan.id}.pdf"
-    out_path.parent.mkdir(parents=True, exist_ok=True)
+    # forza rigenerazione pdf (evita cache vecchie versioni)
+    if out_path.exists():
+        try:
+            out_path.unlink()
+        except Exception:
+            pass
 
     scan_meta = {
+
         "id": scan.id,
         "settore": scan.settore,
         "modello": scan.modello,
         "mese_riferimento": scan.mese_riferimento,
         "created_at": str(scan.created_at)[:19].replace("T", " "),
+
     }
 
-    generate_scan_pdf_enterprise(out_path, scan_meta, vm)
+    generate_scan_pdf_enterprise(
+        out_path,
+        scan_meta,
+        vm
+    )
 
     return send_file(
         out_path,
@@ -201,60 +315,93 @@ def scan_pdf(scan_id: int):
     )
 
 
+# ---------------------------------------------------------
+# One pager
+# ---------------------------------------------------------
+
 @bp.get("/scan/<int:scan_id>/onepager")
 @login_required
 def scan_onepager(scan_id: int):
+
     scan = get_accessible_scan_or_404(scan_id)
 
     report: Dict[str, Any] = {}
+
     try:
         report = json.loads(scan.report_json or "{}")
     except Exception:
         report = {}
 
-    triade = report.get("triade", {}) if isinstance(report, dict) else {}
+    triade = report.get("triade", {})
     vm = triade if isinstance(triade, dict) else {}
 
+    # sicurezza struttura dati
     vm.setdefault("state", {})
     vm.setdefault("risks", {})
     vm.setdefault("kpi", {})
     vm.setdefault("indicators", [])
-    vm.setdefault("action_plan", triade.get("action_plan", []))
-    vm.setdefault("alerts", triade.get("alerts", []))
-    vm.setdefault("decisions", triade.get("decisions", {}))
+    vm.setdefault("action_plan", [])
+    vm.setdefault("alerts", [])
+    vm.setdefault("decisions", {})
 
-    vm["state"].setdefault("overall", "GIALLO")
-    vm["state"].setdefault("overall_score", 50)
-    vm["state"].setdefault("confidenza", "MEDIA")
-    vm["state"].setdefault("confidence", 50)
-    vm["state"].setdefault("summary", "Report disponibile in modalità compatibile.")
-    vm["state"].setdefault("risk_profile", "Profilo di rischio: Non disponibile")
-    vm["state"].setdefault("maturity_label", "Maturità: Non disponibile")
-    vm["state"].setdefault(
-        "board_note",
-        "Documento sintetico a supporto delle decisioni prioritarie del management.",
+    settore = scan.settore
+    kpi_data = vm.get("kpi", {})
+
+    try:
+        analysis = get_benchmark_analysis(settore, kpi_data)
+
+        if isinstance(analysis, dict):
+            vm["benchmark_results"] = (
+                analysis.get("results")
+                or analysis.get("benchmarks")
+                or {}
+            )
+
+            vm["benchmark_raw"] = (
+                analysis.get("benchmark")
+                or analysis.get("raw")
+                or {}
+            )
+        else:
+            vm["benchmark_results"] = {}
+            vm["benchmark_raw"] = {}
+
+    except Exception:
+        vm["benchmark_results"] = {}
+        vm["benchmark_raw"] = {}
+
+    out_path = (
+        Path(current_app.instance_path)
+        / f"scan_{scan.id}_onepager.pdf"
     )
 
-    vm["risks"].setdefault("cash", 0.5)
-    vm["risks"].setdefault("margini", 0.5)
-    vm["risks"].setdefault("acq", 0.5)
+    out_path.parent.mkdir(
+        parents=True,
+        exist_ok=True
+    )
 
-    vm["decisions"].setdefault("cash", "Nessuna indicazione disponibile per questo report.")
-    vm["decisions"].setdefault("margini", "Nessuna indicazione disponibile per questo report.")
-    vm["decisions"].setdefault("acq", "Nessuna indicazione disponibile per questo report.")
-
-    out_path = Path(current_app.instance_path) / f"scan_{scan.id}_onepager.pdf"
-    out_path.parent.mkdir(parents=True, exist_ok=True)
+    # forza rigenerazione pdf (evita cache vecchie versioni)
+    if out_path.exists():
+        try:
+            out_path.unlink()
+        except Exception:
+            pass
 
     scan_meta = {
+
         "id": scan.id,
         "settore": scan.settore,
         "modello": scan.modello,
         "mese_riferimento": scan.mese_riferimento,
         "created_at": str(scan.created_at)[:19].replace("T", " "),
+
     }
 
-    generate_one_pager(out_path, scan_meta, vm)
+    generate_one_pager(
+        out_path,
+        scan_meta,
+        vm
+    )
 
     return send_file(
         out_path,

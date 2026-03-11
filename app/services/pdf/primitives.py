@@ -1,10 +1,16 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, List
 
 from reportlab.lib import colors
 from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
+
+# Import specifici per grafici ReportLab 4.2.5
+from reportlab.graphics.shapes import Drawing
+from reportlab.graphics.charts.piecharts import Pie
+from reportlab.graphics.charts.spider import SpiderChart
+from reportlab.graphics import renderPDF
 
 from .config import (
     BRAND_NAME,
@@ -278,3 +284,38 @@ def bullet_block(
         c.setFillColor(DEFAULT_TEXT)
         c.drawString(x + 5 * mm, yy, item)
         yy -= line_gap_mm * mm
+
+# --- FUNZIONI PER I GRAFICI (Radar & Pie) ---
+
+def draw_radar_chart(c: canvas.Canvas, x: float, y: float, size: float, labels: List[str], values: List[float]):
+    """Grafico Spider/Radar compatibile con ReportLab 4.2.5"""
+    d = Drawing(size, size)
+    chart = SpiderChart()
+    chart.x = 10
+    chart.y = 10
+    chart.width = size - 20
+    chart.height = size - 20
+    chart.data = [values]
+    chart.labels = labels
+    chart.fillColor = colors.Color(0.14, 0.38, 0.92, alpha=0.1)
+    chart.strands[0].strokeColor = DEFAULT_ACCENT
+    chart.strands[0].strokeWidth = 1.5
+    chart.spokeLabels.fontName = 'Helvetica-Bold'
+    chart.spokeLabels.fontSize = 7
+    renderPDF.draw(d, c, x, y)
+
+def draw_pie_chart(c: canvas.Canvas, x: float, y: float, size: float, labels: List[str], values: List[float]):
+    """Grafico a Torta compatibile con ReportLab 4.2.5"""
+    d = Drawing(size, size)
+    pc = Pie()
+    pc.x = 0
+    pc.y = 0
+    pc.width = size
+    pc.height = size
+    pc.data = values
+    pc.labels = labels
+    pc.slices.strokeWidth = 0.5
+    pc.slices[0].fillColor = DEFAULT_ACCENT
+    pc.slices[1].fillColor = DEFAULT_SUCCESS
+    pc.slices[2].fillColor = DEFAULT_WARNING
+    renderPDF.draw(d, c, x, y)

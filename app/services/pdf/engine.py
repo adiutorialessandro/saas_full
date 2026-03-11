@@ -17,6 +17,8 @@ from .narrative import (
     plan_tasks_payload,
 )
 
+from app.utils.benchmarks import get_benchmark_analysis
+
 
 RISK_PROFILE_LABELS = {
     "cash": "Profilo di rischio: Finanziario",
@@ -32,11 +34,55 @@ OVERALL_LABELS = {
 }
 
 
+def _normalize_benchmarks(data: Dict[str, Any] | None) -> Dict[str, Any]:
+    """
+    Normalizza benchmark provenienti dal motore di analisi
+    nel formato atteso dal renderer PDF.
+    Il renderer si aspetta queste chiavi:
+    - margine
+    - conversione
+    - runway
+    - break_even
+    """
+
+    if not isinstance(data, dict):
+        return {}
+
+    normalized: Dict[str, Any] = {}
+
+    mapping = {
+        "margine": ["margine", "margini", "margin", "margins"],
+        "conversione": ["conversione", "conversion", "conv", "sales"],
+        "runway": ["runway", "cash", "liquidity"],
+        "break_even": ["break_even", "breakeven", "break-even"],
+    }
+
+    for target_key, possible_keys in mapping.items():
+        for k in possible_keys:
+            if k in data:
+                val = data[k]
+
+                if isinstance(val, dict):
+                    normalized[target_key] = {
+                        "value": val.get("value", 0),
+                        "target": val.get("target", 0),
+                        "status": val.get("status", "GIALLO"),
+                    }
+                else:
+                    normalized[target_key] = {
+                        "value": float(val),
+                        "target": 0,
+                        "status": "GIALLO",
+                    }
+
+                break
+
+    return normalized
+
 
 def _risk_value(value: Any, default: float = 0.5) -> float:
     v = clamp01(value, default)
     return float(v if v is not None else default)
-
 
 
 def _risk_label(v: float | None) -> str:
@@ -49,7 +95,6 @@ def _risk_label(v: float | None) -> str:
     return "VERDE"
 
 
-
 def _triad_index(vm: Dict[str, Any]) -> float:
     risks = vm.get("risks") or {}
     kpi = vm.get("kpi") or {}
@@ -58,63 +103,11 @@ def _triad_index(vm: Dict[str, Any]) -> float:
     marg = _risk_value(risks.get("margini"), 0.5)
     acq = _risk_value(risks.get("acq"), 0.5)
 
-    runway_mesi = kpi.get("runway_mesi")
-    break_even_ratio = kpi.get("break_even_ratio")
-    margine_pct = kpi.get("margine_pct")
-    conversione = kpi.get("conversione")
-    burn_cash_ratio = kpi.get("burn_cash_ratio")
-
     base_risk = (cash * 0.45) + (marg * 0.30) + (acq * 0.25)
-    penalty = 0.0
+    final_risk = min(1.0, base_risk)
 
-    try:
-        if runway_mesi is not None and float(runway_mesi) < 2:
-            penalty += 0.12
-    except Exception:
-        pass
-
-    try:
-        if break_even_ratio is not None and float(break_even_ratio) < 1.0:
-            penalty += 0.08
-    except Exception:
-        pass
-
-    try:
-        m = float(margine_pct)
-        if m > 1:
-            m /= 100.0
-        if m < 0.30:
-            penalty += 0.06
-    except Exception:
-        m = None
-
-    try:
-        c = float(conversione)
-        if c > 1:
-            c /= 100.0
-        if c < 0.05:
-            penalty += 0.05
-    except Exception:
-        c = None
-
-    try:
-        if burn_cash_ratio is not None:
-            bcr = float(burn_cash_ratio)
-            if bcr > 1:
-                bcr /= 100.0
-            if bcr > 0.25:
-                penalty += 0.05
-    except Exception:
-        pass
-
-    if m is not None and c is not None and m < 0.30 and c < 0.05:
-        penalty += 0.06
-
-    final_risk = min(1.0, base_risk + penalty)
     triad = round((1.0 - final_risk) * 100.0, 1)
-
     return max(0.0, min(100.0, triad))
-
 
 
 def _risk_profile(cash_r: float, marg_r: float, acq_r: float) -> str:
@@ -126,18 +119,43 @@ def _risk_profile(cash_r: float, marg_r: float, acq_r: float) -> str:
         ],
         key=lambda x: x[1],
     )[0]
-    return RISK_PROFILE_LABELS[dominant]
 
+    return RISK_PROFILE_LABELS[dominant]
 
 
 def _build_ctx(scan_meta: Dict[str, Any], vm: Dict[str, Any]) -> Dict[str, Any]:
     risks = vm.get("risks") or {}
     kpi = vm.get("kpi") or {}
-    indicators = vm.get("indicators") or []
+
+    # recupero benchmark se mancanti
+    if not vm.get("benchmark_results"):
+        try:
+            settore = scan_meta.get("settore")
+            analysis = get_benchmark_analysis(settore, kpi)
+
+            if isinstance(analysis, dict):
+                vm["benchmark_results"] = (
+                    analysis.get("results")
+                    or analysis.get("benchmarks")
+                    or analysis
+                )
+            else:
+                vm["benchmark_results"] = {}
+
+        except Exception:
+            vm["benchmark_results"] = {}
 
     cash_r = _risk_value(risks.get("cash"), 0.5)
     marg_r = _risk_value(risks.get("margini"), 0.5)
     acq_r = _risk_value(risks.get("acq"), 0.5)
+
+    triad = _triad_index(vm)
+
+    overall = _risk_label(max(cash_r, marg_r, acq_r))
+
+    risk_profile = vm.get("state", {}).get("risk_profile") or _risk_profile(
+        cash_r, marg_r, acq_r
+    )
 
     delta = {
         "score": None,
@@ -146,9 +164,6 @@ def _build_ctx(scan_meta: Dict[str, Any], vm: Dict[str, Any]) -> Dict[str, Any]:
         "acq": None,
     }
 
-    triad = _triad_index(vm)
-    overall = _risk_label(max(cash_r, marg_r, acq_r))
-    risk_profile = vm.get("state", {}).get("risk_profile") or _risk_profile(cash_r, marg_r, acq_r)
     header_payload = report_header_payload(vm, delta)
 
     return {
@@ -168,14 +183,10 @@ def _build_ctx(scan_meta: Dict[str, Any], vm: Dict[str, Any]) -> Dict[str, Any]:
         "marg_r": marg_r,
         "acq_r": acq_r,
         "kpi": kpi,
-        "indicators": indicators,
         "decisions": vm.get("decisions") or {},
-        "board_note": vm.get("board_note"),
         "header_payload": header_payload,
-        "diagnosis": header_payload.get("diagnosis") if isinstance(header_payload, dict) else {},
-        "health": header_payload.get("health") if isinstance(header_payload, dict) else {},
+        "benchmarks": _normalize_benchmarks(vm.get("benchmark_results")),
     }
-
 
 
 def generate_scan_pdf_enterprise(
@@ -183,15 +194,19 @@ def generate_scan_pdf_enterprise(
     scan_meta: Dict[str, Any],
     vm: Dict[str, Any],
 ) -> Path:
+
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     ctx = _build_ctx(scan_meta, vm)
-    c = canvas.Canvas(str(out_path), pagesize=PAGE_SIZE)
-    render_scan_pages(c, ctx)
-    c.save()
-    return out_path
 
+    c = canvas.Canvas(str(out_path), pagesize=PAGE_SIZE)
+
+    render_scan_pages(c, ctx)
+
+    c.save()
+
+    return out_path
 
 
 def generate_scan_pdf(
@@ -199,8 +214,8 @@ def generate_scan_pdf(
     scan_meta: Dict[str, Any],
     vm: Dict[str, Any],
 ) -> Path:
-    return generate_scan_pdf_enterprise(out_path, scan_meta, vm)
 
+    return generate_scan_pdf_enterprise(out_path, scan_meta, vm)
 
 
 def generate_report(
@@ -208,8 +223,8 @@ def generate_report(
     scan_meta: Dict[str, Any],
     vm: Dict[str, Any],
 ) -> Path:
-    return generate_scan_pdf_enterprise(out_path, scan_meta, vm)
 
+    return generate_scan_pdf_enterprise(out_path, scan_meta, vm)
 
 
 def generate_one_pager(
@@ -217,11 +232,16 @@ def generate_one_pager(
     scan_meta: Dict[str, Any],
     vm: Dict[str, Any],
 ) -> Path:
+
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     ctx = _build_ctx(scan_meta, vm)
+
     c = canvas.Canvas(str(out_path), pagesize=PAGE_SIZE)
+
     render_one_pager(c, ctx)
+
     c.save()
+
     return out_path
