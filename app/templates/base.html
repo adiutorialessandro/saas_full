@@ -50,7 +50,7 @@
           <label>Workspace</label>
           <div class="info-box">
             {% if current_user.memberships and current_user.memberships|length > 0 %}
-              Azienda #{{ current_user.memberships[0].org_id }}
+              Azienda #{{ current_user.primary_org_id() }}
             {% else %}
               Spazio Personale
             {% endif %}

@@ -67,8 +67,8 @@ def quiz():
             bench = SectorBenchmark.query.filter_by(sector_name=ob.get("settore")).first()
 
             inp = Inputs(
-                settore=ob.get("settore", "Generico"),
-                modello=ob.get("modello", "B2B"),
+                settore=ob.get("settore", "Salone Acconciature"),
+                modello=ob.get("modello", "B2C"),
                 mese_riferimento=ob.get("mese_riferimento", ""),
                 quiz_risk=quiz_risk,
                 dimensione=ob.get("dimensione"),
@@ -77,12 +77,12 @@ def quiz():
                 fatturato=ob.get("fatturato"),
                 tipologia_clienti=ob.get("tipologia_clienti"),
                 cassa_attuale=data.get("cassa_attuale"),
-                burn_mensile=data.get("burn_mensile"),
-                incassi_mese=data.get("incassi_mese"),
+                incassi_totali_mese=data.get("incassi_totali_mese"),
+                incassi_retail_mese=data.get("incassi_retail_mese"),
+                numero_clienti_mese=data.get("numero_clienti_mese"),
+                costi_materiali_mese=data.get("costi_materiali_mese"),
                 costi_fissi_mese=data.get("costi_fissi_mese"),
-                margine_lordo_pct=data.get("margine_lordo_pct"),
-                leads_mese=data.get("leads_mese"),
-                clienti_mese=data.get("clienti_mese"),
+                ore_lavorate_mese=data.get("ore_lavorate_mese"),
             )
 
             report = build_report(inp, bench=bench)

@@ -37,20 +37,20 @@ bp = Blueprint("scans", __name__)
 
 def get_accessible_scan_or_404(scan_id: int) -> Scan:
     """
-    Restituisce la scan se accessibile all'utente.
+    Restituisce la scan se accessibile all'utente e non eliminata logicamente (Soft Delete).
     Admin vede tutto, utente solo la propria organization.
     """
-
     user = current_user._get_current_object()
 
     if getattr(user, "is_admin", False):
-        return Scan.query.filter_by(id=scan_id).first_or_404()
+        return Scan.query.filter_by(id=scan_id, is_deleted=False).first_or_404()
 
     org_id = ensure_current_org_id()
 
     return Scan.query.filter_by(
         id=scan_id,
-        org_id=org_id
+        org_id=org_id,
+        is_deleted=False
     ).first_or_404()
 
 
@@ -61,16 +61,15 @@ def get_accessible_scan_or_404(scan_id: int) -> Scan:
 @bp.get("/dashboard")
 @login_required
 def dashboard():
-
     org_id = ensure_current_org_id()
 
     scans = (
         Scan.query
-        .filter_by(org_id=org_id)
+        .filter_by(org_id=org_id, is_deleted=False)
         .order_by(Scan.id.desc())
+        .limit(100)
         .all()
     )
-
     return render_template(
         "dashboard.html",
         scans=scans
@@ -109,7 +108,6 @@ def view_scan(scan_id: int):
     # --------------------------------
     # Benchmark
     # --------------------------------
-
     settore = scan.settore
     kpi_data = vm.get("kpi", {})
 
@@ -144,7 +142,7 @@ def view_scan(scan_id: int):
 
 
 # ---------------------------------------------------------
-# Delete scan
+# Delete scan (Soft Delete)
 # ---------------------------------------------------------
 
 @bp.post("/scan/<int:scan_id>/delete")
@@ -153,10 +151,11 @@ def delete_scan(scan_id: int):
 
     scan = get_accessible_scan_or_404(scan_id)
 
-    db.session.delete(scan)
+    # Invece di distruggere il record, lo marchiamo come eliminato
+    scan.is_deleted = True
     db.session.commit()
 
-    flash(f"Scan #{scan_id} eliminato.")
+    flash(f"Analisi rimossa dalla dashboard.")
 
     return redirect(
         url_for("scans.dashboard")
@@ -164,7 +163,7 @@ def delete_scan(scan_id: int):
 
 
 # ---------------------------------------------------------
-# Bulk delete
+# Bulk delete (Soft Delete)
 # ---------------------------------------------------------
 
 @bp.post("/scans/bulk-delete")
@@ -192,13 +191,8 @@ def bulk_delete():
         return redirect(url_for("scans.dashboard"))
 
     if getattr(current_user, "is_admin", False):
-
-        q = Scan.query.filter(
-            Scan.id.in_(clean_ids)
-        )
-
+        q = Scan.query.filter(Scan.id.in_(clean_ids))
     else:
-
         q = Scan.query.filter(
             Scan.org_id == org_id,
             Scan.id.in_(clean_ids)
@@ -206,13 +200,12 @@ def bulk_delete():
 
     deleted = q.count()
 
-    q.delete(
-        synchronize_session=False
-    )
+    # Eseguiamo un update di massa invece di una delete
+    q.update({"is_deleted": True}, synchronize_session=False)
 
     db.session.commit()
 
-    flash(f"Eliminate {deleted} scansioni.")
+    flash(f"Rimosse {deleted} analisi dalla dashboard.")
 
     return redirect(
         url_for("scans.dashboard")
@@ -311,7 +304,7 @@ def scan_pdf(scan_id: int):
         out_path,
         mimetype="application/pdf",
         as_attachment=True,
-        download_name=f"SaaS_Full_Strategic_Report_{scan.id}.pdf",
+        download_name=f"Triad_Insight_Report_Salone_{scan.id}.pdf",
     )
 
 
@@ -407,5 +400,5 @@ def scan_onepager(scan_id: int):
         out_path,
         mimetype="application/pdf",
         as_attachment=True,
-        download_name=f"SaaS_Full_Executive_OnePager_{scan.id}.pdf",
+        download_name=f"Triad_Insight_Executive_OnePager_{scan.id}.pdf",
     )

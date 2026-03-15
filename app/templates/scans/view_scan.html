@@ -13,7 +13,7 @@
 
   <section class="report-hero" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px;">
     <div class="report-hero-copy">
-      <div class="muted" style="font-size: 12px; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin-bottom: 8px;">Business Report</div>
+      <div class="muted" style="font-size: 12px; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin-bottom: 8px;">Business Report Salone</div>
       <h1 class="report-title" style="margin-bottom: 5px;">{{ scan.settore }}</h1>
       <p class="report-sub muted" style="margin: 0;">
         {{ scan.modello }} · {{ scan.mese_riferimento }}
@@ -30,7 +30,7 @@
 
   <section class="report-score-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 20px; margin-bottom: 30px;">
     <article class="card score-panel" style="grid-column: span 1; display: flex; flex-direction: column; justify-content: space-between;">
-      <div class="muted" style="font-size: 12px; text-transform: uppercase; font-weight: 700;">Triad Score</div>
+      <div class="muted" style="font-size: 12px; text-transform: uppercase; font-weight: 700;">Salute Globale</div>
       
       <div style="display: flex; align-items: baseline; gap: 10px; margin: 15px 0;">
         <div style="font-size: 48px; font-weight: 800; color: var(--accent-blue);">{{ state.get("overall_score", "—") }}</div>
@@ -56,21 +56,21 @@
     </article>
 
     <article class="card">
-      <div class="muted" style="font-size: 12px; text-transform: uppercase; font-weight: 700;">Cash</div>
+      <div class="muted" style="font-size: 12px; text-transform: uppercase; font-weight: 700;">Cassa & Costi Fissi</div>
       <div style="font-size: 36px; font-weight: 800; margin: 10px 0;">{{ (risks.get("cash", 0) * 100)|round(0) }}</div>
-      <div class="muted" style="font-size: 13px;">Indice rischio</div>
+      <div class="muted" style="font-size: 13px;">Indice di rischio</div>
     </article>
 
     <article class="card">
-      <div class="muted" style="font-size: 12px; text-transform: uppercase; font-weight: 700;">Margini</div>
+      <div class="muted" style="font-size: 12px; text-transform: uppercase; font-weight: 700;">Margini Sui Servizi</div>
       <div style="font-size: 36px; font-weight: 800; margin: 10px 0;">{{ (risks.get("margini", 0) * 100)|round(0) }}</div>
-      <div class="muted" style="font-size: 13px;">Indice rischio</div>
+      <div class="muted" style="font-size: 13px;">Indice di rischio</div>
     </article>
 
     <article class="card">
-      <div class="muted" style="font-size: 12px; text-transform: uppercase; font-weight: 700;">Acquisizione</div>
+      <div class="muted" style="font-size: 12px; text-transform: uppercase; font-weight: 700;">Vendita / Retail</div>
       <div style="font-size: 36px; font-weight: 800; margin: 10px 0;">{{ (risks.get("acq", 0) * 100)|round(0) }}</div>
-      <div class="muted" style="font-size: 13px;">Indice rischio</div>
+      <div class="muted" style="font-size: 13px;">Indice di rischio</div>
     </article>
   </section>
 
@@ -96,19 +96,19 @@
     <section class="report-decisions-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px;">
       <article class="card">
         <div class="muted" style="font-size: 12px; text-transform: uppercase; font-weight: 700; margin-bottom: 10px;">Direzione strategica</div>
-        <h3 style="font-size: 18px;">Cash</h3>
+        <h3 style="font-size: 18px;">Gestione Cassa</h3>
         <p class="muted" style="margin: 0; line-height: 1.6;">{{ dec_cash }}</p>
       </article>
 
       <article class="card">
         <div class="muted" style="font-size: 12px; text-transform: uppercase; font-weight: 700; margin-bottom: 10px;">Direzione strategica</div>
-        <h3 style="font-size: 18px;">Margini</h3>
+        <h3 style="font-size: 18px;">Margini & Listino</h3>
         <p class="muted" style="margin: 0; line-height: 1.6;">{{ dec_margini }}</p>
       </article>
 
       <article class="card">
         <div class="muted" style="font-size: 12px; text-transform: uppercase; font-weight: 700; margin-bottom: 10px;">Direzione strategica</div>
-        <h3 style="font-size: 18px;">Acquisizione</h3>
+        <h3 style="font-size: 18px;">Retail e Prodotti</h3>
         <p class="muted" style="margin: 0; line-height: 1.6;">{{ dec_acq }}</p>
       </article>
     </section>
@@ -121,14 +121,14 @@
       {% if benchmarks %}
       <div class="card">
         <h2 style="font-size: 20px; margin-bottom: 5px;">Benchmark di Settore</h2>
-        <p class="muted" style="margin-bottom: 20px;">Confronto calcolato sulle medie per il settore: <strong>{{ scan.settore }}</strong></p>
+        <p class="muted" style="margin-bottom: 20px;">Confronto calcolato sulle medie per: <strong>{{ scan.settore }}</strong></p>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
           {% for key, label, is_pct, suffix in [
-              ('runway', 'Cash Runway', false, ' mesi'),
-              ('margine', 'Margine Lordo', true, '%'),
-              ('conversione', 'Conversione', true, '%'),
-              ('break_even', 'Break-even Ratio', false, '')
+              ('runway', 'Copertura Spese Fisse', false, ' mesi'),
+              ('margine', 'Margine sui Servizi', true, '%'),
+              ('conversione', 'Incidenza Retail', true, '%'),
+              ('break_even', 'Copertura Break-even', false, '')
           ] %}
             {% set b = benchmarks.get(key) %}
             {% if b %}
@@ -146,7 +146,7 @@
                   {% if is_pct %}{{ "%.1f"|format(b.value * 100) }}{% else %}{{ "%.1f"|format(b.value) }}{% endif %}{{ suffix }}
                 </div>
                 <div class="muted" style="font-size: 13px;">
-                  Target Settore: {% if is_pct %}{{ "%.1f"|format(b.target * 100) }}{% else %}{{ "%.2f"|format(b.target) }}{% endif %}{{ suffix }}
+                  Target Ideale: {% if is_pct %}{{ "%.1f"|format(b.target * 100) }}{% else %}{{ "%.2f"|format(b.target) }}{% endif %}{{ suffix }}
                 </div>
               </div>
             {% endif %}
@@ -155,24 +155,18 @@
       </div>
       {% endif %}
       <div class="card">
-        <h2 style="font-size: 20px; margin-bottom: 5px;">Business Risk Map</h2>
-        <p class="muted" style="margin-bottom: 20px;">Mappa sintetica delle aree che stanno reggendo e di quelle che richiedono più attenzione.</p>
+        <h2 style="font-size: 20px; margin-bottom: 5px;">Posizionamento Competitivo</h2>
+        <p class="muted" style="margin-bottom: 20px;">Come performa il tuo salone rispetto agli standard di mercato.</p>
 
-        {% if indicators %}
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-            {% for item in indicators %}
-              <div style="background: var(--bg-main); padding: 15px; border-radius: 10px; border: 1px solid var(--border-color);">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
-                  <div style="font-weight: 700;">{{ item.title }}</div>
-                  <span class="badge 
-                    {% if item.label == 'ROSSO' %}danger
-                    {% elif item.label == 'GIALLO' %}warning
-                    {% else %}success{% endif %}">
-                    {{ item.label }}
-                  </span>
+        {% if state.get("competitive_positioning") %}
+          <div style="display: grid; grid-template-columns: 1fr; gap: 15px;">
+            {% for item in state.get("competitive_positioning") %}
+              <div style="background: var(--bg-main); padding: 15px; border-radius: 10px; border: 1px solid var(--border-color); border-left: 4px solid {{ item.color }};">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                  <span style="font-size: 20px;">{{ item.icon }}</span>
+                  <div style="font-weight: 700; color: {{ item.color }};">{{ item.title }}</div>
                 </div>
-                <div style="font-size: 24px; font-weight: 800; margin-bottom: 5px;">{{ item.value_str }}</div>
-                <div class="muted" style="font-size: 13px; line-height: 1.5;">{{ item.desc }}</div>
+                <div class="muted" style="font-size: 14px; line-height: 1.5;">{{ item.text }}</div>
               </div>
             {% endfor %}
           </div>
@@ -184,45 +178,8 @@
       </div>
 
       <div class="card">
-        <h2 style="font-size: 20px; margin-bottom: 5px;">Alert principali</h2>
-        <p class="muted" style="margin-bottom: 20px;">I segnali che richiedono attenzione immediata.</p>
-
-        {% if alerts %}
-          <div style="display: flex; flex-direction: column; gap: 10px;">
-            {% for a in alerts %}
-              <div style="padding: 15px; border-radius: 10px; border: 1px solid var(--border-color); display: flex; gap: 15px; align-items: flex-start;
-                {% if a.level == 'ROSSO' %}background: rgba(239, 68, 68, 0.05); border-color: rgba(239, 68, 68, 0.2);
-                {% elif a.level == 'GIALLO' %}background: rgba(245, 158, 11, 0.05); border-color: rgba(245, 158, 11, 0.2);
-                {% else %}background: rgba(34, 197, 94, 0.05); border-color: rgba(34, 197, 94, 0.2);{% endif %}">
-                
-                <div style="width: 12px; height: 12px; border-radius: 50%; margin-top: 5px; flex-shrink: 0;
-                  {% if a.level == 'ROSSO' %}background: var(--danger);
-                  {% elif a.level == 'GIALLO' %}background: var(--warning);
-                  {% else %}background: var(--success);{% endif %}">
-                </div>
-                
-                <div>
-                  <div style="font-size: 12px; font-weight: 800; margin-bottom: 5px;
-                    {% if a.level == 'ROSSO' %}color: var(--danger);
-                    {% elif a.level == 'GIALLO' %}color: var(--warning);
-                    {% else %}color: var(--success);{% endif %}">
-                    {{ a.level }}
-                  </div>
-                  <div style="font-size: 14px; line-height: 1.5;">{{ a.text }}</div>
-                </div>
-              </div>
-            {% endfor %}
-          </div>
-        {% else %}
-          <div class="muted" style="text-align: center; padding: 30px 0;">
-            <p>Non risultano segnalazioni critiche da mostrare.</p>
-          </div>
-        {% endif %}
-      </div>
-
-      <div class="card">
-        <h2 style="font-size: 20px; margin-bottom: 5px;">Action Plan – prossimi 30 giorni</h2>
-        <p class="muted" style="margin-bottom: 20px;">Le priorità operative consigliate per migliorare la qualità economica.</p>
+        <h2 style="font-size: 20px; margin-bottom: 5px;">Action Plan Salone – prossimi 30 giorni</h2>
+        <p class="muted" style="margin-bottom: 20px;">Le priorità operative consigliate per far crescere incassi e margini.</p>
 
         {% if action_plan %}
           <ol style="margin: 0; padding-left: 20px; line-height: 1.7; display: flex; flex-direction: column; gap: 10px;">
@@ -242,42 +199,34 @@
     <aside style="display: flex; flex-direction: column; gap: 20px;">
       
       <div class="card">
-        <h2 style="font-size: 18px; margin-bottom: 20px;">KPI sintetici</h2>
+        <h2 style="font-size: 18px; margin-bottom: 20px;">Numeri Chiave Mensili</h2>
         <div style="display: flex; flex-direction: column; gap: 15px;">
 
           <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
-            <span class="muted">Runway</span>
-            <strong>{% if kpi.get("runway_mesi") is not none %}{{ "%.1f"|format(kpi.get("runway_mesi")) }} mesi{% else %}—{% endif %}</strong>
+            <span class="muted">Fiche Media (Scontrino)</span>
+            <strong style="color: var(--success); font-size: 1.1em;">{% if kpi.get("fiche_media") is not none %}€ {{ "%.2f"|format(kpi.get("fiche_media")) }}{% else %}—{% endif %}</strong>
           </div>
 
           <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
-            <span class="muted">Margine lordo</span>
-            <strong>{% if kpi.get("margine_pct") is not none %}{{ "%.1f"|format(kpi.get("margine_pct") * 100) }}%{% else %}—{% endif %}</strong>
+            <span class="muted">Incasso Totale</span>
+            <strong>{% if kpi.get("incassi_totali_mese") is not none %}€ {{ "%.0f"|format(kpi.get("incassi_totali_mese")) }}{% else %}—{% endif %}</strong>
           </div>
 
           <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
-            <span class="muted">Conversione</span>
+            <span class="muted">Incidenza Vendita Prodotti</span>
             <strong>{% if kpi.get("conversione") is not none %}{{ "%.1f"|format(kpi.get("conversione") * 100) }}%{% else %}—{% endif %}</strong>
           </div>
 
           <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
-            <span class="muted">Break-even ratio</span>
-            <strong>{% if kpi.get("break_even_ratio") is not none %}{{ "%.2f"|format(kpi.get("break_even_ratio")) }}{% else %}—{% endif %}</strong>
+            <span class="muted">Margine sui Servizi</span>
+            <strong>{% if kpi.get("margine_pct") is not none %}{{ "%.1f"|format(kpi.get("margine_pct") * 100) }}%{% else %}—{% endif %}</strong>
           </div>
 
           <div style="display: flex; justify-content: space-between;">
-            <span class="muted">Burn/Cash</span>
-            <strong>{% if kpi.get("burn_cash_ratio") is not none %}{{ "%.1f"|format(kpi.get("burn_cash_ratio") * 100) }}%{% else %}—{% endif %}</strong>
+            <span class="muted">Riserva (Mesi di Runway)</span>
+            <strong>{% if kpi.get("runway_mesi") is not none %}{{ "%.1f"|format(kpi.get("runway_mesi")) }}{% else %}—{% endif %}</strong>
           </div>
         </div>
-      </div>
-
-      <div class="card">
-        <h2 style="font-size: 18px; margin-bottom: 15px;">Lettura rapida</h2>
-        <p class="muted" style="margin: 0; line-height: 1.6; font-size: 14px;">
-          Questo report traduce il livello di rischio emerso in una lettura manageriale sintetica:
-          cosa sta reggendo, dove aumentano le pressioni e quale area richiede più attenzione nel breve periodo.
-        </p>
       </div>
 
       <div class="card">

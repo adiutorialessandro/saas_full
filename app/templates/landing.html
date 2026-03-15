@@ -3,31 +3,34 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Triad Insight — Diagnosi chiara del tuo business</title>
-  <meta name="description" content="Analizza finanza, vendite e struttura operativa. Ottieni un report chiaro con priorità e azioni concrete.">
+  <title>L'App per i Parrucchieri — Scopri come incassare di più</title>
+  <meta name="description" content="Scopri dove perdi soldi nel tuo salone e crea promozioni su colore e trattamenti per riempire l'agenda.">
   <link rel="stylesheet" href="{{ url_for('static', filename='landing.css') }}">
+  <style>
+      /* Stili extra per rendere tutto più "morbido" e accogliente */
+      :root { --primary: #ff6b6b; --surface-2: #fff5f5; }
+      .brand-mark { font-size: 1.5em; background: none !important; }
+      h1 { font-family: 'Georgia', serif; letter-spacing: -1px; }
+      .emoji-huge { font-size: 4rem; display: block; margin-bottom: 10px; }
+      .btn-primary { background: linear-gradient(135deg, #ff6b6b, #ff4757) !important; color: white !important; border: none; border-radius: 30px !important; }
+      .mock-card { border-radius: 20px; text-align: center; }
+  </style>
 </head>
 <body>
   
   <header class="site-header">
     <div class="container nav">
       <a class="brand" href="{{ url_for('index') }}">
-        <span class="brand-mark">▲</span>
-        <span class="brand-text">Triad Insight</span>
+        <span class="brand-mark">✂️</span>
+        <span class="brand-text" style="font-weight: 800; font-size: 1.2em;">Salone al Top</span>
       </a>
-
-      <nav class="nav-links">
-        <a href="#prodotto">Prodotto</a>
-        <a href="#come-funziona">Come funziona</a>
-        <a href="{{ url_for('pricing') }}">Prezzi</a>
-      </nav>
 
       <div class="nav-actions">
         {% if current_user.is_authenticated %}
-          <a class="btn" href="{{ url_for('scans.dashboard') }}">Vai alla dashboard</a>
+          <a class="btn btn-primary" href="{{ url_for('scans.dashboard') }}">Il Mio Salone</a>
         {% else %}
-          <a class="btn btn-secondary" href="{{ url_for('auth.login') }}">Accedi</a>
-          <a class="btn" href="{{ url_for('auth.register') }}">Inizia ora</a>
+          <a class="btn" href="{{ url_for('auth.login') }}">Accedi</a>
+          <a class="btn btn-primary" href="{{ url_for('auth.register') }}">Inizia Gratis</a>
         {% endif %}
       </div>
     </div>
@@ -37,177 +40,119 @@
     <section class="hero">
       <div class="container hero-grid">
         <div class="hero-copy">
-          <div class="eyebrow">Business diagnosis platform</div>
-          <h1>Scopri cosa blocca davvero la crescita della tua azienda.</h1>
-          <p class="hero-text">
-            Triad Insight analizza finanza, vendite e struttura operativa. Genera un report chiaro con priorità, alert e azioni concrete in pochissimi minuti.
+          <div class="eyebrow" style="color: #ff6b6b; font-weight: 800;">Fatto da e per i Parrucchieri</div>
+          <h1 style="font-size: 3.5rem; line-height: 1.1;">Il negozio è sempre pieno, ma a fine mese non restano soldi?</h1>
+          <p class="hero-text" style="font-size: 1.2rem;">
+            Sei un artista, non un ragioniere. Inserisci i tuoi incassi e lascia che l'App ti dica se devi lanciare una <strong>"Giornata Cheratina"</strong>, alzare il prezzo del Balayage o spingere sulla vendita dei prodotti al lavatesta.
           </p>
 
           <div class="hero-actions">
             {% if current_user.is_authenticated %}
-              <a class="btn btn-lg" href="{{ url_for('wizard.onboarding') }}">Fai un nuovo Scan</a>
-              <a class="btn btn-secondary btn-lg" href="{{ url_for('scans.dashboard') }}">Dashboard</a>
+              <a class="btn btn-primary btn-lg" href="{{ url_for('wizard.onboarding') }}">💆‍♀️ Analizza i tuoi Incassi</a>
             {% else %}
-              <a class="btn btn-lg" href="{{ url_for('auth.register') }}">Prova il primo scan</a>
-              <a class="btn btn-secondary btn-lg" href="#come-funziona">Scopri come funziona</a>
+              <a class="btn btn-primary btn-lg" href="{{ url_for('auth.register') }}">✨ Inizia l'Analisi del Salone</a>
             {% endif %}
-          </div>
-
-          <div class="hero-trust">
-            <span>✓ Setup rapido</span>
-            <span>✓ Report immediato</span>
-            <span>✓ Azioni concrete</span>
           </div>
         </div>
 
-        <div class="hero-panel" style="display: flex; flex-direction: column; gap: 16px;">
-          
-          <div class="mock-card">
-            <div class="mock-label">Triad Score</div>
-            <div class="score-row">
-              <div class="score-value" style="color: var(--primary);">72</div>
-              <div style="text-align: right;">
-                <div class="mock-label" style="margin-bottom: 4px;">/100</div>
-                <div style="background: rgba(245,158,11,.15); color: var(--warning); padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 700;">Attenzione</div>
-              </div>
-            </div>
-            <div class="progress">
-              <div class="progress-bar" style="width:72%"></div>
-            </div>
-          </div>
-
+        <div class="hero-panel" style="display: flex; flex-direction: column; gap: 16px; background: none; box-shadow: none;">
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-            <div class="mock-card" style="padding: 16px;">
-              <div class="mock-label">Cash</div>
-              <div style="font-size: 24px; font-weight: 800; margin-bottom: 4px;">4.2 mesi</div>
-              <div style="font-size: 13px; font-weight: 600; color: var(--danger);">Runway limitata</div>
+            <div class="mock-card" style="padding: 20px; background: white; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+              <span class="emoji-huge">🧴</span>
+              <div class="mock-label">Vendita Prodotti</div>
+              <div style="font-size: 18px; font-weight: 800; color: #ef4444;">Troppo Bassa</div>
+              <div style="font-size: 13px; color: #666; margin-top:5px;">Devi proporre più shampoo a casa!</div>
             </div>
-            <div class="mock-card" style="padding: 16px;">
-              <div class="mock-label">Conversione</div>
-              <div style="font-size: 24px; font-weight: 800; margin-bottom: 4px;">6.8%</div>
-              <div style="font-size: 13px; font-weight: 600; color: var(--warning);">Sotto target</div>
+            
+            <div class="mock-card" style="padding: 20px; background: white; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+              <span class="emoji-huge">🎨</span>
+              <div class="mock-label">Sprechi Colore</div>
+              <div style="font-size: 18px; font-weight: 800; color: #f59e0b;">Attenzione</div>
+              <div style="font-size: 13px; color: #666; margin-top:5px;">Stai buttando via troppo prodotto.</div>
             </div>
-            <div class="mock-card" style="padding: 16px;">
-              <div class="mock-label">Margine</div>
-              <div style="font-size: 24px; font-weight: 800; margin-bottom: 4px;">34%</div>
-              <div style="font-size: 13px; font-weight: 600; color: var(--warning);">Da proteggere</div>
+
+            <div class="mock-card" style="padding: 20px; background: white; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+              <span class="emoji-huge">💇‍♀️</span>
+              <div class="mock-label">Scontrino Medio</div>
+              <div style="font-size: 18px; font-weight: 800; color: #10b981;">€ 54,00</div>
+              <div style="font-size: 13px; color: #666; margin-top:5px;">Le pieghe funzionano benissimo!</div>
             </div>
-            <div class="mock-card" style="padding: 16px;">
-              <div class="mock-label">Break-even</div>
-              <div style="font-size: 24px; font-weight: 800; margin-bottom: 4px;">1.04</div>
-              <div style="font-size: 13px; font-weight: 600; color: var(--warning);">Molto vicino</div>
+
+            <div class="mock-card" style="padding: 20px; background: white; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+              <span class="emoji-huge">📣</span>
+              <div class="mock-label">Cosa fare oggi?</div>
+              <div style="font-size: 18px; font-weight: 800; color: #ff6b6b;">Promo Schiariture</div>
+              <div style="font-size: 13px; color: #666; margin-top:5px;">Lancia una promo su Instagram.</div>
             </div>
           </div>
-
         </div>
       </div>
     </section>
 
-    <section id="problema" style="background: var(--surface-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+    <section id="problema" style="background: var(--surface-2); padding: 80px 0;">
       <div class="container">
         <div class="section-head center">
-          <div class="eyebrow">Il problema</div>
-          <h2>La maggior parte delle aziende ha dati. Non ha chiarezza.</h2>
-          <p>Numeri sparsi, dashboard complesse e poca capacità di capire dove agire subito.</p>
+          <h2>Perché lavori 10 ore al giorno ma non cresci?</h2>
+          <p>Tagliare bene i capelli non basta più. Devi sapere dove vanno a finire i tuoi soldi.</p>
         </div>
 
         <div class="card-grid three">
-          <article class="info-card">
-            <div class="card-icon">01</div>
-            <h3>Numeri isolati</h3>
-            <p>Guardare KPI separati non basta se non capisci la relazione tra liquidità, margini e acquisizione.</p>
+          <article class="info-card" style="background: white; border-radius: 20px;">
+            <div style="font-size: 3rem; margin-bottom: 10px;">📉</div>
+            <h3>Prezzi Sbagliati</h3>
+            <p>I fornitori alzano i prezzi dei tubi di colore e dell'ossigeno, ma tu hai paura di ritoccare il listino per non perdere le clienti storiche. Risultato? Lavori gratis.</p>
           </article>
 
-          <article class="info-card">
-            <div class="card-icon">02</div>
-            <h3>Priorità confuse</h3>
-            <p>Troppi indicatori creano rumore. Serve una sintesi che evidenzi subito cosa è critico.</p>
+          <article class="info-card" style="background: white; border-radius: 20px;">
+            <div style="font-size: 3rem; margin-bottom: 10px;">🛍️</div>
+            <h3>Zero Rivendita</h3>
+            <p>Se le tue clienti comprano lo shampoo al supermercato, stai perdendo l'incasso più facile. La vendita prodotti è l'unico modo per guadagnare senza usare le forbici.</p>
           </article>
 
-          <article class="info-card">
-            <div class="card-icon">03</div>
-            <h3>Azioni tardive</h3>
-            <p>Molti problemi vengono rilevati troppo tardi, quando liquidità e margini sono già sotto pressione.</p>
+          <article class="info-card" style="background: white; border-radius: 20px;">
+            <div style="font-size: 3rem; margin-bottom: 10px;">🛋️</div>
+            <h3>Tempi Morti</h3>
+            <p>Avere la poltrona vuota mentre una cliente ha il colore in posa è uno spreco. Devi incastrare pieghe o proporre trattamenti veloci al lavatesta (es. filler o fiale).</p>
           </article>
         </div>
       </div>
     </section>
 
-    <section id="prodotto">
+    <section id="prodotto" style="padding: 80px 0;">
       <div class="container">
         <div class="section-head center">
-          <div class="eyebrow">La soluzione</div>
-          <h2>Una diagnosi chiara, in pochi minuti.</h2>
-          <p>Triad Insight raccoglie dati essenziali, legge i segnali critici del business e produce un report leggibile e azionabile.</p>
+          <h2>La tua bussola per incassare di più.</h2>
+          <p>La nostra App prende i tuoi numeri noiosi e li trasforma in consigli pratici che puoi usare già da domani mattina in salone.</p>
         </div>
 
-        <div class="feature-grid">
-          <article class="feature-card" style="text-align: center;">
-            <div class="card-icon" style="margin: 0 auto 16px;">💰</div>
-            <h3>Finanza</h3>
-            <p>Runway, burn, break-even e sostenibilità economica in un colpo d’occhio.</p>
+        <div class="feature-grid" style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+          <article class="feature-card" style="text-align: center; flex: 1; min-width: 250px; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+            <div style="font-size: 3rem; margin-bottom: 15px;">💰</div>
+            <h3>Calcola il vero Margine</h3>
+            <p>Ti diciamo se sui lavori lunghi (come il Balayage) stai effettivamente guadagnando o se stai solo pagando i materiali.</p>
           </article>
 
-          <article class="feature-card" style="text-align: center;">
-            <div class="card-icon" style="margin: 0 auto 16px;">📈</div>
-            <h3>Vendite</h3>
-            <p>Conversione, resa commerciale e capacità di trasformare domanda in ricavi.</p>
-          </article>
-
-          <article class="feature-card" style="text-align: center;">
-            <div class="card-icon" style="margin: 0 auto 16px;">⚙️</div>
-            <h3>Struttura</h3>
-            <p>Comprensione sintetica dello stato dell’azienda e delle priorità operative.</p>
+          <article class="feature-card" style="text-align: center; flex: 1; min-width: 250px; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+            <div style="font-size: 3rem; margin-bottom: 15px;">🚀</div>
+            <h3>Idee Promozionali</h3>
+            <p>L'App ti consiglia quando spingere. Sei a corto di incassi? È il momento di lanciare la "Settimana della Ricostruzione Capelli"!</p>
           </article>
         </div>
       </div>
     </section>
 
-    <section id="come-funziona" style="background: var(--surface-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+    <section class="cta-final" style="background: linear-gradient(135deg, #1a1a2e, #16213e);">
       <div class="container">
-        <div class="section-head center">
-          <div class="eyebrow">Come funziona</div>
-          <h2>Dal dato alla decisione, in 3 passaggi.</h2>
-        </div>
-
-        <div class="steps">
-          <article class="step">
-            <div class="step-num">1</div>
-            <h3>Inserisci i dati essenziali</h3>
-            <p>Settore, modello, mese di riferimento, KPI base e mini assessment guidato attraverso un wizard intuitivo.</p>
-          </article>
-
-          <article class="step">
-            <div class="step-num">2</div>
-            <h3>Genera lo scan</h3>
-            <p>Il motore analizza i segnali principali e costruisce una lettura sintetica dello stato di salute aziendale.</p>
-          </article>
-
-          <article class="step">
-            <div class="step-num">3</div>
-            <h3>Ricevi il report</h3>
-            <p>Ottieni Triad Score, alert chiave, indicatori incrociati e un piano d’azione prioritario stampabile in PDF.</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section class="cta-final">
-      <div class="container">
-        <div class="cta-box">
+        <div class="cta-box" style="text-align: center; background: none;">
           <div>
-            <div class="eyebrow" style="background: rgba(255,255,255,.1); color: #fff; border: 1px solid rgba(255,255,255,.2);">Pronto a iniziare?</div>
-            <h2>Fai il primo scan e scopri dove intervenire davvero.</h2>
-            <p>Registrati, completa l’onboarding e ottieni una fotografia chiara del tuo business in meno di 5 minuti.</p>
+            <h2 style="color: white; font-size: 2.5rem;">Prendi in mano il tuo Salone.</h2>
+            <p style="color: #cbd5e1; font-size: 1.2rem; margin-bottom: 30px;">Crea il tuo account oggi. Mettiti comodo, inserisci gli incassi di questo mese e scopri come far crescere la tua attività.</p>
           </div>
-
-          <div class="cta-side">
+          <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
             {% if current_user.is_authenticated %}
-              <a class="btn btn-secondary btn-lg" style="width: 100%;" href="{{ url_for('wizard.onboarding') }}">Nuovo scan</a>
-              <a class="btn btn-lg" style="width: 100%; border: 1px solid rgba(255,255,255,.2); background: transparent;" href="{{ url_for('scans.dashboard') }}">Vai alla dashboard</a>
+              <a class="btn btn-primary btn-lg" style="padding: 15px 40px; font-size: 1.2rem; border-radius: 30px;" href="{{ url_for('wizard.onboarding') }}">Analizza il Negozio</a>
             {% else %}
-              <a class="btn btn-secondary btn-lg" style="width: 100%;" href="{{ url_for('auth.register') }}">Crea account gratuito</a>
-              <a class="btn btn-lg" style="width: 100%; border: 1px solid rgba(255,255,255,.2); background: transparent;" href="{{ url_for('auth.login') }}">Accedi</a>
+              <a class="btn btn-primary btn-lg" style="padding: 15px 40px; font-size: 1.2rem; border-radius: 30px;" href="{{ url_for('auth.register') }}">Crea Account Gratuito</a>
             {% endif %}
           </div>
         </div>
@@ -215,19 +160,9 @@
     </section>
   </main>
 
-  <footer class="site-footer">
-    <div class="container footer-inner">
-      <div>
-        <div class="footer-brand">Triad Insight</div>
-        <div class="footer-copy">Diagnosi chiara del business, in pochi minuti.</div>
-      </div>
-
-      <div class="footer-links">
-        <a href="#prodotto">Prodotto</a>
-        <a href="#come-funziona">Come funziona</a>
-        <a href="{{ url_for('pricing') }}">Prezzi</a>
-      </div>
-    </div>
+  <footer class="site-footer" style="text-align: center; padding: 40px; border-top: 1px solid #e2e8f0;">
+    <div style="font-weight: 800; font-size: 1.2em; color: #1a1a2e;">✂️ Salone al Top</div>
+    <div style="color: #64748b; margin-top: 10px;">Creato per chi lavora con passione nel mondo dell'Hair Care.</div>
   </footer>
   
 </body>

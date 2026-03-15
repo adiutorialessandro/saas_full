@@ -3,66 +3,229 @@ from wtforms import StringField, PasswordField, SubmitField, FloatField, RadioFi
 from wtforms.validators import DataRequired, Email, Length, NumberRange, Optional, Regexp, EqualTo
 
 class RegisterForm(FlaskForm):
-    email = StringField("Email", validators=[DataRequired(), Email()])
-    password = PasswordField("Password", validators=[DataRequired(), Length(min=6)])
-    password2 = PasswordField("Ripeti Password", validators=[DataRequired(), EqualTo("password")])
+    email = StringField("📧 Email", validators=[DataRequired(), Email()])
+    password = PasswordField("🔐 Password", validators=[DataRequired(), Length(min=6)])
+    password2 = PasswordField("🔐 Ripeti Password", validators=[DataRequired(), EqualTo("password")])
     submit = SubmitField("Registrati")
 
 class LoginForm(FlaskForm):
-    email = StringField("Email", validators=[DataRequired(), Email()])
-    password = PasswordField("Password", validators=[DataRequired()])
+    email = StringField("📧 Email", validators=[DataRequired(), Email()])
+    password = PasswordField("🔐 Password", validators=[DataRequired()])
     submit = SubmitField("Accedi")
 
 class OnboardingForm(FlaskForm):
     tipologia_impresa = SelectField(
-        "Tipologia di impresa",
-        choices=[('', 'Seleziona...'), ('Consulenza B2B', 'Consulenza B2B'), ('Retail', 'Retail'), ('Manifattura', 'Manifattura'), ('SaaS / Tech', 'SaaS / Tech'), ('Ho.Re.Ca.', 'Ho.Re.Ca.'), ('Immobiliare', 'Immobiliare'), ('Sanità / Studi medici', 'Sanità / Studi medici'), ('Generico', 'Altro (Generico)')],
-        validators=[DataRequired()], description="Seleziona il mercato principale per confrontare i tuoi dati con le medie di settore."
-    )
-    modello = SelectField(
-        "Modello di business",
-        choices=[('', 'Seleziona...'), ('B2B', 'B2B (Business to Business)'), ('B2C', 'B2C (Business to Consumer)'), ('SaaS', 'SaaS (Software)'), ('E-commerce', 'E-commerce'), ('Agenzia', 'Agenzia di servizi')],
-        validators=[DataRequired()], description="Come l'azienda genera valore e vende i propri prodotti o servizi ai clienti."
-    )
-    dimensione = SelectField(
-        "Dimensione dell'impresa",
-        choices=[('', 'Seleziona...'), ('Micro', 'Microimpresa (0-9 dipendenti)'), ('Piccola', 'Piccola impresa (10-49 dipendenti)'), ('Media', 'Media impresa (50-249 dipendenti)'), ('Grande', 'Grande impresa (Oltre 250 dipendenti)')],
+        "✂️ Tipologia di Salone",
+        choices=[
+            ('', 'Seleziona...'),
+            ('Donna', '💇‍♀️ Salone Donna'),
+            ('Uomo', '🧔 Barber / Salone Uomo'),
+            ('Unisex', '👫 Salone Unisex'),
+            ('Salone + Estetica', '💅 Salone con cabina estetica')
+        ],
         validators=[DataRequired()]
     )
-    dipendenti = IntegerField("Numero di dipendenti", validators=[DataRequired(), NumberRange(min=0)], description="Numero esatto o approssimativo di collaboratori e dipendenti a carico.")
-    area_geografica = StringField("Area geografica", validators=[DataRequired(), Length(min=2, max=100)], description="Es. Nord Italia, Lombardia, Estero. Serve per contestualizzare il costo del lavoro.")
-    fatturato = StringField("Fatturato indicativo annuo (€)", validators=[DataRequired()], description="Il volume d'affari (fatturato) stimato o registrato nell'ultimo anno.")
-    tipologia_clienti = SelectField(
-        "Tipologia di clienti",
-        choices=[('', 'Seleziona...'), ('PMI', 'Aziende PMI'), ('Corporate', 'Grandi Aziende (Corporate)'), ('Privati', 'Consumatori finali (Privati)'), ('PA', 'Pubblica Amministrazione')],
-        validators=[DataRequired()], description="A chi ti rivolgi prevalentemente per le tue vendite."
+
+    modello = SelectField(
+        "👑 Fascia di Posizionamento",
+        choices=[
+            ('', 'Seleziona...'),
+            ('Economico', '🪙 Base / Prezzi Popolari'),
+            ('Medio', '✨ Fascia Media'),
+            ('Premium', '💎 Premium / Lusso')
+        ],
+        validators=[DataRequired()]
     )
-    mese_riferimento = StringField("Mese riferimento (YYYY-MM)", validators=[DataRequired(), Regexp(r"^\d{4}-\d{2}$", message="Formato: YYYY-MM")], description="Il mese di riferimento dei dati che inserirai (Es: 2024-03).")
+
+    dimensione = SelectField(
+        "🪑 Dimensione del Salone",
+        choices=[
+            ('', 'Seleziona...'),
+            ('Piccolo', '1️⃣ Piccolo (1-2 postazioni)'),
+            ('Medio', '3️⃣ Medio (3-5 postazioni)'),
+            ('Grande', '6️⃣ Grande (Oltre 5 postazioni)')
+        ],
+        validators=[DataRequired()]
+    )
+
+    dipendenti = IntegerField(
+        "👥 Numero di collaboratori",
+        validators=[DataRequired(), NumberRange(min=0)],
+        description="Escludendo te, quanti collaboratori operano in salone? ✂️"
+    )
+
+    area_geografica = StringField(
+        "📍 Provincia / Città",
+        validators=[DataRequired(), Length(min=2, max=100)]
+    )
+
+    fatturato = StringField(
+        "💰 Fatturato annuo stimato (€)",
+        validators=[DataRequired()],
+        description="Il volume d'affari complessivo dell'ultimo anno."
+    )
+
+    tipologia_clienti = SelectField(
+        "💇 Frequenza Clienti",
+        choices=[
+            ('', 'Seleziona...'),
+            ('Alta', '😊 Alta frequenza (piega settimanale)'),
+            ('Media', '🙂 Media (taglio/colore mensile)'),
+            ('Bassa', '😐 Bassa (solo servizi tecnici occasionali)')
+        ],
+        validators=[DataRequired()]
+    )
+
+    mese_riferimento = StringField(
+        "📅 Mese di riferimento (YYYY-MM)",
+        validators=[DataRequired(), Regexp(r"^\d{4}-\d{2}$", message="Formato: YYYY-MM")],
+        description="Il mese che vuoi analizzare (es: 2024-03)"
+    )
+
     submit = SubmitField("Continua")
 
 class EssentialDataForm(FlaskForm):
-    cassa_attuale = FloatField("Disponibilità Liquide (€)", validators=[Optional(), NumberRange(min=0)], description="I soldi effettivi attualmente disponibili sui conti correnti aziendali e in cassa.")
-    burn_mensile = FloatField("Burn Rate Mensile (€)", validators=[Optional(), NumberRange(min=0)], description="I costi fissi che devi pagare ogni mese per tenere aperta l'azienda, indipendentemente dalle vendite (affitti, stipendi fissi, software, ecc.).")
-    incassi_mese = FloatField("Cash-In del Mese (€)", validators=[Optional(), NumberRange(min=0)], description="Il totale dei soldi incassati (entrati fisicamente in banca) in un mese medio.")
-    costi_fissi_mese = FloatField("Costi Operativi Fissi (€)", validators=[Optional(), NumberRange(min=0)], description="Il totale delle spese mensili fisse necessarie per operare.")
-    margine_lordo_pct = FloatField("Margine di Contribuzione (%)", validators=[Optional(), NumberRange(min=0, max=100)], description="Quello che ti rimane in tasca da una vendita dopo aver sottratto solo i costi diretti (es. materie prime) per produrre o erogare il servizio. Esprimilo in percentuale (es. 40).")
-    leads_mese = FloatField("Volume Nuove Opportunità (#)", validators=[Optional(), NumberRange(min=0)], description="Il numero di nuovi potenziali clienti (contatti/lead) che ricevi in media in un mese.")
-    clienti_mese = FloatField("Nuove Conversioni (#)", validators=[Optional(), NumberRange(min=0)], description="Quanti di quei contatti o preventivi diventano effettivamente clienti paganti ogni mese.")
-    submit = SubmitField("Continua")
+    cassa_attuale = FloatField(
+        "💰 Liquidità in Cassa (€)",
+        validators=[Optional(), NumberRange(min=0)],
+        description="Soldi disponibili oggi tra banca e cassa fisica. 🏦"
+    )
+
+    incassi_totali_mese = FloatField(
+        "🧾 Incasso Totale Mensile (€)",
+        validators=[Optional(), NumberRange(min=0)],
+        description="Tutto ciò che è passato in cassa questo mese. 🧴+💇"
+    )
+
+    incassi_retail_mese = FloatField(
+        "🧴 Incasso da Prodotti (Rivendita) (€)",
+        validators=[Optional(), NumberRange(min=0)],
+        description="Quanto hai incassato vendendo prodotti da casa? 🛍️"
+    )
+
+    numero_clienti_mese = FloatField(
+        "👭 Totale Scontrini Emessi",
+        validators=[Optional(), NumberRange(min=0)],
+        description="Quante 'teste' sono passate in salone questo mese? 👤"
+    )
+
+    costi_materiali_mese = FloatField(
+        "🎨 Spesa Prodotti Professionale (€)",
+        validators=[Optional(), NumberRange(min=0)],
+        description="Costi per colori, ossigeni, shampoo e monouso. 🧪"
+    )
+
+    costi_fissi_mese = FloatField(
+        "🏠 Affitto, Utenze e Spese Varie (€)",
+        validators=[Optional(), NumberRange(min=0)],
+        description="Escludi gli stipendi qui, inseriscili sotto. ⚡"
+    )
+
+    costo_stipendi_mese = FloatField(
+        "💶 Costo Totale del Personale (€)",
+        validators=[Optional(), NumberRange(min=0)],
+        description="Somma lorda di tutti gli stipendi dei tuoi ragazzi. 👨‍👩‍👧‍👦"
+    )
+
+    ore_lavorate_mese = FloatField(
+        "⏱️ Ore Totali di Operatività",
+        validators=[Optional(), NumberRange(min=0)],
+        description="Somma di tutte le ore lavorate da te e dallo staff. ⏳"
+    )
+
+    percentuale_servizi_tecnici = FloatField(
+        "🎨 % Servizi Tecnici (Colore/Schiariture)",
+        validators=[Optional(), NumberRange(min=0, max=100)],
+        description="Su 100 clienti, quante fanno un servizio tecnico e non solo piega? 🌈"
+    )
+
+    submit = SubmitField("Genera Analisi Strategica")
 
 class QuizForm(FlaskForm):
-    _choices = [(1, "1"), (2, "2"), (3, "3"), (4, "4"), (5, "5")]
-    q1 = RadioField("Financial Runway & Visibility", choices=_choices, coerce=int, validators=[DataRequired()], description="Hai chiara visibilità su quanti mesi l'azienda può sopravvivere con la cassa attuale in caso di assenza di nuovi incassi?")
-    q2 = RadioField("Cash Flow Stability", choices=_choices, coerce=int, validators=[DataRequired()], description="Le tue entrate mensili sono stabili e prevedibili (voto alto) o subiscono forti sbalzi e ritardi (voto basso)?")
-    q3 = RadioField("Analisi della Marginalità", choices=_choices, coerce=int, validators=[DataRequired()], description="Conosci esattamente quanto guadagni su ogni singolo prodotto/servizio venduto e sai se qualcuno è in perdita?")
-    q4 = RadioField("Sostenibilità della Struttura", choices=_choices, coerce=int, validators=[DataRequired()], description="I costi per mantenere l'azienda sono ben coperti dagli incassi (voto alto) o iniziano a pesare troppo (voto basso)?")
-    q5 = RadioField("Pipeline di Vendita", choices=_choices, coerce=int, validators=[DataRequired()], description="Hai un flusso costante, prevedibile e organizzato di nuovi potenziali clienti interessati?")
-    q6 = RadioField("Efficienza Commerciale", choices=_choices, coerce=int, validators=[DataRequired()], description="Riesci a trasformare facilmente i contatti in clienti chiudendo i contratti senza dover fare sconti eccessivi?")
-    q7 = RadioField("Risk Diversification", choices=_choices, coerce=int, validators=[DataRequired()], description="Il tuo fatturato è ben distribuito (voto alto) o sei a rischio se perdi 1-2 clienti principali (voto basso)?")
-    q8 = RadioField("Data-Driven Management", choices=_choices, coerce=int, validators=[DataRequired()], description="Prendi le decisioni basandoti su numeri e report periodici o ti affidi quasi esclusivamente al tuo intuito e all'esperienza?")
-    q9 = RadioField("Efficienza Operativa", choices=_choices, coerce=int, validators=[DataRequired()], description="I processi interni sono ben organizzati o tu e il team perdete molto tempo in inefficienze, ritardi o doppi passaggi?")
-    q10 = RadioField("Execution & Agility", choices=_choices, coerce=int, validators=[DataRequired()], description="Riesci ad adattare rapidamente l'azienda ai cambiamenti del mercato e a implementare velocemente nuove idee operative?")
-    submit = SubmitField("Genera Analisi Strategica")
+    # Opzioni visive "Effetto Wow" per percepire immediatamente lo stato del salone
+    _choices_visual = [
+        ('5', "🤩 **Stellare** - Cliente entusiasta, capelli perfetti!"),
+        ('4', "🙂 **Buono** - Capelli in ordine, cliente soddisfatta."),
+        ('3', "😐 **Stagnante** - Capelli senza lode, cliente abituale ma tiepida."),
+        ('2', "🙁 **In calo** - Capelli un po' spenti, cliente che guarda altrove."),
+        ('1', "😟 **Emergenza** - Capelli rovinati e cliente che non torna!"),
+    ]
+
+    q1 = RadioField(
+        "💇‍♀️ Fidelizzazione: Ritornano o spariscono?",
+        choices=_choices_visual,
+        validators=[DataRequired()],
+        description="Le tue clienti tornano con regolarità o è un 'mordi e fuggi'?"
+    )
+
+    q2 = RadioField(
+        "🧴 Upselling al Lavatesta",
+        choices=_choices_visual,
+        validators=[DataRequired()],
+        description="Riesci a vendere una fiala o una ricostruzione a ogni lavaggio? 🫧"
+    )
+
+    q3 = RadioField(
+        "🛍️ Cultura del Prodotto a Casa",
+        choices=_choices_visual,
+        validators=[DataRequired()],
+        description="Le clienti escono con lo shampoo consigliato da te o comprano al supermercato? 🧴"
+    )
+
+    q4 = RadioField(
+        "⏱️ Ottimizzazione Tempi Morti",
+        choices=_choices_visual,
+        validators=[DataRequired()],
+        description="Mentre il colore posa, lo staff propone manicure o vendita prodotti? ⏳"
+    )
+
+    q5 = RadioField(
+        "⚖️ Controllo Sprechi Colore",
+        choices=_choices_visual,
+        validators=[DataRequired()],
+        description="Usi la bilancia digitale per ogni grammo di colore o vai 'ad occhio'? 🧪"
+    )
+
+    q6 = RadioField(
+        "🌟 Marketing Stagionale",
+        choices=_choices_visual,
+        validators=[DataRequired()],
+        description="Sfrutti le ricorrenze (Natale, Estate, Sposi) con pacchetti dedicati? 🗓️"
+    )
+
+    q7 = RadioField(
+        "📸 Autorità Social",
+        choices=_choices_visual,
+        validators=[DataRequired()],
+        description="Pubblichi regolarmente i tuoi 'Prima e Dopo' per attirare nuovi servizi tecnici? 🤳"
+    )
+
+    q8 = RadioField(
+        "🎓 Crescita del Team",
+        choices=_choices_visual,
+        validators=[DataRequired()],
+        description="Il tuo staff è aggiornato sulle ultime tendenze Balayage/Cheratina? 📚"
+    )
+
+    q9 = RadioField(
+        "💸 Sicurezza sul Listino",
+        choices=_choices_visual,
+        validators=[DataRequired()],
+        description="Ti senti sicuro quando comunichi il prezzo di un servizio tecnico complesso? 💰"
+    )
+
+    q10 = RadioField(
+        "👑 Percezione del Brand",
+        choices=_choices_visual,
+        validators=[DataRequired()],
+        description="Sei visto come l'esperto della zona o come quello 'più comodo/economico'? 🏆"
+    )
+
+    submit = SubmitField("Calcola il mio Numero Magico 🎯")
+
+# -----------------------------
+# FORM ADMIN (Invariati per logica di sistema)
+# -----------------------------
 
 class CreateOrganizationForm(FlaskForm):
     name = StringField("Nome azienda", validators=[DataRequired()])

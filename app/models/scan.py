@@ -22,3 +22,6 @@ class Scan(db.Model):
     finance_score = db.Column(db.Float)
     sales_score = db.Column(db.Float)
     ops_score = db.Column(db.Float)
+    
+    # --- Soft Delete flag ---
+    is_deleted = db.Column(db.Boolean, default=False, nullable=False)
