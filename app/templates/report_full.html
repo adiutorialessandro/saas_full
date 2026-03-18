@@ -3,537 +3,1391 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SaaS Full - Business Report</title>
+  <title>SaaS Full – Report Interattivo</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
   
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/report.css') }}">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* ===== RESET & BASE ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+    }
+
+    body {
+      background: linear-gradient(135deg, #f5f8fb 0%, #e8eef5 100%);
+      color: #1a1a2e;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ===== LAYOUT ===== */
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 32px 20px;
+    }
+
+    /* ===== HEADER ===== */
+    .report-header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: white;
+      padding: 48px 32px;
+      border-radius: 16px;
+      margin-bottom: 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    }
+
+    .header-content h1 {
+      font-size: 2.4em;
+      font-weight: 800;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+
+    .header-meta {
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 1.05em;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .header-meta span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.95em;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #4fc3f7, #29b6f6);
+      color: white;
+      box-shadow: 0 4px 15px rgba(79, 195, 247, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(79, 195, 247, 0.4);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      border: 1.5px solid rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.25);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    @media (max-width: 900px) {
+      .report-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 24px;
+      }
+      .header-content h1 {
+        font-size: 1.8em;
+      }
+      .header-meta {
+        flex-direction: column;
+        justify-content: center;
+      }
+      .header-actions {
+        width: 100%;
+        flex-direction: column;
+      }
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    /* ===== SECTIONS ===== */
+    .section-header {
+      margin: 48px 0 28px 0;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: relative;
+    }
+
+    .section-header h2 {
+      font-size: 1.8em;
+      font-weight: 800;
+      color: #1a1a2e;
+      flex: 1;
+    }
+
+    .section-header::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 6px;
+      height: 32px;
+      background: linear-gradient(180deg, #4fc3f7 0%, #29b6f6 100%);
+      border-radius: 4px;
+    }
+
+    .section-header h2 {
+      padding-left: 20px;
+    }
+
+    .section-subtitle {
+      color: #666;
+      font-size: 0.95em;
+      margin: -20px 0 24px 0;
+    }
+
+    /* ===== GRID ===== */
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    @media (max-width: 768px) {
+      .grid-3,
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ===== CARDS ===== */
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #4fc3f7, #29b6f6);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .card:hover {
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+      transform: translateY(-4px);
+    }
+
+    .card:hover::before {
+      opacity: 1;
+    }
+
+    .card-title {
+      font-size: 1.15em;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .card-value {
+      font-size: 2.6em;
+      font-weight: 800;
+      color: #2d3748;
+      margin: 8px 0 4px 0;
+      line-height: 1.2;
+      word-break: break-word;
+    }
+
+    .card-desc {
+      color: #666;
+      font-size: 0.95em;
+      line-height: 1.6;
+      margin-top: 12px;
+    }
+
+    /* ===== DIAGNOSIS CARD ===== */
+    .diagnosis-card {
+      background: white;
+      border-radius: 20px;
+      border: none;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+      position: relative;
+      overflow: hidden;
+      border-left: 12px solid #888;
+      border-top: 6px solid #4fc3f7;
+    }
+
+    .diagnosis-card.green {
+      border-left-color: #6b8e6f;
+      border-top-color: #27ae60;
+    }
+
+    .diagnosis-card.yellow {
+      border-left-color: #a38d6b;
+      border-top-color: #f0a500;
+    }
+
+    .diagnosis-card.red {
+      border-left-color: #8b6b6b;
+      border-top-color: #c5221f;
+    }
+
+    .diagnosis-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    @media (max-width: 900px) {
+      .diagnosis-section {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .diagnosis-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .diagnosis-block {
+      background: rgba(0, 0, 0, 0.02);
+      padding: 16px;
+      border-radius: 10px;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .diagnosis-block strong {
+      display: block;
+      font-size: 0.7em;
+      font-weight: 800;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      margin-bottom: 8px;
+    }
+
+    .diagnosis-block p {
+      color: #333;
+      font-size: 0.95em;
+      line-height: 1.6;
+    }
+
+    /* ===== STATUS PILL ===== */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.75em;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .badge-green {
+      background: #e6f9f0;
+      color: #1e7e5f;
+    }
+
+    .badge-yellow {
+      background: #fffae6;
+      color: #d4a100;
+    }
+
+    .badge-orange {
+      background: #ffe6e6;
+      color: #c5221f;
+    }
+
+    .badge-icon {
+      font-size: 1em;
+    }
+
+    /* ===== TREND BADGE ===== */
+    .trend {
+      display: inline-block;
+      font-size: 0.85em;
+      padding: 6px 12px;
+      border-radius: 8px;
+      margin-top: 8px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+
+    .trend-up {
+      background: #e6f9f0;
+      color: #1e7e5f;
+    }
+
+    .trend-down {
+      background: #ffe6e6;
+      color: #c5221f;
+    }
+
+    .trend-flat {
+      background: #e8eef5;
+      color: #666;
+    }
+
+    /* ===== INFO TIP ===== */
+    .info-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      background: #e8eef5;
+      border-radius: 50%;
+      font-size: 0.75em;
+      font-weight: 700;
+      color: #4fc3f7;
+      cursor: help;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .info-icon:hover {
+      background: #4fc3f7;
+      color: white;
+    }
+
+    .info-tooltip {
+      display: none;
+      position: absolute;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1a1a2e;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.85em;
+      white-space: nowrap;
+      z-index: 100;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+      pointer-events: none;
+    }
+
+    .info-icon:hover .info-tooltip,
+    .info-icon[aria-expanded="true"] .info-tooltip {
+      display: block;
+    }
+
+    /* ===== BENCHMARK SECTION ===== */
+    .benchmark-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+    }
+
+    @media (max-width: 900px) {
+      .benchmark-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .benchmark-card {
+      background: white;
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .benchmark-title {
+      font-size: 1.2em;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 24px;
+    }
+
+    .bar-item {
+      margin-bottom: 24px;
+    }
+
+    .bar-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-weight: 700;
+      font-size: 0.95em;
+      color: #1a1a2e;
+    }
+
+    .bar-container {
+      width: 100%;
+      height: 14px;
+      background: #e8eef5;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 8px;
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      background-size: 200% 200%;
+      background-position: 0% 0%;
+    }
+
+    .bar-cash {
+      background: linear-gradient(90deg, #1e7e5f 0%, #27ae60 100%);
+    }
+
+    .bar-margini {
+      background: linear-gradient(90deg, #2196f3 0%, #4fc3f7 100%);
+    }
+
+    .bar-acq {
+      background: linear-gradient(90deg, #f39c12 0%, #f0a500 100%);
+    }
+
+    /* ===== BENCHMARK COMPARISON ===== */
+    .comparison-item {
+      padding: 16px 0;
+      border-bottom: 1px solid #e8eef5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .comparison-item:last-child {
+      border-bottom: none;
+    }
+
+    .comparison-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot-green {
+      background: #27ae60;
+    }
+
+    .dot-yellow {
+      background: #f0a500;
+    }
+
+    .dot-orange {
+      background: #e67e22;
+    }
+
+    .dot-red {
+      background: #c5221f;
+    }
+
+    .comparison-label {
+      flex: 1;
+      font-weight: 700;
+      color: #1a1a2e;
+      font-size: 0.95em;
+    }
+
+    .comparison-values {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      font-size: 0.95em;
+    }
+
+    .comparison-current {
+      font-weight: 700;
+      color: #2d3748;
+      min-width: 60px;
+      text-align: right;
+    }
+
+    .comparison-target {
+      color: #999;
+      font-size: 0.85em;
+      min-width: 80px;
+    }
+
+    /* ===== ROADMAP ===== */
+    .roadmap-container {
+      background: white;
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .roadmap-list {
+      list-style: none;
+    }
+
+    .roadmap-item {
+      padding: 24px;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #f5f8fb 0%, #e8eef5 100%);
+      border-left: 6px solid #4fc3f7;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .roadmap-item:hover {
+      background: linear-gradient(135deg, #e8eef5 0%, #dde5f0 100%);
+      transform: translateX(4px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .roadmap-week {
+      font-size: 0.85em;
+      font-weight: 800;
+      color: #4fc3f7;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .roadmap-action {
+      font-size: 1.1em;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 12px;
+    }
+
+    .roadmap-meta {
+      color: #666;
+      font-size: 0.9em;
+      line-height: 1.8;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+    }
+
+    .roadmap-meta strong {
+      color: #1a1a2e;
+      font-weight: 700;
+    }
+
+    /* ===== CHARTS ===== */
+    .chart-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    @media (max-width: 768px) {
+      .chart-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .chart-card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+      min-height: 380px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chart-title {
+      font-weight: 700;
+      font-size: 1.1em;
+      color: #1a1a2e;
+      margin-bottom: 20px;
+    }
+
+    .chart-container {
+      flex: 1;
+      position: relative;
+    }
+
+    canvas {
+      max-height: 320px;
+    }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      text-align: center;
+      padding: 32px 0;
+      color: #999;
+      font-size: 0.9em;
+      border-top: 1px solid #e8eef5;
+      margin-top: 48px;
+    }
+
+    /* ===== UTILITY ===== */
+    .muted {
+      color: #999;
+      font-size: 0.9em;
+    }
+
+    .insight-box {
+      background: #f5f8fb;
+      border-left: 4px solid #4fc3f7;
+      padding: 16px;
+      border-radius: 8px;
+      margin-top: 16px;
+    }
+
+    .insight-title {
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 6px;
+    }
+
+    .insight-text {
+      color: #666;
+      font-size: 0.95em;
+    }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .card {
+      animation: slideInUp 0.5s ease-out forwards;
+    }
+
+    .card:nth-child(1) {
+      animation-delay: 0.1s;
+    }
+
+    .card:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .card:nth-child(3) {
+      animation-delay: 0.3s;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 600px) {
+      .container {
+        padding: 16px 12px;
+      }
+      .report-header {
+        padding: 32px 20px;
+      }
+      .header-content h1 {
+        font-size: 1.6em;
+      }
+      .card-value {
+        font-size: 2em;
+      }
+      .section-header h2 {
+        font-size: 1.4em;
+      }
+      .roadmap-meta {
+        grid-template-columns: 1fr;
+      }
+      .diagnosis-grid {
+        grid-template-columns: 1fr;
+      }
+      .diagnosis-card {
+        border-left-width: 8px;
+        border-top-width: 4px;
+      }
+    }
+  </style>
 </head>
 <body>
-  {% set benchmarks = vm.get("benchmark_results", {}) %}
 
-  <div class="report-wrap">
-    <div class="report-hero">
-      <div>
-        <div class="report-kicker">SaaS Full · Business Report</div>
-        <h1>{{ scan_meta.settore }}</h1>
-        <div class="report-sub">
-          {{ scan_meta.modello }} · {{ scan_meta.mese }}
-          {% if scan_meta.created_at %} · {{ scan_meta.created_at }}{% endif %}
+{# ===== DATA NORMALIZATION ===== #}
+{% set safe_vm = {
+  'state': {
+    'overall_score': vm.state.overall_score or 50,
+    'confidence': vm.state.confidence or 50,
+    'risk_profile': vm.state.risk_profile or "—",
+    'maturity_label': vm.state.maturity_label or "—",
+    'summary': vm.state.summary or "Sommario non disponibile."
+  },
+  'risks': {
+    'cash': ((vm.risks.cash or 0) * 100)|round(1),
+    'margini': ((vm.risks.margini or 0) * 100)|round(1),
+    'acq': ((vm.risks.acq or 0) * 100)|round(1)
+  },
+  'kpi': {
+    'runway_mesi': vm.kpi.runway_mesi,
+    'break_even_ratio': vm.kpi.break_even_ratio,
+    'conversione': vm.kpi.conversione,
+    'margine_pct': vm.kpi.margine_pct,
+    'burn_cash_ratio': vm.kpi.burn_cash_ratio,
+    'incassi_mese': vm.kpi.incassi_mese
+  },
+  'decisions': {
+    'cash': vm.decisions.cash or "—",
+    'margini': vm.decisions.margini or "—",
+    'acq': vm.decisions.acq or "—"
+  }
+} %}
+
+{% set benchmarks = vm.get("benchmark_results", {}) %}
+{% set urgency = {
+  'cash_pct': (header_payload.urgency.cash_pct if header_payload and header_payload.urgency else 33)|int,
+  'margini_pct': (header_payload.urgency.margini_pct if header_payload and header_payload.urgency else 33)|int,
+  'acq_pct': (header_payload.urgency.acq_pct if header_payload and header_payload.urgency else 34)|int
+} %}
+
+{# Status determination - usa header_payload.health.tone #}
+{% set status_class = header_payload.health.tone if (header_payload and header_payload.health and header_payload.health.tone) else 'green' %}
+
+{# ===== MACROS ===== #}
+
+{# Macro Risk Card #}
+{% macro risk_card(title, value, status, description, tooltip="") %}
+  <div class="card">
+    <div class="card-title">
+      {{ title }}
+      {% if tooltip %}
+        <div class="info-icon" tabindex="0" role="button" aria-label="Info: {{ title }}" aria-expanded="false">
+          <span style="font-size: 1.2em;">i</span>
+          <div class="info-tooltip">{{ tooltip }}</div>
+        </div>
+      {% else %}
+        <span class="badge badge-{{ status|lower }}">
+          <span class="badge-icon">
+            {% if status == 'VERDE' %}✓{% elif status == 'GIALLO' %}⚠{% elif status == 'ORANGE' %}!{% endif %}
+          </span>
+          {{ status }}
+        </span>
+      {% endif %}
+    </div>
+    <div class="card-value">{{ value }}</div>
+    <div class="card-desc">{{ description }}</div>
+  </div>
+{% endmacro %}
+
+{# Macro KPI Card #}
+{% macro kpi_card(title, value, status, description, tooltip="") %}
+  <div class="card">
+    <div class="card-title">
+      {{ title }}
+      {% if tooltip %}
+        <div class="info-icon" tabindex="0" role="button" aria-label="Info: {{ title }}" aria-expanded="false">
+          <span style="font-size: 1.2em;">i</span>
+          <div class="info-tooltip">{{ tooltip }}</div>
+        </div>
+      {% else %}
+        <span class="badge badge-{{ status|lower }}">
+          {% if status == 'VERDE' %}✓{% elif status == 'GIALLO' %}⚠{% elif status == 'ORANGE' %}!{% endif %}
+        </span>
+      {% endif %}
+    </div>
+    <div class="card-value">{{ value }}</div>
+    <div class="card-desc">{{ description }}</div>
+  </div>
+{% endmacro %}
+
+<div class="container">
+
+  {# ===== HEADER ===== #}
+  <div class="report-header">
+    <div class="header-content">
+      <h1>{{ scan_meta.settore }}</h1>
+      <div class="header-meta">
+        <span>📊 {{ scan_meta.modello }}</span>
+        <span>📅 {{ scan_meta.mese }}</span>
+        {% if scan_meta.created_at %}<span>🕐 {{ scan_meta.created_at }}</span>{% endif %}
+      </div>
+    </div>
+    <div class="header-actions">
+      <a class="btn btn-secondary" href="{{ url_for('scans.dashboard') }}">← Torna</a>
+      <a class="btn btn-primary" href="{{ url_for('scans.scan_pdf', scan_id=scan.id) }}">⬇ PDF</a>
+    </div>
+  </div>
+
+  {# ===== STRATEGIC DIAGNOSIS SECTION ===== #}
+  <div class="section-header">
+    <h2>Strategic Diagnosis</h2>
+  </div>
+
+  <div class="diagnosis-section">
+    {# Left: Strategic Diagnosis #}
+    <div class="card diagnosis-card {{ status_class }}">
+      <div class="card-title" style="margin-bottom: 16px;">
+        <span>🔍 Diagnosi Strategica</span>
+        {% if header_payload and header_payload.health %}
+          <span class="badge badge-{{ header_payload.health.tone }}">
+            {{ header_payload.health.icon }} {{ header_payload.health.label|upper }}
+          </span>
+        {% endif %}
+      </div>
+
+      <p style="color: #666; margin-bottom: 20px;">{{ header_payload.diagnosis.headline if header_payload and header_payload.diagnosis else 'Diagnosi non disponibile.' }}</p>
+
+      <div class="diagnosis-grid">
+        <div class="diagnosis-block">
+          <strong>Diagnosi</strong>
+          <p>{{ header_payload.diagnosis.diagnosis if header_payload and header_payload.diagnosis else safe_vm.state.summary }}</p>
+        </div>
+        <div class="diagnosis-block">
+          <strong>Trend</strong>
+          <p>{{ header_payload.diagnosis.trend if header_payload and header_payload.diagnosis else 'Trend non disponibile.' }}</p>
         </div>
       </div>
 
-      <div class="report-hero-actions">
-        <a class="btn btn-secondary" href="{{ url_for('scans.dashboard') }}">Torna all'App</a>
-        <a class="btn" href="{{ url_for('scans.scan_pdf', scan_id=scan.id) }}">Scarica PDF</a>
-        <a class="btn btn-secondary" href="{{ url_for('scans.scan_onepager', scan_id=scan.id) }}">One Pager</a>
+      <div class="diagnosis-grid" style="margin-top: 12px;">
+        <div class="diagnosis-block">
+          <strong>Priorità</strong>
+          <p>{{ header_payload.diagnosis.priority if header_payload and header_payload.diagnosis else 'Priorità non disponibile.' }}</p>
+        </div>
+        <div class="diagnosis-block">
+          <strong>Punto Forte</strong>
+          <p>{{ header_payload.diagnosis.strength if header_payload and header_payload.diagnosis else 'Punto di forza non disponibile.' }}</p>
+        </div>
       </div>
     </div>
 
-    <section class="report-section diagnosis-section">
-      <div class="report-card diagnosis-card diagnosis-{{ header_payload.diagnosis.status_tone if header_payload and header_payload.diagnosis else 'warning' }}">
-        <div class="diagnosis-topline">Strategic Diagnosis</div>
-        <div class="diagnosis-headline">{{ header_payload.diagnosis.headline if header_payload and header_payload.diagnosis else '🟡 Watchlist' }}</div>
-        <p class="diagnosis-summary">{{ header_payload.diagnosis.summary if header_payload and header_payload.diagnosis else vm.state.summary }}</p>
-
-        <div class="diagnosis-grid">
-          <div class="diagnosis-block">
-            <div class="card-label">Diagnosi</div>
-            <p>{{ header_payload.diagnosis.diagnosis if header_payload and header_payload.diagnosis else vm.state.summary }}</p>
-          </div>
-          <div class="diagnosis-block">
-            <div class="card-label">Trend</div>
-            <p>{{ header_payload.diagnosis.trend if header_payload and header_payload.diagnosis else 'Trend non disponibile.' }}</p>
-          </div>
-        </div>
-
-        <div class="diagnosis-grid diagnosis-grid-bottom">
-          <div class="diagnosis-block">
-            <div class="card-label">Priorità</div>
-            <p>{{ header_payload.diagnosis.priority if header_payload and header_payload.diagnosis else 'Priorità non disponibile.' }}</p>
-          </div>
-          <div class="diagnosis-block">
-            <div class="card-label">Punto forte relativo</div>
-            <p>{{ header_payload.diagnosis.strength if header_payload and header_payload.diagnosis else 'Punto di forza non disponibile.' }}</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="report-section executive-insight-section">
-      <div class="report-card executive-insight executive-{{ header_payload.health.tone if header_payload and header_payload.health else 'warning' }}">
-        <div class="executive-insight-top">
-          <div>
-            <div class="executive-insight-kicker">Executive Insight</div>
-            <h2>Indicazione manageriale sintetica</h2>
-          </div>
-
-          {% if header_payload and header_payload.health %}
-            <div class="status-pill status-{{ header_payload.health.tone }}">
-              {{ header_payload.health.icon }} {{ header_payload.health.label }}
-            </div>
-          {% endif %}
-        </div>
-
-        <div class="executive-insight-body">
-          <div class="executive-line">
-            <div class="executive-label">Situazione</div>
-            <p>
-              {{ header_payload.comparative_insight if header_payload and header_payload.comparative_insight else vm.state.summary }}
-            </p>
-          </div>
-
-          <div class="executive-line">
-            <div class="executive-label">Priorità dominante</div>
-            <p>
-              {{ header_payload.priority.title if header_payload and header_payload.priority else "Priorità non disponibile" }} —
-              {{ header_payload.priority.description if header_payload and header_payload.priority else "" }}
-            </p>
-          </div>
-
-          <div class="executive-line">
-            <div class="executive-label">Punto relativamente più solido</div>
-            <p>
-              {{ header_payload.diagnosis.strength if header_payload and header_payload.diagnosis else "Punto di forza non disponibile." }}
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="hero-grid">
-      <div class="report-card score-card">
-        <div class="card-label">Business Stability Score</div>
-        <div class="score-big">{{ vm.state.overall_score or 50 }}/100</div>
-
+    {# Right: Executive Insight #}
+    <div class="card diagnosis-card {{ status_class }}">
+      <div class="card-title" style="margin-bottom: 16px;">
+        <span>👔 Executive Insight</span>
         {% if header_payload and header_payload.health %}
-          <div class="status-pill status-{{ header_payload.health.tone }}">
-            {{ header_payload.health.icon }} {{ header_payload.health.label }}
-          </div>
-        {% endif %}
-
-        {% if header_payload and header_payload.score_trend %}
-          <div class="trend-badge trend-{{ header_payload.score_trend.tone }}">
-            {{ header_payload.score_trend.icon }} {{ header_payload.score_trend.value }}
-            {{ header_payload.score_trend.label }}
-          </div>
-        {% elif delta and delta.score is not none %}
-          <div class="trend-badge {% if delta.score > 0 %}trend-up{% elif delta.score < 0 %}trend-down{% else %}trend-flat{% endif %}">
-            {% if delta.score > 0 %}
-              ↑ +{{ delta.score }}
-            {% elif delta.score < 0 %}
-              ↓ {{ delta.score }}
-            {% else %}
-              → {{ delta.score }}
-            {% endif %}
-            vs scan precedente
-          </div>
-        {% endif %}
-
-        <div class="muted">Confidence {{ vm.state.confidence or 50 }}%</div>
-        <div class="muted">{{ vm.state.risk_profile }}</div>
-        <div class="muted">{{ vm.state.maturity_label }}</div>
-      </div>
-
-      <div class="report-card">
-        <div class="card-title">Executive Summary</div>
-        <p>{{ vm.state.summary }}</p>
-        {% if header_payload and header_payload.comparative_insight %}
-          <div class="insight-box">
-            <div class="card-label">Comparative Insight</div>
-            <p>{{ header_payload.comparative_insight }}</p>
-          </div>
-        {% endif %}
-      </div>
-    </section>
-
-    <section class="report-section">
-      <div class="section-head">
-        <h2>Business Risk Snapshot</h2>
-      </div>
-
-      <div class="grid-3">
-        <div class="report-card risk-card">
-          <div class="card-title">Cassa</div>
-          <div class="risk-value">{{ ((vm.risks.cash or 0) * 100)|round|int }}%</div>
-          {% if header_payload and header_payload.cash_trend %}
-            <div class="trend-badge trend-{{ header_payload.cash_trend.tone }}">
-              {{ header_payload.cash_trend.icon }} {{ header_payload.cash_trend.value }}
-              {{ header_payload.cash_trend.label }}
-            </div>
-          {% elif delta and delta.cash is not none %}
-            <div class="trend-badge {% if delta.cash < 0 %}trend-up{% elif delta.cash > 0 %}trend-down{% else %}trend-flat{% endif %}">
-              {% if delta.cash < 0 %}↑ {{ delta.cash|abs }}{% elif delta.cash > 0 %}↓ +{{ delta.cash }}{% else %}→ {{ delta.cash }}{% endif %}
-              vs precedente
-            </div>
-          {% endif %}
-        </div>
-
-        <div class="report-card risk-card">
-          <div class="card-title">Margini</div>
-          <div class="risk-value">{{ ((vm.risks.margini or 0) * 100)|round|int }}%</div>
-          {% if header_payload and header_payload.margini_trend %}
-            <div class="trend-badge trend-{{ header_payload.margini_trend.tone }}">
-              {{ header_payload.margini_trend.icon }} {{ header_payload.margini_trend.value }}
-              {{ header_payload.margini_trend.label }}
-            </div>
-          {% elif delta and delta.margini is not none %}
-            <div class="trend-badge {% if delta.margini < 0 %}trend-up{% elif delta.margini > 0 %}trend-down{% else %}trend-flat{% endif %}">
-              {% if delta.margini < 0 %}↑ {{ delta.margini|abs }}{% elif delta.margini > 0 %}↓ +{{ delta.margini }}{% else %}→ {{ delta.margini }}{% endif %}
-              vs precedente
-            </div>
-          {% endif %}
-        </div>
-
-        <div class="report-card risk-card">
-          <div class="card-title">Acquisizione</div>
-          <div class="risk-value">{{ ((vm.risks.acq or 0) * 100)|round|int }}%</div>
-          {% if header_payload and header_payload.acq_trend %}
-            <div class="trend-badge trend-{{ header_payload.acq_trend.tone }}">
-              {{ header_payload.acq_trend.icon }} {{ header_payload.acq_trend.value }}
-              {{ header_payload.acq_trend.label }}
-            </div>
-          {% elif delta and delta.acq is not none %}
-            <div class="trend-badge {% if delta.acq < 0 %}trend-up{% elif delta.acq > 0 %}trend-down{% else %}trend-flat{% endif %}">
-              {% if delta.acq < 0 %}↑ {{ delta.acq|abs }}{% elif delta.acq > 0 %}↓ +{{ delta.acq }}{% else %}→ {{ delta.acq }}{% endif %}
-              vs precedente
-            </div>
-          {% endif %}
-        </div>
-      </div>
-
-      <div class="chart-grid">
-        <div class="report-card">
-          <div class="card-title">Radar Rischi</div>
-          <canvas id="riskRadar"></canvas>
-        </div>
-        <div class="report-card">
-          <div class="card-title">Confronto Rischi</div>
-          <canvas id="riskBars"></canvas>
-        </div>
-      </div>
-    </section>
-
-    <section class="report-section">
-      <div class="section-head">
-        <h2>KPI Dashboard & Benchmark di Settore</h2>
-        {% if benchmarks %}
-          <p class="muted" style="margin-top:-10px; margin-bottom: 20px;">
-            Confronto calcolato sulle medie per il settore:
-            <strong>{{ vm.meta.benchmark_settore.settore_riferimento if vm.meta and vm.meta.benchmark_settore else (scan_meta.settore or "Media Standard") }}</strong>
-          </p>
+          <span class="badge badge-{{ header_payload.health.tone }}">
+            {{ header_payload.health.icon }} {{ header_payload.health.label|upper }}
+          </span>
         {% endif %}
       </div>
 
-      <div class="grid-3">
-        <div class="report-card">
-          <div class="card-title card-title-inline">
-            Cash Runway
-            <span class="info-tip" tabindex="0" aria-label="Spiegazione Cash Runway">
-              i
-              <span class="info-bubble">
-                {{ header_payload.runway_explanation if header_payload and header_payload.runway_explanation else "Indica per quanti mesi l'azienda può operare senza incassi." }}
-              </span>
-            </span>
-          </div>
-          <div class="kpi-value">
-            {% if vm.kpi.runway_mesi is not none %}
-              {{ "%.1f"|format(vm.kpi.runway_mesi) }} mesi
-            {% else %}
-              —
-            {% endif %}
-          </div>
-          {% if benchmarks %}
-            <div class="muted" style="font-size: 0.85em; margin-top: 8px; border-top: 1px solid #eee; padding-top: 5px;">
-              Target Settore: <strong>{{ benchmarks.runway.target if benchmarks.runway else "—" }} mesi</strong>
-            </div>
-          {% endif %}
-        </div>
+      <p style="color: #1a1a2e; font-weight: 700; font-size: 1.05em; margin-bottom: 16px;">Indicazione manageriale sintetica</p>
 
-        <div class="report-card">
-          <div class="card-title">Break-even ratio</div>
-          <div class="kpi-value">
-            {% if vm.kpi.break_even_ratio is not none %}
-              {{ "%.2f"|format(vm.kpi.break_even_ratio) }}
-            {% else %}
-              —
-            {% endif %}
-          </div>
-          {% if benchmarks %}
-            <div class="muted" style="font-size: 0.85em; margin-top: 8px; border-top: 1px solid #eee; padding-top: 5px;">
-              Target Settore: <strong>{{ "%.2f"|format(benchmarks.break_even.target) if benchmarks.break_even else "—" }}</strong>
-            </div>
-          {% endif %}
-        </div>
-
-        <div class="report-card">
-          <div class="card-title">Conversione</div>
-          <div class="kpi-value">
-            {% if vm.kpi.conversione is not none %}
-              {{ "%.1f"|format((vm.kpi.conversione if vm.kpi.conversione <= 1 else vm.kpi.conversione / 100) * 100) }}%
-            {% else %}
-              —
-            {% endif %}
-          </div>
-          {% if benchmarks %}
-            <div class="muted" style="font-size: 0.85em; margin-top: 8px; border-top: 1px solid #eee; padding-top: 5px;">
-              Target Settore: <strong>{{ "%.1f"|format((benchmarks.conversione.target * 100)) if benchmarks.conversione else "—" }}%</strong>
-            </div>
-          {% endif %}
-        </div>
-
-        <div class="report-card">
-          <div class="card-title">Margine lordo</div>
-          <div class="kpi-value">
-            {% if vm.kpi.margine_pct is not none %}
-              {{ "%.1f"|format((vm.kpi.margine_pct if vm.kpi.margine_pct <= 1 else vm.kpi.margine_pct / 100) * 100) }}%
-            {% else %}
-              —
-            {% endif %}
-          </div>
-          {% if benchmarks %}
-            <div class="muted" style="font-size: 0.85em; margin-top: 8px; border-top: 1px solid #eee; padding-top: 5px;">
-              Target Settore: <strong>{{ "%.1f"|format((benchmarks.margine.target * 100)) if benchmarks.margine else "—" }}%</strong>
-            </div>
-          {% endif %}
-        </div>
-
-        <div class="report-card">
-          <div class="card-title">Burn/Cash</div>
-          <div class="kpi-value">
-            {% if vm.kpi.burn_cash_ratio is not none %}
-              {{ "%.1f"|format((vm.kpi.burn_cash_ratio if vm.kpi.burn_cash_ratio <= 1 else vm.kpi.burn_cash_ratio / 100) * 100) }}%
-            {% else %}
-              —
-            {% endif %}
-          </div>
-        </div>
-
-        <div class="report-card">
-          <div class="card-title">Incassi mese</div>
-          <div class="kpi-value">
-            {% if vm.kpi.incassi_mese is not none %}
-              € {{ "%.0f"|format(vm.kpi.incassi_mese) }}
-            {% else %}
-              —
-            {% endif %}
-          </div>
+      <div class="diagnosis-grid">
+        <div class="diagnosis-block">
+          <strong>Situazione</strong>
+          <p>{{ header_payload.comparative_insight if header_payload and header_payload.comparative_insight else safe_vm.state.summary }}</p>
         </div>
       </div>
-    </section>
 
-    <section class="report-section">
-      <div class="section-head">
-        <h2>Direzione Strategica</h2>
-      </div>
-
-      <div class="grid-3">
-        <div class="report-card">
-          <div class="card-title">Cassa</div>
-          <p>{{ vm.decisions.cash or "—" }}</p>
+      <div class="diagnosis-grid" style="margin-top: 12px;">
+        <div class="diagnosis-block">
+          <strong>Priorità Dominante</strong>
+          <p>{{ header_payload.priority.title if header_payload and header_payload.priority else "Priorità non disponibile" }} — {{ header_payload.priority.description if header_payload and header_payload.priority else "" }}</p>
         </div>
-        <div class="report-card">
-          <div class="card-title">Margini</div>
-          <p>{{ vm.decisions.margini or "—" }}</p>
-        </div>
-        <div class="report-card">
-          <div class="card-title">Acquisizione</div>
-          <p>{{ vm.decisions.acq or "—" }}</p>
+        <div class="diagnosis-block">
+          <strong>Punto Più Solido</strong>
+          <p>{{ header_payload.diagnosis.strength if header_payload and header_payload.diagnosis else "Punto di forza non disponibile." }}</p>
         </div>
       </div>
-    </section>
-
-    <section class="report-section">
-      <div class="section-head">
-        <h2>Trend storico</h2>
-      </div>
-
-      <div class="chart-grid">
-        <div class="report-card">
-          <div class="card-title">Business Stability Score nel tempo</div>
-          <canvas id="trendScore"></canvas>
-        </div>
-        <div class="report-card">
-          <div class="card-title">Evoluzione dei rischi</div>
-          <canvas id="trendRisks"></canvas>
-        </div>
-      </div>
-    </section>
-
-    <section class="report-section">
-      <div class="section-head">
-        <h2>Action Plan</h2>
-      </div>
-
-      <div class="report-card">
-        {% if vm.plan_tasks %}
-          <div class="plan-list">
-            {% for item in vm.plan_tasks %}
-              <div class="plan-row">
-                <div class="plan-week">Settimana {{ item.week }}</div>
-                <div class="plan-main">
-                  <div class="plan-action">{{ item.action }}</div>
-                  <div class="plan-meta">
-                    Owner: {{ item.owner }} · KPI: {{ item.target_kpi }} · Target: {{ item.target_value }}
-                  </div>
-                </div>
-              </div>
-            {% endfor %}
-          </div>
-        {% elif vm.action_plan %}
-          <ol class="action-plan-pro">
-            {% for item in vm.action_plan %}
-              <li>{{ item }}</li>
-            {% endfor %}
-          </ol>
-        {% else %}
-          <p>Nessun piano disponibile.</p>
-        {% endif %}
-      </div>
-    </section>
+    </div>
   </div>
 
-  <script>
-    const riskValues = [
-      {{ ((vm.risks.cash or 0) * 100)|round(1) }},
-      {{ ((vm.risks.margini or 0) * 100)|round(1) }},
-      {{ ((vm.risks.acq or 0) * 100)|round(1) }}
-    ];
+  {# ===== BUSINESS RISK SNAPSHOT ===== #}
+  <div class="section-header">
+    <h2>Business Risk Snapshot</h2>
+  </div>
+  <div class="section-subtitle">Analisi dei rischi primari per la sostenibilità aziendale</div>
 
-    new Chart(document.getElementById('riskRadar'), {
-      type: 'radar',
-      data: {
-        labels: ['Cassa', 'Margini', 'Acquisizione'],
-        datasets: [{
-          label: 'Rischio %',
-          data: riskValues,
-          backgroundColor: 'rgba(54, 162, 235, 0.2)',
-          borderColor: 'rgba(54, 162, 235, 1)',
-          pointBackgroundColor: 'rgba(54, 162, 235, 1)'
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          r: {
-            min: 0,
-            max: 100
-          }
+  <div class="grid-3">
+    {{ risk_card(
+      'Cassa',
+      safe_vm.risks.cash ~ '%',
+      'VERDE' if safe_vm.risks.cash < 35 else 'GIALLO' if safe_vm.risks.cash < 65 else 'ORANGE',
+      'Tenuta finanziaria e visibilità di breve periodo.',
+      'Misura la solidità della posizione di cassa e la capacità di operare senza incassi.'
+    ) }}
+    {{ risk_card(
+      'Margini',
+      safe_vm.risks.margini ~ '%',
+      'VERDE' if safe_vm.risks.margini < 35 else 'GIALLO' if safe_vm.risks.margini < 65 else 'ORANGE',
+      'Sostenibilità economica e protezione del margine.',
+      'Indica la salute dei margini e la capacità di generare profitto.'
+    ) }}
+    {{ risk_card(
+      'Acquisizione',
+      safe_vm.risks.acq ~ '%',
+      'VERDE' if safe_vm.risks.acq < 35 else 'GIALLO' if safe_vm.risks.acq < 65 else 'ORANGE',
+      'Prevedibilità e continuità del motore commerciale.',
+      'Misura la stabilità e continuità del processo di acquisizione clienti.'
+    ) }}
+  </div>
+
+  {# ===== RISK CHARTS ===== #}
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-title">📊 Radar Rischi</div>
+      <div class="chart-container">
+        <canvas id="riskRadar" role="img" aria-label="Grafico radar dei rischi aziendali"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">📈 Confronto Rischi</div>
+      <div class="chart-container">
+        <canvas id="riskBars" role="img" aria-label="Grafico a barre dei rischi aziendali"></canvas>
+      </div>
+    </div>
+  </div>
+
+  {# ===== STRATEGIC SCORE ===== #}
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Business Stability Score</div>
+      <div style="font-size: 3.2em; font-weight: 800; color: #4fc3f7; margin: 16px 0;">
+        {{ safe_vm.state.overall_score }}<span style="font-size: 0.5em; color: #999;">/100</span>
+      </div>
+      {% if header_payload and header_payload.health %}
+        <span class="badge badge-{{ header_payload.health.tone }}" style="margin-bottom: 12px;">
+          {{ header_payload.health.icon }} {{ header_payload.health.label|upper }}
+        </span>
+      {% endif %}
+      {% if header_payload and header_payload.score_trend %}
+        <div class="trend trend-{{ header_payload.score_trend.tone }}" style="margin-top: 8px;">
+          {{ header_payload.score_trend.icon }} {{ header_payload.score_trend.value }} {{ header_payload.score_trend.label }}
+        </div>
+      {% endif %}
+      <div class="card-desc" style="margin-top: 16px;">
+        <strong>Confidenza:</strong> {{ safe_vm.state.confidence }}%<br>
+        <strong>Profilo:</strong> {{ safe_vm.state.risk_profile }}<br>
+        <strong>Maturità:</strong> {{ safe_vm.state.maturity_label }}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Executive Summary</div>
+      <p style="color: #666; line-height: 1.8; margin-top: 12px;">{{ safe_vm.state.summary }}</p>
+      {% if header_payload and header_payload.comparative_insight %}
+        <div class="insight-box">
+          <div class="insight-title">Comparative Insight</div>
+          <div class="insight-text">{{ header_payload.comparative_insight }}</div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  {# ===== KPI DASHBOARD ===== #}
+  <div class="section-header">
+    <h2>KPI Dashboard</h2>
+  </div>
+  <div class="section-subtitle">
+    Confronto calcolato sulle medie per il settore: <strong>{{ vm.meta.benchmark_settore.settore_riferimento if vm.meta and vm.meta.benchmark_settore else (scan_meta.settore or "Media Standard") }}</strong>
+  </div>
+
+  <div class="grid-3">
+    {{ kpi_card(
+      'Cash Runway',
+      ('%.1f mesi' % safe_vm.kpi.runway_mesi) if safe_vm.kpi.runway_mesi is not none else '—',
+      'VERDE' if (safe_vm.kpi.runway_mesi or 0) > 6 else 'GIALLO' if (safe_vm.kpi.runway_mesi or 0) > 3 else 'ORANGE',
+      'Autonomia finanziaria di breve',
+      'Indica per quanti mesi l\'azienda può operare senza incassi.'
+    ) }}
+    {{ kpi_card(
+      'Break-even Ratio',
+      ('%.2f' % safe_vm.kpi.break_even_ratio) if safe_vm.kpi.break_even_ratio is not none else '—',
+      'VERDE' if (safe_vm.kpi.break_even_ratio or 0) > 1.5 else 'GIALLO' if (safe_vm.kpi.break_even_ratio or 0) > 1 else 'ORANGE',
+      'Copertura dei costi fissi',
+      'Misura quante volte i ricavi coprono i costi fissi.'
+    ) }}
+    {{ kpi_card(
+      'Conversione',
+      ('%.1f%%' % ((safe_vm.kpi.conversione or 0) * 100)) if safe_vm.kpi.conversione is not none else '—',
+      'VERDE' if (safe_vm.kpi.conversione or 0) > 0.5 else 'GIALLO' if (safe_vm.kpi.conversione or 0) > 0.25 else 'ORANGE',
+      'Lead trasformati in clienti',
+      'Percentuale di lead che si convertono in clienti paganti.'
+    ) }}
+    {{ kpi_card(
+      'Margine Lordo',
+      ('%.1f%%' % ((safe_vm.kpi.margine_pct or 0) * 100)) if safe_vm.kpi.margine_pct is not none else '—',
+      'VERDE' if (safe_vm.kpi.margine_pct or 0) > 0.5 else 'GIALLO' if (safe_vm.kpi.margine_pct or 0) > 0.3 else 'ORANGE',
+      'Qualità economica dell\'offerta',
+      'Percentuale del ricavo rimasto dopo i costi diretti.'
+    ) }}
+    {{ kpi_card(
+      'Burn / Cash',
+      ('%.1f%%' % ((safe_vm.kpi.burn_cash_ratio or 0) * 100)) if safe_vm.kpi.burn_cash_ratio is not none else '—',
+      'VERDE' if (safe_vm.kpi.burn_cash_ratio or 0) < 0.1 else 'GIALLO' if (safe_vm.kpi.burn_cash_ratio or 0) < 0.2 else 'ORANGE',
+      'Pressione del burn sulla cassa',
+      'Rapporto tra burn rate e cassa disponibile.'
+    ) }}
+    {{ kpi_card(
+      'Incassi Mese',
+      ('€ %.0f' % safe_vm.kpi.incassi_mese) if safe_vm.kpi.incassi_mese is not none else '—',
+      'VERDE',
+      'Ricavi e incassi del periodo',
+      'Importo totale incassato nel mese.'
+    ) }}
+  </div>
+
+  {# ===== STRATEGIC PRIORITIES & BENCHMARK ===== #}
+  <div class="section-header">
+    <h2>Strategic Priorities & Benchmarks</h2>
+  </div>
+
+  <div class="benchmark-grid">
+    <div class="benchmark-card">
+      <div class="benchmark-title">⚡ Distribuzione Urgenza</div>
+
+      <div class="bar-item">
+        <div class="bar-label">
+          <span>Cassa</span>
+          <strong>{{ urgency.cash_pct }}%</strong>
+        </div>
+        <div class="bar-container">
+          <div class="bar-fill bar-cash" style="width: {{ urgency.cash_pct }}%;"></div>
+        </div>
+      </div>
+
+      <div class="bar-item">
+        <div class="bar-label">
+          <span>Margini</span>
+          <strong>{{ urgency.margini_pct }}%</strong>
+        </div>
+        <div class="bar-container">
+          <div class="bar-fill bar-margini" style="width: {{ urgency.margini_pct }}%;"></div>
+        </div>
+      </div>
+
+      <div class="bar-item">
+        <div class="bar-label">
+          <span>Acquisizione</span>
+          <strong>{{ urgency.acq_pct }}%</strong>
+        </div>
+        <div class="bar-container">
+          <div class="bar-fill bar-acq" style="width: {{ urgency.acq_pct }}%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="benchmark-card">
+      <div class="benchmark-title">🎯 Confronto Benchmark</div>
+
+      <div class="comparison-item">
+        <span class="comparison-dot dot-yellow"></span>
+        <span class="comparison-label">Margine</span>
+        <div class="comparison-values">
+          <span class="comparison-current">{{ ('%.1f%%' % ((safe_vm.kpi.margine_pct or 0) * 100)) if safe_vm.kpi.margine_pct is not none else '—' }}</span>
+          <span class="comparison-target">Tgt: {{ ('%.1f%%' % ((benchmarks.margine.target or 0) * 100)) if benchmarks and benchmarks.margine else '—' }}</span>
+        </div>
+      </div>
+
+      <div class="comparison-item">
+        <span class="comparison-dot dot-green"></span>
+        <span class="comparison-label">Conversione</span>
+        <div class="comparison-values">
+          <span class="comparison-current">{{ ('%.1f%%' % ((safe_vm.kpi.conversione or 0) * 100)) if safe_vm.kpi.conversione is not none else '—' }}</span>
+          <span class="comparison-target">Tgt: {{ ('%.1f%%' % ((benchmarks.conversione.target or 0) * 100)) if benchmarks and benchmarks.conversione else '—' }}</span>
+        </div>
+      </div>
+
+      <div class="comparison-item">
+        <span class="comparison-dot dot-green"></span>
+        <span class="comparison-label">Runway</span>
+        <div class="comparison-values">
+          <span class="comparison-current">{{ ('%.1f' % safe_vm.kpi.runway_mesi) if safe_vm.kpi.runway_mesi is not none else '—' }}</span>
+          <span class="comparison-target">Tgt: {{ ('%.1f' % (benchmarks.runway.target or 0)) if benchmarks and benchmarks.runway else '—' }}</span>
+        </div>
+      </div>
+
+      <div class="comparison-item">
+        <span class="comparison-dot dot-green"></span>
+        <span class="comparison-label">Break-even</span>
+        <div class="comparison-values">
+          <span class="comparison-current">{{ ('%.2f' % safe_vm.kpi.break_even_ratio) if safe_vm.kpi.break_even_ratio is not none else '—' }}</span>
+          <span class="comparison-target">Tgt: {{ ('%.2f' % (benchmarks.break_even.target or 0)) if benchmarks and benchmarks.break_even else '—' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# ===== STRATEGIC DIRECTION ===== #}
+  <div class="section-header">
+    <h2>Direzione Strategica</h2>
+  </div>
+
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-title">💰 Cassa</div>
+      <p style="color: #666; line-height: 1.8; margin-top: 12px;">{{ safe_vm.decisions.cash }}</p>
+    </div>
+    <div class="card">
+      <div class="card-title">📊 Margini</div>
+      <p style="color: #666; line-height: 1.8; margin-top: 12px;">{{ safe_vm.decisions.margini }}</p>
+    </div>
+    <div class="card">
+      <div class="card-title">🎯 Acquisizione</div>
+      <p style="color: #666; line-height: 1.8; margin-top: 12px;">{{ safe_vm.decisions.acq }}</p>
+    </div>
+  </div>
+
+  {# ===== TREND CHARTS ===== #}
+  <div class="section-header">
+    <h2>Trend Storico</h2>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-title">📈 Business Stability Score nel Tempo</div>
+      <div class="chart-container">
+        <canvas id="trendScore" role="img" aria-label="Grafico trend del Business Stability Score"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">📉 Evoluzione dei Rischi</div>
+      <div class="chart-container">
+        <canvas id="trendRisks" role="img" aria-label="Grafico trend dell'evoluzione dei rischi"></canvas>
+      </div>
+    </div>
+  </div>
+
+  {# ===== EXECUTION ROADMAP ===== #}
+  <div class="section-header">
+    <h2>Execution Roadmap — Next 90 Days</h2>
+  </div>
+
+  <div class="roadmap-container">
+    {% if vm.plan_tasks %}
+      <ul class="roadmap-list">
+        {% for task in vm.plan_tasks %}
+          <li class="roadmap-item">
+            <div class="roadmap-week">📅 Settimana {{ task.week }}</div>
+            <div class="roadmap-action">{{ task.action }}</div>
+            <div class="roadmap-meta">
+              <div><strong>Owner:</strong> {{ task.owner }}</div>
+              <div><strong>KPI:</strong> {{ task.target_kpi }}</div>
+              <div><strong>Target:</strong> {{ task.target_value }}</div>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% elif vm.action_plan %}
+      <ol style="padding-left: 20px; line-height: 1.8;">
+        {% for item in vm.action_plan %}
+          <li style="margin-bottom: 16px; color: #666;">{{ item }}</li>
+        {% endfor %}
+      </ol>
+    {% else %}
+      <p style="color: #999; text-align: center; padding: 40px 0;">Nessun piano disponibile.</p>
+    {% endif %}
+  </div>
+
+  {# ===== FOOTER ===== #}
+  <div class="footer">
+    SaaS Full · Report Interattivo · {{ scan_meta.mese }} {{ scan_meta.created_at or '' }}
+  </div>
+
+</div>
+
+{# ===== CHARTS JAVASCRIPT ===== #}
+<script>
+  // Configurazione centralizzata
+  const CHART_CONFIG = {
+    risks: {
+      labels: ['Cassa', 'Margini', 'Acquisizione'],
+      values: [{{ safe_vm.risks.cash }}, {{ safe_vm.risks.margini }}, {{ safe_vm.risks.acq }}],
+      colors: {
+        radar: {
+          bg: 'rgba(79, 195, 247, 0.15)',
+          border: 'rgba(79, 195, 247, 0.8)',
+          point: 'rgba(79, 195, 247, 1)'
         },
-        plugins: {
-          legend: { display: false }
+        bars: ['rgba(30, 126, 95, 0.8)', 'rgba(33, 150, 243, 0.8)', 'rgba(240, 165, 0, 0.8)']
+      }
+    },
+    baseOptions: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: {
+          display: false,
+          labels: { font: { size: 12, weight: 'bold' } }
         }
       }
-    });
+    }
+  };
 
-    new Chart(document.getElementById('riskBars'), {
-      type: 'bar',
-      data: {
-        labels: ['Cassa', 'Margini', 'Acquisizione'],
-        datasets: [{
-          label: 'Rischio %',
-          data: riskValues,
-          backgroundColor: [
-            'rgba(255, 99, 132, 0.6)',
-            'rgba(255, 205, 86, 0.6)',
-            'rgba(75, 192, 192, 0.6)'
-          ]
-        }]
+  // Helper per creare chart
+  function createChart(elementId, type, data, options = {}) {
+    const ctx = document.getElementById(elementId);
+    if (!ctx) return null;
+
+    const finalOptions = {
+      ...CHART_CONFIG.baseOptions,
+      ...options,
+      plugins: {
+        ...(CHART_CONFIG.baseOptions.plugins || {}),
+        ...(options.plugins || {})
+      }
+    };
+
+    return new Chart(ctx, { type, data, options: finalOptions });
+  }
+
+  // Risk Radar
+  createChart('riskRadar', 'radar', {
+    labels: CHART_CONFIG.risks.labels,
+    datasets: [{
+      label: 'Rischio %',
+      data: CHART_CONFIG.risks.values,
+      backgroundColor: CHART_CONFIG.risks.colors.radar.bg,
+      borderColor: CHART_CONFIG.risks.colors.radar.border,
+      pointBackgroundColor: CHART_CONFIG.risks.colors.radar.point,
+      borderWidth: 2.5,
+      pointRadius: 5,
+      pointHoverRadius: 7
+    }]
+  }, {
+    scales: { r: { min: 0, max: 100, ticks: { stepSize: 25, font: { size: 11 } } } }
+  });
+
+  // Risk Bars
+  createChart('riskBars', 'bar', {
+    labels: CHART_CONFIG.risks.labels,
+    datasets: [{
+      label: 'Rischio %',
+      data: CHART_CONFIG.risks.values,
+      backgroundColor: CHART_CONFIG.risks.colors.bars,
+      borderRadius: 10,
+      borderSkipped: false
+    }]
+  }, {
+    scales: { y: { min: 0, max: 100, ticks: { stepSize: 25, font: { size: 11 } } } }
+  });
+
+  // Historical data
+  const HISTORY = {
+    labels: [{% for h in history %}"{{ h.label }}",{% endfor %}],
+    scores: [{% for h in history %}{{ h.overall_score or 50 }},{% endfor %}],
+    cash: [{% for h in history %}{{ h.cash or 50 }},{% endfor %}],
+    margini: [{% for h in history %}{{ h.margini or 50 }},{% endfor %}],
+    acq: [{% for h in history %}{{ h.acq or 50 }},{% endfor %}]
+  };
+
+  // Trend Score
+  createChart('trendScore', 'line', {
+    labels: HISTORY.labels,
+    datasets: [{
+      label: 'Business Stability Score',
+      data: HISTORY.scores,
+      borderColor: '#4fc3f7',
+      backgroundColor: 'rgba(79, 195, 247, 0.1)',
+      fill: true,
+      tension: 0.4,
+      borderWidth: 3,
+      pointRadius: 5,
+      pointBackgroundColor: '#4fc3f7',
+      pointBorderColor: '#fff',
+      pointBorderWidth: 2,
+      pointHoverRadius: 7
+    }]
+  }, {
+    scales: { y: { min: 0, max: 100, ticks: { stepSize: 25, font: { size: 11 } } } }
+  });
+
+  // Trend Risks
+  createChart('trendRisks', 'line', {
+    labels: HISTORY.labels,
+    datasets: [
+      {
+        label: 'Cassa',
+        data: HISTORY.cash,
+        borderColor: '#1e7e5f',
+        backgroundColor: 'rgba(30, 126, 95, 0.05)',
+        tension: 0.4,
+        borderWidth: 2.5,
+        pointRadius: 4,
+        fill: false
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false }
-        },
-        scales: {
-          y: {
-            min: 0,
-            max: 100
-          }
-        }
-      }
-    });
-
-    const historyLabels = [
-      {% for h in history %}
-        "{{ h.label }}",
-      {% endfor %}
-    ];
-
-    const historyScores = [
-      {% for h in history %}
-        {{ h.overall_score or 50 }},
-      {% endfor %}
-    ];
-
-    const historyCash = [
-      {% for h in history %}
-        {{ h.cash or 50 }},
-      {% endfor %}
-    ];
-
-    const historyMargini = [
-      {% for h in history %}
-        {{ h.margini or 50 }},
-      {% endfor %}
-    ];
-
-    const historyAcq = [
-      {% for h in history %}
-        {{ h.acq or 50 }},
-      {% endfor %}
-    ];
-
-    new Chart(document.getElementById('trendScore'), {
-      type: 'line',
-      data: {
-        labels: historyLabels,
-        datasets: [{
-          label: 'Business Stability Score',
-          data: historyScores,
-          tension: 0.3,
-          borderColor: '#4bc0c0',
-          backgroundColor: 'rgba(75, 192, 192, 0.1)',
-          fill: true
-        }]
+      {
+        label: 'Margini',
+        data: HISTORY.margini,
+        borderColor: '#2196f3',
+        backgroundColor: 'rgba(33, 150, 243, 0.05)',
+        tension: 0.4,
+        borderWidth: 2.5,
+        pointRadius: 4,
+        fill: false
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false }
-        },
-        scales: {
-          y: {
-            min: 0,
-            max: 100
-          }
-        }
+      {
+        label: 'Acquisizione',
+        data: HISTORY.acq,
+        borderColor: '#f0a500',
+        backgroundColor: 'rgba(240, 165, 0, 0.05)',
+        tension: 0.4,
+        borderWidth: 2.5,
+        pointRadius: 4,
+        fill: false
       }
+    ]
+  }, {
+    scales: { y: { min: 0, max: 100, ticks: { stepSize: 25, font: { size: 11 } } } },
+    plugins: { legend: { display: true, labels: { font: { size: 12, weight: 'bold' }, padding: 16 } } }
+  });
+
+  // Accessibility: Info tips keyboard navigation
+  document.querySelectorAll('.info-icon').forEach(tip => {
+    tip.addEventListener('click', function(e) {
+      e.preventDefault();
+      const isExpanded = this.getAttribute('aria-expanded') === 'true';
+      this.setAttribute('aria-expanded', !isExpanded);
     });
 
-    new Chart(document.getElementById('trendRisks'), {
-      type: 'line',
-      data: {
-        labels: historyLabels,
-        datasets: [
-          { label: 'Cassa', data: historyCash, tension: 0.3, borderColor: '#ff6384' },
-          { label: 'Margini', data: historyMargini, tension: 0.3, borderColor: '#ffcd56' },
-          { label: 'Acquisizione', data: historyAcq, tension: 0.3, borderColor: '#36a2eb' }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: {
-            min: 0,
-            max: 100
-          }
-        }
+    tip.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        this.click();
       }
     });
-  </script>
+  });
+
+  console.log('✅ Report loaded successfully');
+</script>
+
 </body>
 </html>

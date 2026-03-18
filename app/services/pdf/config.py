@@ -1,6 +1,11 @@
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.units import mm
+# filepath: app/services/pdf/config.py
+from reportlab.lib.pagesizes import A4
+
+PAGE_SIZE = A4  # (210mm, 297mm)
+MARGIN = 36  # pixel
 
 PAGE_SIZE = landscape(A4)
 W, H = PAGE_SIZE
