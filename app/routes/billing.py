@@ -150,3 +150,9 @@ def webhook():
             db.session.commit()
 
     return jsonify({"received": True}), 200
+@bp.route('/pricing')
+@login_required
+def pricing():
+    from app.models.plan import Plan
+    plans = Plan.query.order_by(Plan.price_month).all()
+    return render_template('pricing.html', plans=plans)

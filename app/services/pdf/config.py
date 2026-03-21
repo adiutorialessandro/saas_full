@@ -1,35 +1,70 @@
 from reportlab.lib import colors
-from reportlab.lib.pagesizes import A4, landscape
-from reportlab.lib.units import mm
-# filepath: app/services/pdf/config.py
 from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import mm
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
-PAGE_SIZE = A4  # (210mm, 297mm)
-MARGIN = 36  # pixel
+# --- MARGINI ---
+PDF_MARGINS = {
+    "left": 18 * mm,
+    "right": 18 * mm,
+    "top": 16 * mm,
+    "bottom": 14 * mm
+}
 
-PAGE_SIZE = landscape(A4)
-W, H = PAGE_SIZE
+# --- FONTS ---
+def setup_pdf_fonts():
+    """
+    Inizializza i font personalizzati. 
+    Per evitare dipendenze da file .ttf esterni, usiamo i font vettoriali nativi (Helvetica).
+    """
+    pass
 
-M_L = 18 * mm
-M_R = 18 * mm
-M_T = 16 * mm
-M_B = 14 * mm
+# --- STILI (ParagraphStyles) ---
+_base = getSampleStyleSheet()
 
-SAFE_W = W - M_L - M_R
-SAFE_H = H - M_T - M_B
-
-DEFAULT_PRIMARY = colors.HexColor("#0f172a")
-DEFAULT_ACCENT = colors.HexColor("#2563eb")
-DEFAULT_SUCCESS = colors.HexColor("#16a34a")
-DEFAULT_WARNING = colors.HexColor("#d97706")
-DEFAULT_DANGER = colors.HexColor("#dc2626")
-DEFAULT_TEXT = colors.HexColor("#0f172a")
-DEFAULT_MUTED = colors.HexColor("#64748b")
-DEFAULT_BORDER = colors.HexColor("#e2e8f0")
-DEFAULT_SURFACE = colors.HexColor("#ffffff")
-DEFAULT_SURFACE_2 = colors.HexColor("#f8fafc")
-DEFAULT_BG = colors.HexColor("#f1f5f9")
-
-BRAND_NAME = "SaaS Full"
-PDF_TITLE = "Business Strategic Scan"
-PDF_SUBTITLE = "Executive business report"
+STYLES = {
+    "CoverTitle": ParagraphStyle(
+        "CoverTitle",
+        parent=_base["Heading1"],
+        fontName="Helvetica-Bold",
+        fontSize=32,
+        textColor=colors.HexColor("#1a1a2e"),
+        spaceAfter=15,
+        leading=36
+    ),
+    "CoverSubtitle": ParagraphStyle(
+        "CoverSubtitle",
+        parent=_base["Normal"],
+        fontName="Helvetica",
+        fontSize=14,
+        textColor=colors.HexColor("#64748b"),
+        spaceAfter=10
+    ),
+    "Heading1": ParagraphStyle(
+        "Heading1",
+        parent=_base["Heading1"],
+        fontName="Helvetica-Bold",
+        fontSize=18,
+        textColor=colors.HexColor("#1a1a2e"),
+        spaceBefore=25,
+        spaceAfter=15
+    ),
+    "Heading2": ParagraphStyle(
+        "Heading2",
+        parent=_base["Heading2"],
+        fontName="Helvetica-Bold",
+        fontSize=14,
+        textColor=colors.HexColor("#4fc3f7"), # Azzurro brand
+        spaceBefore=15,
+        spaceAfter=10
+    ),
+    "Normal": ParagraphStyle(
+        "Normal",
+        parent=_base["Normal"],
+        fontName="Helvetica",
+        fontSize=11,
+        textColor=colors.HexColor("#334155"),
+        leading=16,
+        spaceAfter=8
+    )
+}

@@ -1,103 +1,47 @@
 {% extends "base.html" %}
 {% block content %}
-
-<div class="dash-hero">
-  <div class="dash-hero-inner">
-    <div>
-      <h1 class="dash-title">Cliente: {{ org.name }}</h1>
-      <div class="dash-sub">
-        Dettaglio organizzazione, utenti associati e scansioni.
-        {% if org.plan %}
-          · Piano: <b>{{ org.plan.name }}</b>
-        {% else %}
-          · Piano: <b>Nessuno</b>
-        {% endif %}
-      </div>
-    </div>
-
-    <div class="dash-actions">
-      <a class="btn" href="{{ url_for('admin.create_org_user', org_id=org.id) }}">+ Utente</a>
-      <a class="btn" href="{{ url_for('admin.update_organization_plan', org_id=org.id) }}">Piano</a>
-      <a class="btn" href="{{ url_for('admin.organizations') }}">← Torna ai clienti</a>
-      {% if config.BILLING_ENABLED %}
-      <a class="btn" href="{{ url_for('billing.portal', org_id=org.id) }}">Billing</a>
-        {% endif %}
-    </div>
-  </div>
-</div>
-
-<div class="card inbox-card" style="margin-bottom:20px;">
-  <div class="inbox-toolbar">
-    <div><b>Utenti associati</b></div>
-  </div>
-
-  {% if users %}
-    <div class="inbox-list">
-      {% for u in users %}
-        <div class="inbox-row">
-          <div class="inbox-main">
-            <div class="inbox-title">
-              <b>{{ u.email }}</b>
-            </div>
-            <div class="inbox-meta muted">
-              Ruolo org: {{ u.role }} · Admin globale: {{ "Sì" if u.is_admin else "No" }}
-            </div>
-          </div>
-
-          <div class="inbox-right">
-            <a class="btn" href="{{ url_for('admin.update_org_user_role', org_id=org.id, user_id=u.id) }}">Ruolo</a>
-            <a class="btn" href="{{ url_for('admin.reset_org_user_password', org_id=org.id, user_id=u.id) }}">Password</a>
-
-            <form method="post"
-                  action="{{ url_for('admin.delete_org_user', org_id=org.id, user_id=u.id) }}"
-                  style="display:inline;">
-              <button class="btn btn-danger" type="submit"
-                      onclick="return confirm('Rimuovere questo utente dall’azienda?')">
-                Elimina
-              </button>
-            </form>
-          </div>
+<div class="container" style="max-width: 1200px; margin: 40px auto;">
+    <div style="margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h1 style="font-size: 2rem; font-weight: 800;">Azienda: {{ org.name }}</h1>
+            <p class="muted">Piano Attuale: <strong style="color: var(--primary);">{{ org.plan.name if org.plan else 'Nessuno' }}</strong> | Status: {{ org.billing_status or 'Trial' }}</p>
         </div>
-      {% endfor %}
-    </div>
-  {% else %}
-    <div class="empty-state">
-      <div class="empty-title">Nessun utente associato.</div>
-    </div>
-  {% endif %}
-</div>
-
-<div class="card inbox-card">
-  <div class="inbox-toolbar">
-    <div><b>Scansioni dell'azienda</b></div>
-  </div>
-
-  {% if scans %}
-    <div class="inbox-list">
-      {% for s in scans %}
-        <div class="inbox-row">
-          <div class="inbox-main">
-            <div class="inbox-title">
-              <span class="pill">#{{ s.id }}</span>
-              <b>{{ s.settore }}</b>
-              <span class="muted">· {{ s.modello }} · {{ s.mese_riferimento }}</span>
-            </div>
-            <div class="inbox-meta muted">
-              Creato: {{ s.created_at|fmt_dt if s.created_at else "" }}
-            </div>
-          </div>
-
-          <div class="inbox-right">
-            <a class="btn" href="{{ url_for('admin.view_scan', scan_id=s.id) }}">Apri</a>
-          </div>
+        <div style="display: flex; gap: 10px;">
+            <a href="{{ url_for('admin.organizations') }}" class="btn btn-secondary">← Torna alla lista</a>
+            <a href="{{ url_for('admin.update_org_plan', org_id=org.id) }}" class="btn btn-primary"><i class="fas fa-exchange-alt"></i> Cambia Piano</a>
         </div>
-      {% endfor %}
     </div>
-  {% else %}
-    <div class="empty-state">
-      <div class="empty-title">Nessuna scansione presente.</div>
-    </div>
-  {% endif %}
-</div>
 
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px;">
+        <div class="card" style="padding: 25px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                <h3 style="font-weight: 800;">Membri del Team</h3>
+                <a href="{{ url_for('admin.create_org_user', org_id=org.id) }}" class="btn btn-primary" style="font-size: 0.8rem; padding: 5px 15px;">+ Aggiungi</a>
+            </div>
+            <table style="width: 100%; border-collapse: collapse;">
+                {% for m in memberships %}
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 10px 0;"><strong>{{ m.user.email }}</strong></td>
+                    <td style="padding: 10px 0;"><span class="badge badge-green">{{ m.role }}</span></td>
+                    <td style="padding: 10px 0; text-align: right;">
+                        <a href="{{ url_for('admin.edit_org_user_role', org_id=org.id, user_id=m.user.id) }}" style="color: var(--primary); text-decoration: none; font-size: 0.9em;">Modifica Ruolo</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <div class="card" style="padding: 25px;">
+            <h3 style="font-weight: 800; margin-bottom: 20px;">Analisi Eseguite</h3>
+            {% for s in scans %}
+            <div style="padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between;">
+                <span>{{ s.mese_riferimento }}</span>
+                <a href="{{ url_for('admin.view_scan', scan_id=s.id) }}" style="color: var(--primary); font-weight: 700;">Vedi PDF</a>
+            </div>
+            {% else %}
+            <p class="muted">Nessuna analisi prodotta.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
 {% endblock %}

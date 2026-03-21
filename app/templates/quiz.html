@@ -1,84 +1,157 @@
 {% extends "base.html" %}
+
 {% block content %}
 <style>
-  /* Stili del Quiz adattati al Dark Theme */
-  .quiz-question { margin-bottom: 20px; padding: 20px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-main); }
-  .quiz-label { font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; font-size: 1.05rem; }
-  .quiz-choices { display: flex; gap: 20px; flex-wrap: wrap; }
-  .quiz-choices div { display: flex; align-items: center; gap: 6px; }
-  .quiz-choices label { font-weight: normal; margin: 0; cursor: pointer; color: var(--text-main); }
-  
-  /* Tooltip icona adattata al tema scuro */
-  .info-icon { 
-      cursor: help; margin-left: 8px; background: var(--bg-sidebar); color: var(--text-main); 
-      border: 1px solid var(--border-color); border-radius: 50%; width: 18px; height: 18px; 
-      display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; 
-  }
+    .quiz-container { max-width: 800px; margin: 40px auto; padding: 0 20px; }
+    .question-card { 
+        background: white; 
+        padding: 35px; 
+        border-radius: 16px; 
+        margin-bottom: 30px; 
+        border: 1px solid #e8eef5;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        transition: border-color 0.3s;
+    }
+    .question-card:hover { border-color: #4fc3f7; }
+    .question-title { font-weight: 800; font-size: 1.2rem; margin-bottom: 20px; color: #1a1a2e; }
+    
+    .rating-group {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .rating-option input { display: none; }
+    .rating-option label {
+        display: flex;
+        align-items: flex-start;
+        padding: 18px 20px;
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s;
+        color: #334155;
+        line-height: 1.5;
+        font-size: 0.95rem;
+    }
+    .rating-option label:before {
+        content: '';
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        margin-right: 15px;
+        margin-top: 2px;
+        border-radius: 50%;
+        border: 2px solid #cbd5e1;
+        flex-shrink: 0;
+        transition: all 0.2s;
+        background: white;
+    }
+    .rating-option input:checked + label {
+        background: #f0f9ff;
+        color: #0f172a;
+        border-color: #38bdf8;
+        box-shadow: 0 4px 12px rgba(56, 189, 248, 0.1);
+    }
+    .rating-option input:checked + label:before {
+        border-color: #0ea5e9;
+        background-color: #0ea5e9;
+        box-shadow: inset 0 0 0 4px #f0f9ff;
+    }
 </style>
 
-<div style="max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px;">
-  
-  <div class="card" style="padding: 20px;">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-      <div class="muted" style="text-transform: uppercase; font-size: 12px; font-weight: 700; letter-spacing: 0.5px;">Step 3 di 3</div>
-      <div style="font-weight: 700;">Valutazione Qualitativa</div>
-    </div>
-    <div style="width: 100%; height: 8px; background: var(--bg-main); border-radius: 4px; overflow: hidden; margin-top: 15px;">
-      <div style="height: 100%; width: 100%; background: var(--success); border-radius: 4px;"></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div style="margin-bottom: 30px;">
-      <h2 style="font-size: 24px; margin-bottom: 10px;">Assessment dello stato di salute</h2>
-      <p class="muted">Valuta questi aspetti da 1 (Critico/Basso) a 5 (Ottimo/Alto). Passa il mouse sull'icona "i" per leggere la domanda esplicativa.</p>
+<div class="quiz-container">
+    <div style="margin-bottom: 40px; text-align: center;">
+        <span class="badge badge-green" style="margin-bottom: 10px;">STEP 3 DI 3</span>
+        <h1 style="font-size: 2.5rem; font-weight: 900;">Organizational Health Index</h1>
+        <p class="muted" style="font-size: 1.1rem; margin-top: 10px;">Valuta i pilastri qualitativi del tuo Business System scegliendo l'affermazione che descrive meglio la tua realtà.</p>
     </div>
 
-    <form method="post">
-      {{ form.hidden_tag() }}
-      
-      <div class="quiz-grid">
-        {% for field in form %}
-          {% if field.name not in ['csrf_token', 'submit'] %}
-          <div class="quiz-question">
-            <div class="quiz-label">
-              {{ field.label.text }}
-              {% if field.description %}
-                <span class="info-icon" title="{{ field.description }}" data-bs-toggle="tooltip">i</span>
-              {% endif %}
+    <form method="POST">
+        {{ form.hidden_tag() }}
+
+        {% for field in form if field.name != 'csrf_token' and field.name != 'submit' %}
+        <div class="question-card">
+            <div class="question-title">
+                {{ loop.index }}. {{ field.label.text }}
             </div>
             
-            <div class="quiz-choices">
-              {% for subfield in field %}
-                <div>
-                  {{ subfield() }} 
-                  <label for="{{ subfield.id }}">{{ subfield.label.text }}</label>
+            <div class="rating-group">
+                {% for subfield in field %}
+                <div class="rating-option">
+                    {{ subfield }}
+                    <label for="{{ subfield.id }}">{{ subfield.label.text }}</label>
                 </div>
-              {% endfor %}
+                {% endfor %}
             </div>
-            
-            {% for e in field.errors %}
-              <div style="color: var(--danger); font-size: 0.85em; font-weight: 600; margin-top: 10px;">{{ e }}</div>
-            {% endfor %}
-          </div>
-          {% endif %}
+        </div>
         {% endfor %}
-      </div>
 
-      <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 20px; margin-top: 10px; border-top: 1px solid var(--border-color);">
-        <a class="btn btn-secondary" href="{{ url_for('wizard.data') }}">Indietro</a>
-        <button class="btn" type="submit">{{ form.submit.label.text }}</button>
-      </div>
+        <div style="margin-top: 50px; display: flex; justify-content: space-between; align-items: center; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 -10px 30px rgba(0,0,0,0.05);">
+            <a href="{{ url_for('wizard.step2') }}" class="btn btn-secondary" style="padding: 12px 30px; text-decoration: none;">
+                <i class="fas fa-arrow-left"></i> Indietro
+            </a>
+            <div style="text-align: right;">
+                <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 5px;">Cliccando genererai il report finale</p>
+                <button type="submit" class="btn-nav-action" style="border:none; cursor:pointer; padding: 15px 40px; font-size: 1.1rem;">
+                    Genera Diagnostica Strategica <i class="fas fa-magic"></i>
+                </button>
+            </div>
+        </div>
     </form>
-  </div>
 </div>
 
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    if (typeof bootstrap !== 'undefined') {
-        tooltipTriggerList.map(function (tooltipTriggerEl) { return new bootstrap.Tooltip(tooltipTriggerEl) });
-    }
-  });
-</script>
+    <div id="loading-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.98); z-index: 9999; flex-direction: column; justify-content: center; align-items: center; color: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; backdrop-filter: blur(10px);">
+        
+        <div style="position: relative; width: 100px; height: 100px; margin-bottom: 40px;">
+            <i class="fas fa-circle-notch fa-spin" style="font-size: 4rem; color: #38bdf8; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"></i>
+            <i class="fas fa-brain" style="font-size: 1.5rem; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"></i>
+        </div>
+        
+        <h2 id="loading-text" style="font-size: 1.8rem; font-weight: 800; margin-bottom: 15px; letter-spacing: -0.5px; text-align: center;">Inizializzazione Motore Algoritmico...</h2>
+        <p style="color: #94a3b8; font-size: 1rem; margin-bottom: 30px; text-align: center; max-width: 400px;">Attendi mentre i nostri modelli analizzano i tuoi dati e costruiscono il piano d'azione.</p>
+        
+        <div style="width: 350px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden;">
+            <div id="progress-bar" style="width: 5%; height: 100%; background: linear-gradient(90deg, #38bdf8, #8b5cf6); transition: width 0.5s ease-out; box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);"></div>
+        </div>
+        
+        <p style="color: #475569; margin-top: 25px; font-size: 0.85rem; font-family: monospace;">Elaborazione sicura end-to-end</p>
+    </div>
+
+    <script>
+        document.querySelector('form').addEventListener('submit', function(e) {
+            // Mostra l'overlay
+            document.getElementById('loading-overlay').style.display = 'flex';
+            
+            // Le frasi ad effetto che cambieranno ogni 1.5 secondi
+            const texts = [
+                "Calcolo del Business Stability Score...",
+                "Analisi Modelli Finanziari ed EBITDA Gap...",
+                "Esecuzione Stress Test di Cassa...",
+                "Valutazione Framework McKinsey 7S...",
+                "Connessione al Cluster OpenAI...",
+                "Generazione Executive Memo in corso...",
+                "Impaginazione Dossier Strategico...",
+                "Quasi pronto..."
+            ];
+            
+            let i = 0;
+            const textEl = document.getElementById('loading-text');
+            const barEl = document.getElementById('progress-bar');
+            
+            // Aggiorna testo e barra progressivamente
+            const interval = setInterval(() => {
+                i++;
+                if (i < texts.length) {
+                    textEl.innerText = texts[i];
+                    barEl.style.width = ((i + 1) * 100 / texts.length) + '%';
+                } else {
+                    clearInterval(interval);
+                    barEl.style.width = '100%';
+                }
+            }, 1500); // Cambia frase ogni 1.5 secondi
+        });
+    </script>
 {% endblock %}
+

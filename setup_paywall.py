@@ -1,4 +1,11 @@
-{% extends "base.html" %}
+import os
+
+print("🚀 Installazione Paywall e Gestione Limiti SaaS...")
+
+# ==========================================
+# 1. CREAZIONE DELLA PAGINA PREZZI (PRICING)
+# ==========================================
+pricing_html = """{% extends "base.html" %}
 {% block content %}
 <style>
   .pricing-container { max-width: 1000px; margin: 60px auto; padding: 0 20px; text-align: center; }
@@ -56,3 +63,53 @@
     </div>
 </div>
 {% endblock %}
+"""
+with open('app/templates/pricing.html', 'w') as f:
+    f.write(pricing_html)
+
+# ==========================================
+# 2. INIEZIONE ROTTA /PRICING IN BILLING.PY
+# ==========================================
+billing_path = 'app/routes/billing.py'
+with open(billing_path, 'r') as f:
+    billing_content = f.read()
+
+if "def pricing():" not in billing_content:
+    pricing_route = """
+@bp.route('/pricing')
+@login_required
+def pricing():
+    from app.models.plan import Plan
+    plans = Plan.query.order_by(Plan.price_month).all()
+    return render_template('pricing.html', plans=plans)
+"""
+    with open(billing_path, 'a') as f:
+        f.write(pricing_route)
+
+# ==========================================
+# 3. APPLICAZIONE DEL BLOCCO AL WIZARD
+# ==========================================
+wizard_path = 'app/routes/wizard.py'
+with open(wizard_path, 'r') as f:
+    wizard_content = f.read()
+
+limit_check = """
+    # --- SAAS LIMIT CHECK (PAYWALL) ---
+    from app.models.scan import Scan
+    org = current_user.current_org
+    if org and org.plan:
+        if org.plan.scan_limit != -1:
+            scan_count = Scan.query.filter_by(org_id=org.id).count()
+            if scan_count >= org.plan.scan_limit:
+                flash("Hai raggiunto il limite di scansioni gratuite del tuo piano. Fai l'upgrade per sbloccare nuove analisi.", "warning")
+                return redirect(url_for('billing.pricing'))
+    # ----------------------------------
+"""
+
+if "SAAS LIMIT CHECK" not in wizard_content:
+    # Cerchiamo l'inizio della funzione step1() e iniettiamo il controllo
+    wizard_content = wizard_content.replace('def step1():', 'def step1():\n' + limit_check)
+    with open(wizard_path, 'w') as f:
+        f.write(wizard_content)
+
+print("✅ Paywall configurato con successo!")

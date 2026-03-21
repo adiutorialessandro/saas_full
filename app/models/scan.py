@@ -1,5 +1,8 @@
+"""
+SaaS Full - Scan Model
+Rappresenta un singolo report/analisi generata per un'azienda.
+"""
 from ..extensions import db
-
 
 class Scan(db.Model):
     __tablename__ = "scan"
@@ -13,12 +16,19 @@ class Scan(db.Model):
 
     settore = db.Column(db.String(100), nullable=False)
     modello = db.Column(db.String(100), nullable=False)
-    mese_riferimento = db.Column(db.String(7), nullable=False)  # YYYY-MM
+    mese_riferimento = db.Column(db.String(7), nullable=False)  # Formato YYYY-MM
 
+    # Output del motore strategico
     report_json = db.Column(db.Text, nullable=False)
+    
+    # Dati grezzi di input (Utili per Machine Learning o ricalcolo report futuri)
+    raw_data = db.Column(db.Text, nullable=True)
 
-    # --- Triad metrics snapshot (used for dashboard trend and analysis history) ---
+    # --- Triad metrics snapshot (Per grafici storici nella Dashboard) ---
     triad_index = db.Column(db.Float)
     finance_score = db.Column(db.Float)
     sales_score = db.Column(db.Float)
     ops_score = db.Column(db.Float)
+    
+    def __repr__(self) -> str:
+        return f"<Scan {self.id} | Org: {self.org_id}>"

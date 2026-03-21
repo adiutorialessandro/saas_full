@@ -32,7 +32,7 @@ def create_app(config_class=Config):
     app.register_blueprint(report_bp)
 
     # ========================================================
-    # FIX: REINSERITO IL FILTRO JINJA PER LE DATE (EVITA CRASH DASHBOARD)
+    # FIX: FILTRO JINJA PER LE DATE
     # ========================================================
     @app.template_filter('fmt_dt')
     def fmt_dt(value):

@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  /* Stili del Quiz McKinsey Style */
+  .quiz-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 20px;
+  }
+  
+  .quiz-question { 
+      padding: 24px; 
+      border: 1px solid var(--border-color); 
+      border-radius: 12px; 
+      background: var(--bg-main); 
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+      transition: all 0.3s ease;
+  }
+  
+  .quiz-question:hover {
+      border-color: #4fc3f7;
+      box-shadow: 0 4px 12px rgba(79, 195, 247, 0.1);
+  }
+
+  .quiz-label { 
+      font-weight: 800; 
+      margin-bottom: 8px; 
+      display: flex; 
+      align-items: center; 
+      font-size: 1.1rem; 
+      color: var(--text-main);
+  }
+  
+  .quiz-desc {
+      font-size: 0.85em;
+      color: #888;
+      margin-bottom: 20px;
+      line-height: 1.5;
+  }
+
+  /* Custom Rating Buttons (1 to 5) */
+  .quiz-choices { 
+      display: flex; 
+      justify-content: space-between;
+      gap: 10px; 
+  }
+  
+  .quiz-choices div { 
+      flex: 1; 
+  }
+  
+  .quiz-choices input[type="radio"] {
+      display: none; /* Nascondiamo il pallino standard */
+  }
+  
+  .quiz-choices label { 
+      display: block;
+      width: 100%;
+      text-align: center;
+      padding: 12px 0;
+      background: var(--bg-sidebar);
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--text-main);
+      transition: all 0.2s ease;
+  }
+  
+  /* Colori dinamici in base al voto (1 rosso, 3 giallo, 5 verde) */
+  .quiz-choices div:nth-child(1) input:checked + label { background: #ffe6e6; border-color: #ef4444; color: #ef4444; }
+  .quiz-choices div:nth-child(2) input:checked + label { background: #fff0eb; border-color: #f97316; color: #f97316; }
+  .quiz-choices div:nth-child(3) input:checked + label { background: #fffae6; border-color: #f59e0b; color: #f59e0b; }
+  .quiz-choices div:nth-child(4) input:checked + label { background: #f0fdf4; border-color: #84cc16; color: #84cc16; }
+  .quiz-choices div:nth-child(5) input:checked + label { background: #e6f9f0; border-color: #22c55e; color: #22c55e; }
+
+  .quiz-choices label:hover {
+      background: var(--border-color);
+  }
+</style>
+
+<div style="max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px;">
+  
+  <div class="card" style="padding: 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div class="muted" style="text-transform: uppercase; font-size: 12px; font-weight: 800; letter-spacing: 0.5px; color: #4fc3f7;">Step 3 di 3</div>
+      <div style="font-weight: 800;">Organizational Health Index (OHI)</div>
+    </div>
+    <div style="width: 100%; height: 8px; background: var(--bg-main); border-radius: 4px; overflow: hidden; margin-top: 15px;">
+      <div style="height: 100%; width: 100%; background: linear-gradient(90deg, #4fc3f7, #29b6f6); border-radius: 4px;"></div>
+    </div>
+  </div>
+
+  <div class="card" style="padding: 32px;">
+    <div style="margin-bottom: 32px; border-bottom: 1px solid var(--border-color); padding-bottom: 24px;">
+      <h2 style="font-size: 28px; margin-bottom: 12px; font-weight: 800;">Diagnostica Organizzativa</h2>
+      <p class="muted" style="font-size: 1.05em; line-height: 1.6;">
+        Valuta i <strong>7 pilastri (7S)</strong> della tua azienda da 1 a 5.<br>
+        1 = Livello critico / fortemente disfunzionale <br>
+        5 = Livello di eccellenza / best-in-class
+      </p>
+    </div>
+
+    <form method="post">
+      {{ form.hidden_tag() }}
+      
+      <div class="quiz-grid">
+        {% for field in form %}
+          {% if field.name not in ['csrf_token', 'submit'] %}
+          <div class="quiz-question">
+            <div class="quiz-label">{{ field.label.text }}</div>
+            {% if field.description %}
+              <div class="quiz-desc">{{ field.description }}</div>
+            {% endif %}
+            
+            <div class="quiz-choices">
+              {% for subfield in field %}
+                <div>
+                  {{ subfield() }} 
+                  <label for="{{ subfield.id }}">{{ subfield.label.text }}</label>
+                </div>
+              {% endfor %}
+            </div>
+            
+            {% for e in field.errors %}
+              <div style="color: #ef4444; font-size: 0.85em; font-weight: 700; margin-top: 10px;">⚠️ {{ e }}</div>
+            {% endfor %}
+          </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 32px; margin-top: 32px; border-top: 1px solid var(--border-color);">
+        <a class="btn btn-secondary" style="padding: 12px 24px;" href="{{ url_for('wizard.data') }}">← Torna ai KPI</a>
+        <button class="btn btn-primary" style="padding: 12px 32px; font-size: 1.1em; background: linear-gradient(135deg, #4fc3f7, #29b6f6); color: white; border: none; font-weight: 800;" type="submit">
+          {{ form.submit.label.text }} →
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container" style="max-width: 1200px; margin: 40px auto;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <div>
+            <h1 style="font-size: 2em; margin-bottom: 5px;">Benchmark di Settore</h1>
+            <p style="color: var(--text-muted);">Gestisci i target KPI (McKinsey Style) per ogni mercato.</p>
+        </div>
+        <div>
+            <a href="{{ url_for('admin.index') }}" class="btn btn-secondary" style="margin-right: 10px;">Torna alla Dashboard</a>
+            <a href="{{ url_for('admin.create_benchmark') }}" class="btn btn-primary">+ Nuovo Settore</a>
+        </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div style="padding: 15px; margin-bottom: 20px; border-radius: 8px; font-weight: bold;
+               background-color: {% if category == 'danger' %}#ffe6e6{% elif category == 'success' %}#e6f9f0{% else %}#fff0eb{% endif %};
+               color: {% if category == 'danger' %}#c5221f{% elif category == 'success' %}#1e7e5f{% else %}#d4a100{% endif %};">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="card" style="padding: 0; overflow: hidden;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+                <tr style="background: var(--bg-sidebar); border-bottom: 2px solid var(--border-color);">
+                    <th style="padding: 15px 20px; font-weight: bold;">Settore</th>
+                    <th style="padding: 15px 20px; font-weight: bold;">Target Margine</th>
+                    <th style="padding: 15px 20px; font-weight: bold;">Target Conv.</th>
+                    <th style="padding: 15px 20px; font-weight: bold;">Break-even Sano</th>
+                    <th style="padding: 15px 20px; font-weight: bold;">Runway Minima</th>
+                    <th style="padding: 15px 20px; font-weight: bold; text-align: right;">Azioni</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for b in benchmarks %}
+                <tr style="border-bottom: 1px solid var(--border-color); transition: background 0.2s;">
+                    <td style="padding: 15px 20px; font-weight: 600;">{{ b.sector_name }}</td>
+                    <td style="padding: 15px 20px;">{{ b.margine_lordo_target }}%</td>
+                    <td style="padding: 15px 20px;">{{ b.conversione_target }}%</td>
+                    <td style="padding: 15px 20px;">{{ b.break_even_sano }}x</td>
+                    <td style="padding: 15px 20px;">{{ b.runway_minima }} mesi</td>
+                    <td style="padding: 15px 20px; text-align: right;">
+                        <a href="{{ url_for('admin.edit_benchmark', bench_id=b.id) }}" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.9em;">Modifica</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" style="padding: 30px; text-align: center; color: var(--text-muted);">
+                        Nessun benchmark configurato. Verranno usati i fallback standard ("Media Standard").
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

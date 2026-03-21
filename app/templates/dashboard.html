@@ -1,96 +1,49 @@
 {% extends "base.html" %}
 {% block content %}
-
-<div class="page-header">
-    <h1 class="page-title">Dashboard Analisi</h1>
-</div>
-
-<div class="dark-card">
-    <div class="card-header">
-        <h2>Triad Insight — Le tue scansioni</h2>
+<div class="container" style="max-width: 1200px; margin: 40px auto; padding: 0 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h1 style="font-size: 2.2rem; font-weight: 800;">Le tue Analisi</h1>
+        <a href="{{ url_for('wizard.step1') }}" class="btn-nav-action" style="text-decoration: none; padding: 12px 24px; border-radius: 10px; background: linear-gradient(135deg, #4fc3f7, #29b6f6); color: white; font-weight: 800;">
+            <i class="fas fa-plus"></i> Nuovo Scan
+        </a>
     </div>
-    
-    <div class="table-container">
-        <table class="dark-table">
+
+    <div class="card" style="padding: 0; overflow: hidden;">
+        <table style="width: 100%; border-collapse: collapse;">
             <thead>
-                <tr>
-                    <th>Settore</th>
-                    <th>Modello</th>
-                    <th>Mese Rif.</th>
-                    <th>Creazione</th>
-                    <th>Azioni</th>
+                <tr style="background: #f9fafb; border-bottom: 2px solid #e8eef5; text-align: left;">
+                    <th style="padding: 15px 20px; color: #64748b; font-size: 0.85rem; text-transform: uppercase;">Data</th>
+                    <th style="padding: 15px 20px; color: #64748b; font-size: 0.85rem; text-transform: uppercase;">Settore</th>
+                    <th style="padding: 15px 20px; color: #64748b; font-size: 0.85rem; text-transform: uppercase;">Maturità</th>
+                    <th style="padding: 15px 20px; color: #64748b; font-size: 0.85rem; text-transform: uppercase; text-align: right;">Azioni</th>
                 </tr>
             </thead>
             <tbody>
-                {% if scans %}
-                    {% for s in scans %}
-                    <tr>
-                        <td>{{ s.settore }}</td>
-                        <td>{{ s.modello }}</td>
-                        <td>{{ s.mese_riferimento }}</td>
-                        <td>{{ s.created_at|fmt_dt if s.created_at else 'N/A' }}</td>
-                        <td class="table-actions">
-                            <a href="{{ url_for('scans.view_scan', scan_id=s.id) }}" title="Visualizza">👁️</a>
-                            <a href="{{ url_for('report.view_report', scan_id=s.id) }}" title="Report Interattivo">📊</a>
-                            <a href="{{ url_for('scans.scan_pdf', scan_id=s.id) }}" title="Scarica PDF">📄</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
+                {% for s in scans %}
+                <tr style="border-bottom: 1px solid #e8eef5;">
+                    <td style="padding: 15px 20px; font-weight: 600;">{{ s.created_at.strftime('%d/%m/%Y') }}</td>
+                    <td style="padding: 15px 20px;">{{ s.settore }}</td>
+                    <td style="padding: 15px 20px;">
+                        <span class="badge {% if s.overall_score and s.overall_score >= 70 %}badge-green{% elif s.overall_score and s.overall_score >= 45 %}badge-warning{% else %}badge-danger{% endif %}">
+                            {{ s.overall_score|default(0, true)|round(0) }}%
+                        </span>
+                    </td>
+                    <td style="padding: 15px 20px; text-align: right;">
+                        <a href="{{ url_for('scans.view_scan', scan_id=s.id) }}" style="color: #29b6f6; text-decoration: none; font-weight: 700; margin-right: 15px;">Vedi Report</a>
+                        <form action="{{ url_for('scans.delete_scan', scan_id=s.id) }}" method="POST" style="display:inline;">
+                            <button type="submit" style="background:none; border:none; color: #ef4444; cursor:pointer; font-size: 0.9rem;" onclick="return confirm('Sei sicuro?')">Elimina</button>
+                        </form>
+                    </td>
+                </tr>
                 {% else %}
-                    <tr>
-                        <td colspan="5" class="empty-state">
-                            Nessuna scansione disponibile. <a href="{{ url_for('wizard.onboarding') }}">Inizia il tuo primo scan!</a>
-                        </td>
-                    </tr>
-                {% endif %}
+                <tr>
+                    <td colspan="4" style="padding: 40px; text-align: center; color: #64748b;">
+                        Nessuna scansione disponibile. <a href="{{ url_for('wizard.step1') }}" style="color: #29b6f6; font-weight: 700;">Inizia il tuo primo scan!</a>
+                    </td>
+                </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
-
-<div class="dark-card mt-4">
-    <div class="card-header">
-        <h2>Trend Salute Aziendale</h2>
-    </div>
-    <div class="trend-chart-wrap" style="height: 300px; padding: 20px;">
-        <canvas id="triadTrendChart"></canvas>
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-  fetch("{{ url_for('report.triad_trend') }}")
-    .then((r) => r.json())
-    .then((data) => {
-      const canvas = document.getElementById("triadTrendChart");
-      if (!canvas || !data || !Array.isArray(data.labels) || !Array.isArray(data.values)) return;
-
-      new Chart(canvas, {
-        type: "line",
-        data: {
-          labels: data.labels,
-          datasets: [
-            {
-              label: "Triad Index",
-              data: data.values,
-              borderColor: "#fae8b4", /* Giallo crema del tema */
-              backgroundColor: "rgba(250, 232, 180, 0.1)",
-              fill: true,
-              tension: 0.35
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          color: "#94a3b8",
-          scales: {
-            x: { grid: { color: "#2d3748" }, ticks: { color: "#94a3b8" } },
-            y: { grid: { color: "#2d3748" }, ticks: { color: "#94a3b8" }, min: 0, max: 100 }
-          }
-        }
-      });
-    }).catch(() => {});
-</script>
-
 {% endblock %}

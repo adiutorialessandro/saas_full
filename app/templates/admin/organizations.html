@@ -1,53 +1,38 @@
 {% extends "base.html" %}
 {% block content %}
-
-<div class="dash-hero">
-  <div class="dash-hero-inner">
-    <div>
-      <h1 class="dash-title">Clienti (Organizations)</h1>
-      <div class="dash-sub">Elenco aziende registrate nella piattaforma.</div>
+<div class="container" style="max-width: 1200px; margin: 40px auto; padding: 0 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h1 style="font-size: 2.2rem; font-weight: 800;">Gestione Organizzazioni</h1>
+        <a href="{{ url_for('admin.index') }}" class="btn btn-secondary" style="text-decoration: none; padding: 10px 20px;">Torna Indietro</a>
     </div>
 
-    <div class="dash-actions">
-      <a class="btn" href="{{ url_for('admin.create_organization') }}">+ Nuova azienda</a>
-      <a class="btn" href="{{ url_for('admin.plans') }}">Piani</a>
+    <div class="card" style="padding: 0; overflow: hidden;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #f9fafb; border-bottom: 2px solid #e8eef5; text-align: left;">
+                    <th style="padding: 15px 20px;">AZIENDA</th>
+                    <th style="padding: 15px 20px;">OWNER</th>
+                    <th style="padding: 15px 20px;">PIANO</th>
+                    <th style="padding: 15px 20px;">UTENTI</th>
+                    <th style="padding: 15px 20px;">SCAN</th>
+                    <th style="padding: 15px 20px; text-align: right;">AZIONI</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                <tr style="border-bottom: 1px solid #e8eef5;">
+                    <td style="padding: 15px 20px; font-weight: 800;">{{ row.org.name }}</td>
+                    <td style="padding: 15px 20px; color: #64748b;">{{ row.owner }}</td>
+                    <td style="padding: 15px 20px;"><span class="badge badge-green">{{ row.plan_name }}</span></td>
+                    <td style="padding: 15px 20px;">{{ row.users }}</td>
+                    <td style="padding: 15px 20px;">{{ row.scans }}</td>
+                    <td style="padding: 15px 20px; text-align: right;">
+                        <a href="{{ url_for('admin.organization_detail', org_id=row.org.id) }}" style="color: #29b6f6; text-decoration: none; font-weight: 700;">Gestisci</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
-  </div>
 </div>
-
-<div class="card inbox-card">
-  {% if rows %}
-    <div class="inbox-list">
-      {% for r in rows %}
-        <div class="inbox-row">
-          <div class="inbox-main">
-            <div class="inbox-title">
-              <span class="pill">#{{ r.org.id }}</span>
-              <b>{{ r.org.name }}</b>
-            </div>
-            <div class="inbox-meta muted">
-              Owner: {{ r.owner }}
-              · Utenti: {{ r.users }}
-              · Scans: {{ r.scans }}
-              · Piano: {{ r.plan_name }}
-            </div>
-          </div>
-
-          <div class="inbox-right">
-            <a class="btn" href="{{ url_for('admin.organization_detail', org_id=r.org.id) }}">Apri</a>
-          </div>
-        </div>
-      {% endfor %}
-    </div>
-  {% else %}
-    <div class="empty-state">
-      <div class="empty-title">Nessun cliente presente.</div>
-      <div class="muted">Crea la prima azienda per iniziare.</div>
-      <div style="margin-top:12px;">
-        <a class="btn" href="{{ url_for('admin.create_organization') }}">Crea azienda</a>
-      </div>
-    </div>
-  {% endif %}
-</div>
-
 {% endblock %}

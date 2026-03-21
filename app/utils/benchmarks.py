@@ -1,242 +1,135 @@
 """
-Benchmark definitions and KPI evaluation utilities
-SaaS Full – Strategic Diagnostic Engine
+SaaS Full – Dynamic Benchmark Utility
+Recupera i benchmark dal database e valuta le performance dei KPI.
 """
+import logging
+from typing import Dict, Any, Optional
+from app.models.benchmark import SectorBenchmark
 
-from typing import Dict, Any
+logger = logging.getLogger(__name__)
 
+# =========================================================
+# UTILITIES DI NORMALIZZAZIONE
+# =========================================================
 
-# ---------------------------------------------------------
-# BENCHMARK SETTORIALI
-# ---------------------------------------------------------
-
-BENCHMARKS = {
-
-    "Consulenza B2B": {
-        "margine_pct": 0.55,
-        "conversione": 0.10,
-        "break_even_ratio": 1.20,
-        "runway_mesi": 6
-    },
-
-    "Retail": {
-        "margine_pct": 0.30,
-        "conversione": 0.04,
-        "break_even_ratio": 1.10,
-        "runway_mesi": 3
-    },
-
-    "Manifattura": {
-        "margine_pct": 0.35,
-        "conversione": 0.07,
-        "break_even_ratio": 1.15,
-        "runway_mesi": 4
-    },
-
-    "SaaS / Tech": {
-        "margine_pct": 0.75,
-        "conversione": 0.05,
-        "break_even_ratio": 1.30,
-        "runway_mesi": 12
-    },
-
-    "Ho.Re.Ca.": {
-        "margine_pct": 0.25,
-        "conversione": 0.15,
-        "break_even_ratio": 1.10,
-        "runway_mesi": 2
-    },
-
-    "Immobiliare": {
-        "margine_pct": 0.40,
-        "conversione": 0.08,
-        "break_even_ratio": 1.20,
-        "runway_mesi": 6
-    },
-
-    "Sanità / Studi medici": {
-        "margine_pct": 0.50,
-        "conversione": 0.20,
-        "break_even_ratio": 1.20,
-        "runway_mesi": 4
-    }
-
-}
-
-
-# ---------------------------------------------------------
-# UTILITIES
-# ---------------------------------------------------------
-
-def _extract_float(value) -> float:
-    """
-    Estrae un numero da stringhe sporche
-    es:
-    "31.2 mesi" -> 31.2
-    "44%" -> 44
-    """
-
+def _extract_float(value: Any) -> float:
+    """Estrae un numero in modo sicuro da stringhe sporche (es: '31.2 mesi' -> 31.2)"""
     if value is None:
         return 0.0
-
     if isinstance(value, (int, float)):
         return float(value)
-
     try:
-
-        cleaned = "".join(
-            c for c in str(value)
-            if c.isdigit() or c in ".-"
-        )
-
+        cleaned = "".join(c for c in str(value) if c.isdigit() or c in ".-")
         return float(cleaned) if cleaned else 0.0
-
     except Exception:
         return 0.0
 
 
-# ---------------------------------------------------------
-# KPI EVALUATION
-# ---------------------------------------------------------
+# =========================================================
+# KPI EVALUATION ENGINE
+# =========================================================
 
-def evaluate_kpi(value: float, target: float) -> str:
-    """
-    Valutazione standard KPI
-    """
-
+def evaluate_kpi(value: float, target: float, higher_is_better: bool = True) -> str:
+    """Valutazione standard a semaforo per un KPI rispetto al suo target."""
     if target == 0:
         return "GRIGIO"
 
-    if value >= target:
-        return "VERDE"
-
-    if value >= target * 0.75:
-        return "GIALLO"
-
-    return "ROSSO"
-
+    if higher_is_better:
+        if value >= target: return "VERDE"
+        if value >= target * 0.75: return "GIALLO"
+        return "ROSSO"
+    else:
+        # Per metriche dove "meno è meglio" (es. Churn rate)
+        if value <= target: return "VERDE"
+        if value <= target * 1.25: return "GIALLO"
+        return "ROSSO"
 
 def evaluate_break_even(value: float) -> str:
-    """
-    Valutazione specifica break-even ratio
-    """
-
-    if value >= 2:
-        return "VERDE"
-
-    if value >= 1:
-        return "GIALLO"
-
+    """Valutazione specifica per il break-even ratio aziendale."""
+    if value >= 2.0: return "VERDE"
+    if value >= 1.0: return "GIALLO"
     return "ROSSO"
 
 
-# ---------------------------------------------------------
-# BENCHMARK ENGINE
-# ---------------------------------------------------------
+# =========================================================
+# CORE BENCHMARK ENGINE
+# =========================================================
 
 def get_benchmark_analysis(settore: str, kpi_data: Dict[str, Any]) -> Dict[str, Any]:
-
+    """
+    Recupera i dati di settore dal Database e calcola i gap (distanza dal target).
+    """
     if not settore:
-        return {
-            "status": "error",
-            "message": "Settore non specificato"
-        }
+        return {"status": "error", "message": "Settore non specificato"}
 
-    settore_norm = settore.strip().lower()
+    settore_norm = settore.strip()
 
-    # normalizzazione nomi settore (evita mismatch tipo "saas", "tech", ecc.)
-    SECTOR_MAP = {
-        "saas": "SaaS / Tech",
-        "tech": "SaaS / Tech",
-        "software": "SaaS / Tech",
-        "ristorazione": "Ho.Re.Ca.",
-        "hotel": "Ho.Re.Ca.",
-        "bar": "Ho.Re.Ca.",
-        "medico": "Sanità / Studi medici",
-        "studio medico": "Sanità / Studi medici",
+    # Mappa di sinonimi per intercettare varianti
+    sector_map = {
+        "saas": "SaaS / Tech", "tech": "SaaS / Tech", "software": "SaaS / Tech",
+        "ristorazione": "Ho.Re.Ca.", "hotel": "Ho.Re.Ca.", "bar": "Ho.Re.Ca.",
+        "medico": "Sanità / Studi medici", "studio medico": "Sanità / Studi medici",
     }
-
-    # prova prima con la mappa sinonimi
-    for key, mapped in SECTOR_MAP.items():
-        if key in settore_norm:
-            settore_norm = mapped.lower()
+    
+    # Normalizzazione settore
+    for key, mapped in sector_map.items():
+        if key in settore_norm.lower():
+            settore_norm = mapped
             break
 
-    benchmark = None
-    sector_name = None
+    # 1. Recupero dal Database (Dinamico)
+    bench_db = SectorBenchmark.query.filter(SectorBenchmark.sector_name.ilike(f"%{settore_norm}%")).first()
 
-    for k, v in BENCHMARKS.items():
-        if k.lower() in settore_norm or settore_norm in k.lower():
-            benchmark = v
-            sector_name = k
-            break
-
-    if not benchmark:
-
-        sector_name = "Media Standard"
-
+    if bench_db:
+        sector_name = bench_db.sector_name
         benchmark = {
-            "margine_pct": 0.35,
-            "conversione": 0.10,
-            "break_even_ratio": 1.10,
-            "runway_mesi": 4
+            "margine_pct": (bench_db.margine_lordo_target or 55.0) / 100.0,
+            "conversione": (bench_db.conversione_target or 10.0) / 100.0,
+            "break_even_ratio": bench_db.break_even_sano or 1.2,
+            "runway_mesi": bench_db.runway_minima or 6
+        }
+    else:
+        # 2. Fallback Standard se il settore non è ancora mappato nel DB dall'Admin
+        logger.warning(f"Nessun benchmark in DB per il settore '{settore_norm}'. Uso Media Standard.")
+        sector_name = "Media Standard"
+        benchmark = {
+            "margine_pct": 0.40,
+            "conversione": 0.08,
+            "break_even_ratio": 1.15,
+            "runway_mesi": 6
         }
 
-    results = {}
-
-    # ---------------------------
-    # RUNWAY
-    # ---------------------------
-
+    # 3. Calcolo GAP
     runway = _extract_float(kpi_data.get("runway_mesi"))
-    target_runway = benchmark["runway_mesi"]
-
-    results["runway"] = {
-        "value": runway,
-        "target": target_runway,
-        "status": evaluate_kpi(runway, target_runway),
-        "gap": runway - target_runway
-    }
-
-    # ---------------------------
-    # MARGINE
-    # ---------------------------
-
     margine = _extract_float(kpi_data.get("margine_pct"))
-    target_margine = benchmark["margine_pct"]
-
-    results["margine"] = {
-        "value": margine,
-        "target": target_margine,
-        "status": evaluate_kpi(margine, target_margine),
-        "gap": margine - target_margine
-    }
-
-    # ---------------------------
-    # CONVERSIONE
-    # ---------------------------
-
     conversione = _extract_float(kpi_data.get("conversione"))
-    target_conversione = benchmark["conversione"]
-
-    results["conversione"] = {
-        "value": conversione,
-        "target": target_conversione,
-        "status": evaluate_kpi(conversione, target_conversione),
-        "gap": conversione - target_conversione
-    }
-
-    # ---------------------------
-    # BREAK EVEN
-    # ---------------------------
-
     break_even = _extract_float(kpi_data.get("break_even_ratio"))
 
-    results["break_even"] = {
-        "value": break_even,
-        "target": benchmark["break_even_ratio"],
-        "status": evaluate_break_even(break_even),
-        "gap": break_even - benchmark["break_even_ratio"]
+    results = {
+        "runway": {
+            "value": runway,
+            "target": benchmark["runway_mesi"],
+            "status": evaluate_kpi(runway, benchmark["runway_mesi"], True),
+            "gap": runway - benchmark["runway_mesi"]
+        },
+        "margine": {
+            "value": margine,
+            "target": benchmark["margine_pct"],
+            "status": evaluate_kpi(margine, benchmark["margine_pct"], True),
+            "gap": margine - benchmark["margine_pct"]
+        },
+        "conversione": {
+            "value": conversione,
+            "target": benchmark["conversione"],
+            "status": evaluate_kpi(conversione, benchmark["conversione"], True),
+            "gap": conversione - benchmark["conversione"]
+        },
+        "break_even": {
+            "value": break_even,
+            "target": benchmark["break_even_ratio"],
+            "status": evaluate_break_even(break_even),
+            "gap": break_even - benchmark["break_even_ratio"]
+        }
     }
 
     return {

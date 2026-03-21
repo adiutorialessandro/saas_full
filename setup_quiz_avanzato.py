@@ -1,4 +1,9 @@
-from flask_wtf import FlaskForm
+import re
+
+print("🚀 Aggiornamento Quiz Strategico McKinsey in corso...")
+
+# 1. Riscrivi forms.py completamente per inserire le nuove domande
+forms_content = """from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, FloatField, RadioField, SelectField, IntegerField
 from wtforms.validators import DataRequired, Email, Length, NumberRange, Optional, Regexp, EqualTo
 
@@ -83,3 +88,48 @@ class CreatePlanForm(FlaskForm):
 class UpdateOrganizationPlanForm(FlaskForm):
     plan_id = SelectField("Piano", coerce=int, validators=[DataRequired()])
     submit = SubmitField("Aggiorna piano")
+"""
+with open('app/forms.py', 'w') as f:
+    f.write(forms_content)
+print("✅ Form aggiornati con le nuove domande a risposta chiusa (3 scenari).")
+
+# 2. Patch Orchestrator per leggere le nuove metriche di Rischio (1.0 = Peggiore, 0.0 = Migliore)
+path_orch = 'app/services/analysis/strategy_orchestrator.py'
+with open(path_orch, 'r') as f:
+    content_orch = f.read()
+
+new_func = """def _calculate_ohi_score(quiz: Dict[str, Any]) -> Dict[str, Any]:
+    if not quiz:
+        return {"score": 50, "status": "Neutral", "insights": ["Dati qualitativi non disponibili."]}
+    
+    scores = []
+    for v in quiz.values():
+        try:
+            val = float(v)
+            if val <= 1.0:
+                scores.append((1.0 - val) * 100)
+            else:
+                scores.append(val * 20)
+        except: pass
+    
+    avg = (sum(scores) / len(scores)) if scores else 50
+    
+    status = "Elite" if avg >= 80 else "Stable" if avg >= 60 else "Fragile"
+    
+    insights = []
+    if float(quiz.get('chiarezza_obiettivi', 0)) >= 0.5: insights.append("Mancanza di direzione strategica chiara o condivisa.")
+    if float(quiz.get('velocita_decisionale', 0)) >= 0.5: insights.append("Eccessiva burocrazia interna e colli di bottiglia decisionali.")
+    if float(quiz.get('fiducia_leadership', 1)) <= 0.5: insights.append("Leadership forte e riconosciuta come punto di riferimento dal team.")
+    
+    return {
+        "score": round(avg),
+        "status": status,
+        "insights": insights[:3] if insights else ["La cultura aziendale appare allineata e bilanciata."]
+    }"""
+
+content_orch = re.sub(r'def _calculate_ohi_score\(.*?(?=def _calculate_value_chain)', new_func + '\n\n', content_orch, flags=re.DOTALL)
+
+with open(path_orch, 'w') as f:
+    f.write(content_orch)
+print("✅ Orchestratore Strategico allineato al nuovo formato risposte.")
+print("🎉 CONFIGURAZIONE BACKEND COMPLETATA!")

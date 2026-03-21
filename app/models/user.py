@@ -31,3 +31,12 @@ class User(UserMixin, db.Model):
         if not self.memberships:
             return 0
         return int(self.memberships[0].org_id or 0)
+    @property
+    def current_org(self):
+        from app.models.membership import Membership
+        from app.models.organization import Organization
+        # Prende la prima membership dell'utente e restituisce l'organizzazione collegata
+        member = Membership.query.filter_by(user_id=self.id).first()
+        if member:
+            return Organization.query.get(member.org_id)
+        return None

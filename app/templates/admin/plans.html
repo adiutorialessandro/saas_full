@@ -1,43 +1,42 @@
 {% extends "base.html" %}
 {% block content %}
-
-<div class="dash-hero">
-  <div class="dash-hero-inner">
-    <div>
-      <h1 class="dash-title">Piani SaaS</h1>
-      <div class="dash-sub">Gestione dei piani di abbonamento.</div>
-    </div>
-
-    <div class="dash-actions">
-      <a class="btn" href="{{ url_for('admin.create_plan') }}">+ Nuovo piano</a>
-    </div>
-  </div>
-</div>
-
-<div class="card inbox-card">
-  {% if plans %}
-    <div class="inbox-list">
-      {% for p in plans %}
-        <div class="inbox-row">
-          <div class="inbox-main">
-            <div class="inbox-title">
-              <span class="pill">#{{ p.id }}</span>
-              <b>{{ p.name }}</b>
-            </div>
-            <div class="inbox-meta muted">
-              Limite scans: {{ "Illimitato" if p.scan_limit == -1 else p.scan_limit }}
-              · Prezzo/mese: € {{ "%.2f"|format(p.price_month) }}
-              · Attivo: {{ "Sì" if p.is_active else "No" }}
-            </div>
-          </div>
+<div class="container" style="max-width: 1200px; margin: 40px auto; padding: 0 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <div>
+            <h1 style="font-size: 2.2rem; font-weight: 800;">Gestione Piani (Tiers)</h1>
+            <p class="muted">Configura i limiti di scansione e i prezzi mensili.</p>
         </div>
-      {% endfor %}
+        <div style="display: flex; gap: 10px;">
+            <a href="{{ url_for('admin.index') }}" class="btn btn-secondary">← Torna alla Dashboard</a>
+            <a href="{{ url_for('admin.create_plan') }}" class="btn btn-primary"><i class="fas fa-plus"></i> Nuovo Piano</a>
+        </div>
     </div>
-  {% else %}
-    <div class="empty-state">
-      <div class="empty-title">Nessun piano presente.</div>
-    </div>
-  {% endif %}
-</div>
 
+    <div class="card" style="padding: 0; overflow: hidden;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #f9fafb; border-bottom: 2px solid #e8eef5; text-align: left;">
+                    <th style="padding: 15px 20px;">NOME PIANO</th>
+                    <th style="padding: 15px 20px;">LIMITE SCAN / MESE</th>
+                    <th style="padding: 15px 20px;">PREZZO MESE</th>
+                    <th style="padding: 15px 20px;">STRIPE PRICE ID</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for plan in plans %}
+                <tr style="border-bottom: 1px solid #e8eef5;">
+                    <td style="padding: 15px 20px; font-weight: 800; color: var(--primary);">{{ plan.name }}</td>
+                    <td style="padding: 15px 20px;"><span class="badge badge-warning">{{ "Illimitato" if plan.scan_limit == -1 else plan.scan_limit }}</span></td>
+                    <td style="padding: 15px 20px; font-weight: bold;">€ {{ "%.0f"|format(plan.price_month) }}</td>
+                    <td style="padding: 15px 20px; color: #64748b; font-family: monospace; font-size: 0.85em;">
+                        {{ plan.stripe_price_id or 'Non configurato' }}
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="4" style="padding: 40px; text-align: center; color: #999;">Nessun piano configurato nel database.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 {% endblock %}

@@ -1,234 +1,141 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Triad Insight — Diagnosi chiara del tuo business</title>
-  <meta name="description" content="Analizza finanza, vendite e struttura operativa. Ottieni un report chiaro con priorità e azioni concrete.">
-  <link rel="stylesheet" href="{{ url_for('static', filename='landing.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaaS Strategy | L'Advisory Board Digitale per la tua Azienda</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        body { background: #f8fafc; color: #0f172a; line-height: 1.6; }
+        
+        /* NAVBAR */
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 5%; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: fixed; width: 100%; top: 0; z-index: 1000; }
+        .logo { font-size: 1.5rem; font-weight: 900; color: #1a1a2e; text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .nav-links { display: flex; gap: 20px; align-items: center; }
+        .btn { padding: 10px 24px; border-radius: 8px; font-weight: bold; text-decoration: none; transition: all 0.3s; }
+        .btn-outline { color: #38bdf8; border: 2px solid #38bdf8; }
+        .btn-outline:hover { background: #f0f9ff; }
+        .btn-primary { background: linear-gradient(135deg, #38bdf8, #8b5cf6); color: white; border: none; }
+        .btn-primary:hover { box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4); transform: translateY(-2px); }
+
+        /* HERO SECTION */
+        .hero { padding: 160px 5% 100px; text-align: center; background: #1a1a2e; color: white; position: relative; overflow: hidden; }
+        .hero::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(139,92,246,0.15) 0%, rgba(26,26,46,0) 50%); pointer-events: none; }
+        .hero h1 { font-size: 4rem; font-weight: 900; line-height: 1.1; margin-bottom: 20px; letter-spacing: -1px; }
+        .hero h1 span { background: linear-gradient(135deg, #38bdf8, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { font-size: 1.25rem; color: #94a3b8; max-width: 700px; margin: 0 auto 40px; }
+        .hero-actions { display: flex; justify-content: center; gap: 20px; }
+
+        /* FEATURES SECTION */
+        .features { padding: 100px 5%; max-width: 1200px; margin: 0 auto; }
+        .section-title { text-align: center; font-size: 2.5rem; font-weight: 800; margin-bottom: 60px; color: #0f172a; }
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; }
+        .feature-card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #e2e8f0; transition: transform 0.3s; }
+        .feature-card:hover { transform: translateY(-10px); border-color: #38bdf8; }
+        .feature-icon { width: 60px; height: 60px; background: #f0f9ff; color: #38bdf8; border-radius: 15px; display: flex; justify-content: center; align-items: center; font-size: 1.8rem; margin-bottom: 20px; }
+        .feature-card.purple .feature-icon { background: #faf5ff; color: #8b5cf6; }
+        .feature-card.green .feature-icon { background: #f0fdf4; color: #10b981; }
+        .feature-card h3 { font-size: 1.5rem; margin-bottom: 15px; font-weight: 800; }
+        .feature-card p { color: #64748b; font-size: 1rem; }
+
+        /* HOW IT WORKS */
+        .steps { background: white; padding: 100px 5%; }
+        .step-container { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px; }
+        .step-row { display: flex; align-items: center; gap: 40px; }
+        .step-row:nth-child(even) { flex-direction: row-reverse; }
+        .step-content { flex: 1; }
+        .step-number { font-size: 1.2rem; font-weight: bold; color: #8b5cf6; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        .step-content h3 { font-size: 2rem; font-weight: 800; margin-bottom: 15px; }
+        .step-content p { color: #64748b; font-size: 1.1rem; }
+        .step-image { flex: 1; background: #f8fafc; height: 300px; border-radius: 20px; border: 2px dashed #cbd5e1; display: flex; justify-content: center; align-items: center; color: #94a3b8; font-size: 1.2rem; }
+
+        /* CTA FOOTER */
+        .cta-footer { text-align: center; padding: 100px 5%; background: linear-gradient(135deg, #1a1a2e, #2d2a4a); color: white; }
+        .cta-footer h2 { font-size: 3rem; font-weight: 900; margin-bottom: 20px; }
+        .cta-footer p { font-size: 1.2rem; color: #94a3b8; margin-bottom: 40px; max-width: 600px; margin-left: auto; margin-right: auto; }
+        
+        .footer { padding: 30px 5%; text-align: center; background: #0f172a; color: #64748b; font-size: 0.9rem; }
+    </style>
 </head>
 <body>
-  
-  <header class="site-header">
-    <div class="container nav">
-      <a class="brand" href="{{ url_for('index') }}">
-        <span class="brand-mark">▲</span>
-        <span class="brand-text">Triad Insight</span>
-      </a>
 
-      <nav class="nav-links">
-        <a href="#prodotto">Prodotto</a>
-        <a href="#come-funziona">Come funziona</a>
-        <a href="{{ url_for('pricing') }}">Prezzi</a>
-      </nav>
+    <nav class="navbar">
+        <a href="/" class="logo"><i class="fas fa-chart-line" style="color: #38bdf8;"></i> SaaS Strategy</a>
+        <div class="nav-links">
+            <a href="{{ url_for('auth.login') }}" class="btn btn-outline">Accedi</a>
+            <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Inizia Gratis</a>
+        </div>
+    </nav>
 
-      <div class="nav-actions">
-        {% if current_user.is_authenticated %}
-          <a class="btn" href="{{ url_for('scans.dashboard') }}">Vai alla dashboard</a>
-        {% else %}
-          <a class="btn btn-secondary" href="{{ url_for('auth.login') }}">Accedi</a>
-          <a class="btn" href="{{ url_for('auth.register') }}">Inizia ora</a>
-        {% endif %}
-      </div>
-    </div>
-  </header>
-
-  <main>
     <section class="hero">
-      <div class="container hero-grid">
-        <div class="hero-copy">
-          <div class="eyebrow">Business diagnosis platform</div>
-          <h1>Scopri cosa blocca davvero la crescita della tua azienda.</h1>
-          <p class="hero-text">
-            Triad Insight analizza finanza, vendite e struttura operativa. Genera un report chiaro con priorità, alert e azioni concrete in pochissimi minuti.
-          </p>
-
-          <div class="hero-actions">
-            {% if current_user.is_authenticated %}
-              <a class="btn btn-lg" href="{{ url_for('wizard.onboarding') }}">Fai un nuovo Scan</a>
-              <a class="btn btn-secondary btn-lg" href="{{ url_for('scans.dashboard') }}">Dashboard</a>
-            {% else %}
-              <a class="btn btn-lg" href="{{ url_for('auth.register') }}">Prova il primo scan</a>
-              <a class="btn btn-secondary btn-lg" href="#come-funziona">Scopri come funziona</a>
-            {% endif %}
-          </div>
-
-          <div class="hero-trust">
-            <span>✓ Setup rapido</span>
-            <span>✓ Report immediato</span>
-            <span>✓ Azioni concrete</span>
-          </div>
+        <h1>L'intelligenza di un Board d'Eccellenza.<br><span>In pochi secondi.</span></h1>
+        <p>Analizza i tuoi dati finanziari, scopri le inefficienze nascoste e genera un Action Plan di livello McKinsey guidato dall'Intelligenza Artificiale.</p>
+        <div class="hero-actions">
+            <a href="{{ url_for('auth.register') }}" class="btn btn-primary" style="padding: 16px 35px; font-size: 1.2rem;">Esegui il tuo primo Scan</a>
         </div>
-
-        <div class="hero-panel" style="display: flex; flex-direction: column; gap: 16px;">
-          
-          <div class="mock-card">
-            <div class="mock-label">Triad Score</div>
-            <div class="score-row">
-              <div class="score-value" style="color: var(--primary);">72</div>
-              <div style="text-align: right;">
-                <div class="mock-label" style="margin-bottom: 4px;">/100</div>
-                <div style="background: rgba(245,158,11,.15); color: var(--warning); padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 700;">Attenzione</div>
-              </div>
-            </div>
-            <div class="progress">
-              <div class="progress-bar" style="width:72%"></div>
-            </div>
-          </div>
-
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-            <div class="mock-card" style="padding: 16px;">
-              <div class="mock-label">Cash</div>
-              <div style="font-size: 24px; font-weight: 800; margin-bottom: 4px;">4.2 mesi</div>
-              <div style="font-size: 13px; font-weight: 600; color: var(--danger);">Runway limitata</div>
-            </div>
-            <div class="mock-card" style="padding: 16px;">
-              <div class="mock-label">Conversione</div>
-              <div style="font-size: 24px; font-weight: 800; margin-bottom: 4px;">6.8%</div>
-              <div style="font-size: 13px; font-weight: 600; color: var(--warning);">Sotto target</div>
-            </div>
-            <div class="mock-card" style="padding: 16px;">
-              <div class="mock-label">Margine</div>
-              <div style="font-size: 24px; font-weight: 800; margin-bottom: 4px;">34%</div>
-              <div style="font-size: 13px; font-weight: 600; color: var(--warning);">Da proteggere</div>
-            </div>
-            <div class="mock-card" style="padding: 16px;">
-              <div class="mock-label">Break-even</div>
-              <div style="font-size: 24px; font-weight: 800; margin-bottom: 4px;">1.04</div>
-              <div style="font-size: 13px; font-weight: 600; color: var(--warning);">Molto vicino</div>
-            </div>
-          </div>
-
-        </div>
-      </div>
     </section>
 
-    <section id="problema" style="background: var(--surface-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
-      <div class="container">
-        <div class="section-head center">
-          <div class="eyebrow">Il problema</div>
-          <h2>La maggior parte delle aziende ha dati. Non ha chiarezza.</h2>
-          <p>Numeri sparsi, dashboard complesse e poca capacità di capire dove agire subito.</p>
+    <section class="features">
+        <h2 class="section-title">Oltre i semplici grafici. <br>Vera consulenza automatizzata.</h2>
+        <div class="grid-3">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-calculator"></i></div>
+                <h3>What-If & Stress Test</h3>
+                <p>Simula scenari di crisi, calcola il tuo Runway e scopri quanti mesi di sopravvivenza guadagni tagliando i costi del 10%.</p>
+            </div>
+            <div class="feature-card purple">
+                <div class="feature-icon"><i class="fas fa-robot"></i></div>
+                <h3>AI Executive Memo</h3>
+                <p>Un algoritmo basato su OpenAI analizza i tuoi KPI e scrive un memo strategico diretto per te e per i tuoi investitori.</p>
+            </div>
+            <div class="feature-card green">
+                <div class="feature-icon"><i class="fas fa-sitemap"></i></div>
+                <h3>Framework McKinsey</h3>
+                <p>Dal modello 7S ai 3 Orizzonti dell'Innovazione. Il nostro motore mappa la tua organizzazione trovando il vero collo di bottiglia.</p>
+            </div>
         </div>
-
-        <div class="card-grid three">
-          <article class="info-card">
-            <div class="card-icon">01</div>
-            <h3>Numeri isolati</h3>
-            <p>Guardare KPI separati non basta se non capisci la relazione tra liquidità, margini e acquisizione.</p>
-          </article>
-
-          <article class="info-card">
-            <div class="card-icon">02</div>
-            <h3>Priorità confuse</h3>
-            <p>Troppi indicatori creano rumore. Serve una sintesi che evidenzi subito cosa è critico.</p>
-          </article>
-
-          <article class="info-card">
-            <div class="card-icon">03</div>
-            <h3>Azioni tardive</h3>
-            <p>Molti problemi vengono rilevati troppo tardi, quando liquidità e margini sono già sotto pressione.</p>
-          </article>
-        </div>
-      </div>
     </section>
 
-    <section id="prodotto">
-      <div class="container">
-        <div class="section-head center">
-          <div class="eyebrow">La soluzione</div>
-          <h2>Una diagnosi chiara, in pochi minuti.</h2>
-          <p>Triad Insight raccoglie dati essenziali, legge i segnali critici del business e produce un report leggibile e azionabile.</p>
+    <section class="steps">
+        <h2 class="section-title">Come funziona</h2>
+        <div class="step-container">
+            <div class="step-row">
+                <div class="step-content">
+                    <div class="step-number">Step 1</div>
+                    <h3>Inserisci i dati essenziali</h3>
+                    <p>Tramite un wizard guidato, inserisci i dati di base della tua azienda: fatturato, burn rate, costi fissi e rispondi a 8 domande sulla tua struttura organizzativa.</p>
+                </div>
+                <div class="step-image"><i class="fas fa-tasks fa-3x"></i></div>
+            </div>
+            <div class="step-row">
+                <div class="step-content">
+                    <div class="step-number">Step 2</div>
+                    <h3>Il Motore Algoritmico lavora</h3>
+                    <p>Il sistema calcola l'EBITDA Gap, confronta le tue metriche con i Benchmark di settore e interpella ChatGPT per formulare una diagnosi.</p>
+                </div>
+                <div class="step-image" style="background: #faf5ff; border-color: #d8b4fe; color: #c084fc;"><i class="fas fa-brain fa-3x"></i></div>
+            </div>
+            <div class="step-row">
+                <div class="step-content">
+                    <div class="step-number">Step 3</div>
+                    <h3>Ottieni il Dossier in PDF</h3>
+                    <p>Ricevi un report multipagina dal design "Luxury", pronto da stampare o presentare in CDA, con i KPI codificati a colori e il piano d'azione.</p>
+                </div>
+                <div class="step-image" style="background: #f0fdf4; border-color: #86efac; color: #4ade80;"><i class="fas fa-file-pdf fa-3x"></i></div>
+            </div>
         </div>
-
-        <div class="feature-grid">
-          <article class="feature-card" style="text-align: center;">
-            <div class="card-icon" style="margin: 0 auto 16px;">💰</div>
-            <h3>Finanza</h3>
-            <p>Runway, burn, break-even e sostenibilità economica in un colpo d’occhio.</p>
-          </article>
-
-          <article class="feature-card" style="text-align: center;">
-            <div class="card-icon" style="margin: 0 auto 16px;">📈</div>
-            <h3>Vendite</h3>
-            <p>Conversione, resa commerciale e capacità di trasformare domanda in ricavi.</p>
-          </article>
-
-          <article class="feature-card" style="text-align: center;">
-            <div class="card-icon" style="margin: 0 auto 16px;">⚙️</div>
-            <h3>Struttura</h3>
-            <p>Comprensione sintetica dello stato dell’azienda e delle priorità operative.</p>
-          </article>
-        </div>
-      </div>
     </section>
 
-    <section id="come-funziona" style="background: var(--surface-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
-      <div class="container">
-        <div class="section-head center">
-          <div class="eyebrow">Come funziona</div>
-          <h2>Dal dato alla decisione, in 3 passaggi.</h2>
-        </div>
-
-        <div class="steps">
-          <article class="step">
-            <div class="step-num">1</div>
-            <h3>Inserisci i dati essenziali</h3>
-            <p>Settore, modello, mese di riferimento, KPI base e mini assessment guidato attraverso un wizard intuitivo.</p>
-          </article>
-
-          <article class="step">
-            <div class="step-num">2</div>
-            <h3>Genera lo scan</h3>
-            <p>Il motore analizza i segnali principali e costruisce una lettura sintetica dello stato di salute aziendale.</p>
-          </article>
-
-          <article class="step">
-            <div class="step-num">3</div>
-            <h3>Ricevi il report</h3>
-            <p>Ottieni Triad Score, alert chiave, indicatori incrociati e un piano d’azione prioritario stampabile in PDF.</p>
-          </article>
-        </div>
-      </div>
+    <section class="cta-footer">
+        <h2>Pronto a scalare la tua azienda?</h2>
+        <p>Smetti di navigare a vista. Affidati ai dati, ai benchmark di mercato e all'intelligenza artificiale per prendere decisioni infallibili.</p>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary" style="padding: 16px 35px; font-size: 1.2rem; background: linear-gradient(135deg, #10b981, #059669);">Inizia la prova gratuita</a>
     </section>
 
-    <section class="cta-final">
-      <div class="container">
-        <div class="cta-box">
-          <div>
-            <div class="eyebrow" style="background: rgba(255,255,255,.1); color: #fff; border: 1px solid rgba(255,255,255,.2);">Pronto a iniziare?</div>
-            <h2>Fai il primo scan e scopri dove intervenire davvero.</h2>
-            <p>Registrati, completa l’onboarding e ottieni una fotografia chiara del tuo business in meno di 5 minuti.</p>
-          </div>
+    <footer class="footer">
+        &copy; 2026 SaaS Strategy Engine. Tutti i diritti riservati.
+    </footer>
 
-          <div class="cta-side">
-            {% if current_user.is_authenticated %}
-              <a class="btn btn-secondary btn-lg" style="width: 100%;" href="{{ url_for('wizard.onboarding') }}">Nuovo scan</a>
-              <a class="btn btn-lg" style="width: 100%; border: 1px solid rgba(255,255,255,.2); background: transparent;" href="{{ url_for('scans.dashboard') }}">Vai alla dashboard</a>
-            {% else %}
-              <a class="btn btn-secondary btn-lg" style="width: 100%;" href="{{ url_for('auth.register') }}">Crea account gratuito</a>
-              <a class="btn btn-lg" style="width: 100%; border: 1px solid rgba(255,255,255,.2); background: transparent;" href="{{ url_for('auth.login') }}">Accedi</a>
-            {% endif %}
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer class="site-footer">
-    <div class="container footer-inner">
-      <div>
-        <div class="footer-brand">Triad Insight</div>
-        <div class="footer-copy">Diagnosi chiara del business, in pochi minuti.</div>
-      </div>
-
-      <div class="footer-links">
-        <a href="#prodotto">Prodotto</a>
-        <a href="#come-funziona">Come funziona</a>
-        <a href="{{ url_for('pricing') }}">Prezzi</a>
-      </div>
-    </div>
-  </footer>
-  
 </body>
 </html>

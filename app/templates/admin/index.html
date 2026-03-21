@@ -1,89 +1,66 @@
 {% extends "base.html" %}
 {% block content %}
+<div class="container" style="max-width: 1200px; margin: 40px auto; padding: 0 20px;">
+    <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 30px; color: #0f172a;">Control Room</h1>
 
-<div class="dash-hero">
-  <div class="dash-hero-inner">
-    <div>
-      <h1 class="dash-title">Admin Dashboard</h1>
-      <div class="dash-sub">Controllo globale di utenti, aziende, piani e scansioni.</div>
-    </div>
-
-    <div class="dash-actions">
-      <a class="btn" href="{{ url_for('admin.organizations') }}">Clienti</a>
-      <a class="btn" href="{{ url_for('admin.plans') }}">Piani</a>
-    </div>
-  </div>
-</div>
-
-<div class="card inbox-card" style="margin-bottom:20px;">
-  <div class="inbox-list">
-    <div class="inbox-row">
-      <div class="inbox-main">
-        <div class="inbox-title"><b>Organizations</b></div>
-        <div class="inbox-meta muted">{{ orgs_count }}</div>
-      </div>
-    </div>
-
-    <div class="inbox-row">
-      <div class="inbox-main">
-        <div class="inbox-title"><b>Utenti</b></div>
-        <div class="inbox-meta muted">{{ users_count }}</div>
-      </div>
-    </div>
-
-    <div class="inbox-row">
-      <div class="inbox-main">
-        <div class="inbox-title"><b>Scansioni</b></div>
-        <div class="inbox-meta muted">{{ scans_count }}</div>
-      </div>
-    </div>
-
-    <div class="inbox-row">
-      <div class="inbox-main">
-        <div class="inbox-title"><b>Piani</b></div>
-        <div class="inbox-meta muted">{{ plans_count }}</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="card inbox-card">
-  <div class="inbox-toolbar">
-    <div><b>Ultime scansioni</b></div>
-  </div>
-
-  {% if rows %}
-    <div class="inbox-list">
-      {% for r in rows %}
-        <div class="inbox-row">
-          <div class="inbox-main">
-            <div class="inbox-title">
-              <span class="pill">#{{ r.scan.id }}</span>
-              <b>{{ r.scan.settore }}</b>
-              <span class="muted">· {{ r.scan.modello }} · {{ r.scan.mese_riferimento }}</span>
-            </div>
-            <div class="inbox-meta muted">
-              Azienda: {{ r.org_name }} · Utente: {{ r.user_email }}
-            </div>
-          </div>
-
-          <div class="inbox-right">
-            <a class="btn" href="{{ url_for('admin.view_scan', scan_id=r.scan.id) }}">Apri</a>
-
-            <form method="post" action="{{ url_for('admin.delete_scan', scan_id=r.scan.id) }}" style="display:inline;">
-              <button class="btn btn-danger" type="submit" onclick="return confirm('Eliminare questa scansione?')">
-                Elimina
-              </button>
-            </form>
-          </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px;">
+        <div class="card" style="border-left: 5px solid #8b5cf6; padding: 20px;">
+            <div style="color: #64748b; font-size: 0.8rem; font-weight: bold; text-transform: uppercase;">Estimated MRR</div>
+            <div style="font-size: 1.8rem; font-weight: 900; color: #1e293b;">€ {{ "{:,.2f}".format(mrr).replace(',', '.') }}</div>
+            <div style="color: #10b981; font-size: 0.8rem; margin-top: 5px;"><i class="fas fa-chart-line"></i> Ricavo Mensile</div>
         </div>
-      {% endfor %}
+        <div class="card" style="border-left: 5px solid #3b82f6; padding: 20px;">
+            <div style="color: #64748b; font-size: 0.8rem; font-weight: bold; text-transform: uppercase;">Total Scans</div>
+            <div style="font-size: 1.8rem; font-weight: 900; color: #1e293b;">{{ total_scans }}</div>
+            <div style="color: #3b82f6; font-size: 0.8rem; margin-top: 5px;"><i class="fas fa-bolt"></i> {{ scans_24h }} nelle ultime 24h</div>
+        </div>
+        <div class="card" style="border-left: 5px solid #10b981; padding: 20px;">
+            <div style="color: #64748b; font-size: 0.8rem; font-weight: bold; text-transform: uppercase;">Organizations</div>
+            <div style="font-size: 1.8rem; font-weight: 900; color: #1e293b;">{{ total_orgs }}</div>
+            <div style="color: #64748b; font-size: 0.8rem; margin-top: 5px;">Tenant Attivi</div>
+        </div>
+        <div class="card" style="border-left: 5px solid #f59e0b; padding: 20px;">
+            <div style="color: #64748b; font-size: 0.8rem; font-weight: bold; text-transform: uppercase;">Users</div>
+            <div style="font-size: 1.8rem; font-weight: 900; color: #1e293b;">{{ total_users }}</div>
+            <div style="color: #64748b; font-size: 0.8rem; margin-top: 5px;">Utenti Registrati</div>
+        </div>
     </div>
-  {% else %}
-    <div class="empty-state">
-      <div class="empty-title">Nessuna scansione presente.</div>
-    </div>
-  {% endif %}
-</div>
 
+    <div style="display: flex; gap: 15px; margin-bottom: 40px; flex-wrap: wrap;">
+        <a href="{{ url_for('admin.plans') }}" class="btn btn-secondary" style="padding: 12px 24px;"><i class="fas fa-tags"></i> Piani e Prezzi</a>
+        <a href="{{ url_for('admin.create_organization') }}" class="btn btn-primary" style="padding: 12px 24px;"><i class="fas fa-plus"></i> Nuova Azienda</a>
+        <a href="{{ url_for('admin.benchmarks') }}" class="btn btn-secondary" style="padding: 12px 24px;"><i class="fas fa-chart-bar"></i> Gestione Benchmark</a>
+    </div>
+
+    <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px;">Ultime Aziende Registrate</h2>
+    
+    <div class="card" style="padding: 0; overflow: hidden;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #f9fafb; border-bottom: 2px solid #e8eef5; text-align: left;">
+                    <th style="padding: 15px 20px;">NOME AZIENDA</th>
+                    <th style="padding: 15px 20px;">DATA REG.</th>
+                    <th style="padding: 15px 20px;">UTENTI</th>
+                    <th style="padding: 15px 20px;">SCANS</th>
+                    <th style="padding: 15px 20px; text-align: right;">AZIONI</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                <tr style="border-bottom: 1px solid #e8eef5;">
+                    <td style="padding: 15px 20px; font-weight: bold; color: var(--primary);">{{ row.org.name }}</td>
+                    <td style="padding: 15px 20px; color: #64748b;">{{ row.org.created_at.strftime('%d/%m/%Y') }}</td>
+                    <td style="padding: 15px 20px;"><span class="badge badge-warning">{{ row.users_count }}</span></td>
+                    <td style="padding: 15px 20px;"><span class="badge badge-green">{{ row.scans_count }}</span></td>
+                    <td style="padding: 15px 20px; text-align: right;">
+                        <a href="{{ url_for('admin.organization_detail', org_id=row.org.id) }}" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;">Gestisci</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5" style="padding: 40px; text-align: center; color: #999;">Nessuna azienda trovata.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 {% endblock %}
