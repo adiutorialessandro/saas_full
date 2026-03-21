@@ -13,3 +13,4 @@ alembic==1.13.2
 stripe==11.6.0
 python-dotenv
 openai
+Flask-Mail

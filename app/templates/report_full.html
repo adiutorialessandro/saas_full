@@ -70,6 +70,7 @@
 {# 
   NORMALIZZAZIONE VARIABILI JINJA2 
 #}
+{% set vm = vm | default({}) %}
 {% set st = vm.state if vm.state is defined else vm.triade.state if vm.triade is defined else {} %}
 {% set kpi = vm.kpi if vm.kpi is defined else vm.triade.kpi if vm.triade is defined else {} %}
 {% set risks = vm.risks if vm.risks is defined else vm.triade.risks if vm.triade is defined else {} %}

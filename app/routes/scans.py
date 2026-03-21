@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import logging
+import uuid
 from pathlib import Path
 from typing import Any, Dict
 
@@ -141,7 +142,6 @@ def delete_scan(scan_id: int):
 @login_required
 def bulk_delete():
     """Elimina scansioni multiple selezionate dalla dashboard."""
-    org_id = ensure_current_org_id()
     raw_ids = request.form.getlist("scan_ids")
 
     if not raw_ids:
@@ -155,9 +155,11 @@ def bulk_delete():
         flash("ID scansioni non validi.", "danger")
         return redirect(url_for("scans.dashboard"))
 
-    # Query condizionale Admin vs User
     q = Scan.query.filter(Scan.id.in_(clean_ids))
+    
+    # FIX: Evitiamo che ensure_current_org_id() crashi se chiamato da un Admin
     if not getattr(current_user, "is_admin", False):
+        org_id = ensure_current_org_id()
         q = q.filter(Scan.org_id == org_id)
 
     deleted_count = q.delete(synchronize_session=False)
@@ -181,14 +183,13 @@ def scan_pdf(scan_id: int):
     vm = _prepare_scan_view_model(scan)
     scan_meta = _get_scan_meta(scan)
 
-    out_path = Path(current_app.instance_path) / f"scan_report_{scan.id}.pdf"
+    # FIX: Aggiunto UUID per prevenire la sovrascrittura di file in caso di richieste simultanee
+    unique_suffix = uuid.uuid4().hex[:8]
+    out_path = Path(current_app.instance_path) / f"scan_report_{scan.id}_{unique_suffix}.pdf"
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # Rimozione sicura cache preesistente
-    if out_path.exists():
-        out_path.unlink(missing_ok=True)
-
-    generate_scan_pdf_enterprise(out_path, scan_meta, vm)
+    # Convertito in stringa per massima compatibilità con la libreria PDF
+    generate_scan_pdf_enterprise(str(out_path), scan_meta, vm)
 
     return send_file(
         out_path,
@@ -206,13 +207,12 @@ def scan_onepager(scan_id: int):
     vm = _prepare_scan_view_model(scan)
     scan_meta = _get_scan_meta(scan)
 
-    out_path = Path(current_app.instance_path) / f"scan_executive_{scan.id}.pdf"
+    # FIX: Aggiunto UUID anche qui
+    unique_suffix = uuid.uuid4().hex[:8]
+    out_path = Path(current_app.instance_path) / f"scan_executive_{scan.id}_{unique_suffix}.pdf"
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
-    if out_path.exists():
-        out_path.unlink(missing_ok=True)
-
-    generate_one_pager(out_path, scan_meta, vm)
+    generate_one_pager(str(out_path), scan_meta, vm)
 
     return send_file(
         out_path,

@@ -1,15 +1,31 @@
 import os
 from flask import Flask, render_template
+from flask_mail import Mail  # 📬 Aggiunto per le email
 from .extensions import db, migrate, login_manager
 from .config import Config
+
+# 📬 Inizializza l'oggetto Mail globale
+mail = Mail()
 
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
+    # ========================================================
+    # 📬 CONFIGURAZIONE EMAIL (FLASK-MAIL)
+    # ========================================================
+    app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+    app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
+    app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', 'True') == 'True'
+    app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
+    app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
+    app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')
+
+    # Inizializzazione estensioni
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
+    mail.init_app(app)  # 📬 Collega Mail alla tua app Flask
 
     login_manager.login_view = "auth.login"
 
