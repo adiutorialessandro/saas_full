@@ -1,6 +1,7 @@
 import functools
 from flask import Blueprint, render_template, request, redirect, url_for, flash, abort
 from flask_login import login_required, current_user
+from flask_mail import Message # 📬 Aggiunto per l'invio delle email
 
 from app.extensions import db
 from app.models.user import User
@@ -250,3 +251,29 @@ def edit_plan(plan_id):
         return redirect(url_for("admin.plans"))
         
     return render_template("admin/edit_plan.html", plan=plan)
+
+# ==========================================
+# 📬 TEST INVIO EMAIL
+# ==========================================
+@bp.route("/test-email")
+@admin_required
+def test_email():
+    from app import mail # Import locale per evitare import circolari all'avvio
+    
+    try:
+        msg = Message(
+            subject="🚀 Test di integrazione SaaS Full",
+            recipients=[current_user.email], 
+            body="Se stai leggendo questa email, il motore Flask-Mail funziona perfettamente e il tuo SaaS è pronto a inviare notifiche!"
+        )
+        
+        mail.send(msg)
+        
+        flash("Email inviata con successo! Controlla la tua casella di posta.", "success")
+        return redirect(url_for('admin.index'))
+        
+    except Exception as e:
+        error_msg = f"Errore invio email: {str(e)}"
+        print(f"🔴 {error_msg}")
+        flash(error_msg, "danger")
+        return redirect(url_for('admin.index'))
