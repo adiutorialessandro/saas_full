@@ -1,42 +1,87 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container" style="max-width: 1200px; margin: 40px auto; padding: 0 20px;">
+    
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
         <div>
-            <h1 style="font-size: 2.2rem; font-weight: 800;">Gestione Piani (Tiers)</h1>
-            <p class="muted">Configura i limiti di scansione e i prezzi mensili.</p>
+            <h1 style="font-size: 2.2rem; font-weight: 800; margin-bottom: 5px;">Gestione Piani (Tiers)</h1>
+            <p style="color: #64748b; margin: 0;">Configura i limiti di scansione, i prezzi e le integrazioni Stripe.</p>
         </div>
-        <div style="display: flex; gap: 10px;">
-            <a href="{{ url_for('admin.index') }}" class="btn btn-secondary">← Torna alla Dashboard</a>
-            <a href="{{ url_for('admin.create_plan') }}" class="btn btn-primary"><i class="fas fa-plus"></i> Nuovo Piano</a>
+        <div style="display: flex; gap: 12px;">
+            <a href="{{ url_for('admin.index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Dashboard
+            </a>
+            <a href="{{ url_for('admin.create_plan') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Nuovo Piano
+            </a>
         </div>
     </div>
 
-    <div class="card" style="padding: 0; overflow: hidden;">
-        <table style="width: 100%; border-collapse: collapse;">
+    <div class="card" style="padding: 0; border: 1px solid #e8eef5; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+        <table style="width: 100%; border-collapse: collapse; background: white;">
             <thead>
                 <tr style="background: #f9fafb; border-bottom: 2px solid #e8eef5; text-align: left;">
-                    <th style="padding: 15px 20px;">NOME PIANO</th>
-                    <th style="padding: 15px 20px;">LIMITE SCAN / MESE</th>
-                    <th style="padding: 15px 20px;">PREZZO MESE</th>
-                    <th style="padding: 15px 20px;">STRIPE PRICE ID</th>
+                    <th style="padding: 18px 20px; font-size: 0.85rem; letter-spacing: 0.05em; color: #64748b;">NOME PIANO</th>
+                    <th style="padding: 18px 20px; font-size: 0.85rem; letter-spacing: 0.05em; color: #64748b;">LIMITE SCAN</th>
+                    <th style="padding: 18px 20px; font-size: 0.85rem; letter-spacing: 0.05em; color: #64748b;">PREZZO MESE</th>
+                    <th style="padding: 18px 20px; font-size: 0.85rem; letter-spacing: 0.05em; color: #64748b;">STRIPE PRICE ID</th>
+                    <th style="padding: 18px 20px; font-size: 0.85rem; letter-spacing: 0.05em; color: #64748b; text-align: right;">AZIONI</th>
                 </tr>
             </thead>
             <tbody>
                 {% for plan in plans %}
-                <tr style="border-bottom: 1px solid #e8eef5;">
-                    <td style="padding: 15px 20px; font-weight: 800; color: var(--primary);">{{ plan.name }}</td>
-                    <td style="padding: 15px 20px;"><span class="badge badge-warning">{{ "Illimitato" if plan.scan_limit == -1 else plan.scan_limit }}</span></td>
-                    <td style="padding: 15px 20px; font-weight: bold;">€ {{ "%.0f"|format(plan.price_month) }}</td>
-                    <td style="padding: 15px 20px; color: #64748b; font-family: monospace; font-size: 0.85em;">
-                        {{ plan.stripe_price_id or 'Non configurato' }}
+                <tr style="border-bottom: 1px solid #e8eef5; transition: background 0.2s hover;">
+                    <td style="padding: 18px 20px;">
+                        <span style="font-weight: 800; color: var(--primary); font-size: 1.1rem;">{{ plan.name }}</span>
+                    </td>
+                    <td style="padding: 18px 20px;">
+                        {% if plan.scan_limit == -1 %}
+                            <span class="badge" style="background: #e0f2fe; color: #0369a1;">Illimitato</span>
+                        {% else %}
+                            <span class="badge badge-warning">{{ plan.scan_limit }} scan</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 18px 20px; font-weight: 700; font-size: 1rem;">
+                        € {{ "%.0f"|format(plan.price_month) }}
+                    </td>
+                    <td style="padding: 18px 20px;">
+                        <code style="background: #f1f5f9; padding: 4px 8px; border-radius: 4px; color: #475569; font-size: 0.85rem;">
+                            {{ plan.stripe_price_id or '---' }}
+                        </code>
+                    </td>
+                    <td style="padding: 18px 20px; text-align: right;">
+                        <a href="{{ url_for('admin.edit_plan', plan_id=plan.id) }}" 
+                           class="btn btn-sm btn-outline-primary" 
+                           style="border-radius: 6px; font-weight: 600; padding: 6px 14px;">
+                            <i class="fas fa-edit"></i> Modifica
+                        </a>
                     </td>
                 </tr>
                 {% else %}
-                <tr><td colspan="4" style="padding: 40px; text-align: center; color: #999;">Nessun piano configurato nel database.</td></tr>
+                <tr>
+                    <td colspan="5" style="padding: 60px; text-align: center;">
+                        <div style="color: #94a3b8;">
+                            <i class="fas fa-layer-group fa-3x" style="margin-bottom: 15px; opacity: 0.3;"></i>
+                            <p>Nessun piano trovato. Comincia creandone uno nuovo!</p>
+                        </div>
+                    </td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
+
+<style>
+    /* Piccolo effetto hover per le righe della tabella */
+    tbody tr:hover {
+        background-color: #f8fafc;
+    }
+    .badge {
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+</style>
 {% endblock %}

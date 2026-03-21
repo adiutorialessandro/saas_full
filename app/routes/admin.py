@@ -224,3 +224,27 @@ def edit_org_user_role(org_id, user_id):
         flash("Ruolo utente aggiornato.", "success")
         return redirect(url_for('admin.organization_detail', org_id=org_id))
     return render_template("admin/generic_form.html", form=form, title=f"Modifica Ruolo Utente")
+
+@bp.route("/plans/edit/<int:plan_id>", methods=["GET", "POST"])
+@admin_required
+def edit_plan(plan_id):
+    # ATTENZIONE: Se il tuo modello si chiama diversamente (es. SubscriptionPlan), cambialo qui sotto
+    from app.models import Plan 
+    from app import db
+    
+    plan = Plan.query.get_or_404(plan_id)
+    
+    if request.method == "POST":
+        # Prendiamo i dati esatti dal form
+        plan.name = request.form.get("name")
+        plan.scan_limit = int(request.form.get("scan_limit", 0))
+        plan.price_month = float(request.form.get("price_month", 0.0))
+        plan.stripe_price_id = request.form.get("stripe_price_id")
+        
+        # Salviamo nel database
+        db.session.commit()
+        
+        # Rimandiamo l'utente alla tabella
+        return redirect(url_for("admin.plans"))
+        
+    return render_template("admin/edit_plan.html", plan=plan)
