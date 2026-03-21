@@ -42,10 +42,10 @@
     .badge-rosso, .badge-orange, .badge-danger { background: #ffe6e6; color: #c5221f; }
     .insight-box { background: #f5f8fb; border-left: 4px solid #4fc3f7; padding: 16px; border-radius: 8px; margin-top: 16px; }
 
-    /* ===== ADVANCED STRATEGY (McKINSEY FRAMEWORKS) ===== */
-    .mece-card { background: #fff; border-radius: 16px; padding: 32px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border-top: 6px solid #e63946; }
-    .mece-path { font-family: monospace; color: #666; background: #f5f8fb; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9em; }
-    .mece-root { font-size: 1.4em; font-weight: 800; color: #1a1a2e; margin-bottom: 12px; }
+    /* ===== ADVANCED STRATEGY ===== */
+    .root-card { background: #fff; border-radius: 16px; padding: 32px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border-top: 6px solid #e63946; }
+    .root-path { font-family: monospace; color: #666; background: #f5f8fb; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9em; }
+    .root-title { font-size: 1.4em; font-weight: 800; color: #1a1a2e; margin-bottom: 12px; }
     .value-chain-container { display: flex; gap: 12px; margin-top: 24px; overflow-x: auto; padding-bottom: 12px; }
     .vc-stage { flex: 1; min-width: 140px; background: #f5f8fb; padding: 16px; border-radius: 8px; text-align: center; position: relative; border: 1px solid #e8eef5; }
     .vc-stage.bottleneck { background: #fff0f0; border-color: #ffcdd2; box-shadow: 0 4px 12px rgba(229, 57, 70, 0.15); }
@@ -94,7 +94,7 @@
     </div>
   </div>
   
-  {# FIX: OPENAI STRATEGIC MEMO (Aggiunto qui subito sotto l'header) #}
+  {# FIX: OPENAI STRATEGIC MEMO #}
   {% set ai_memo = st.get('ai_memo', '') %}
   {% if ai_memo %}
   <div style="background: linear-gradient(to right, #ffffff, #f5f3ff); border-left: 5px solid #8b5cf6; padding: 30px; border-radius: 16px; margin-bottom: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
@@ -163,8 +163,6 @@
   </div>
 
   {# ========================================================= #}
-  
-  {# ========================================================= #}
   {# INIZIO BLOCCO FINANCIAL PROJECTIONS                       #}
   {# ========================================================= #}
   {% set fin = vm.triade.financial_projections if vm.triade is defined and vm.triade.financial_projections else vm.financial_projections if vm.financial_projections else {} %}
@@ -222,7 +220,7 @@
   </div>
   {% endif %}
 
-  {# INIZIO BLOCCO ADVANCED STRATEGY (McKINSEY STYLE)          #}
+  {# INIZIO BLOCCO ADVANCED STRATEGY                            #}
   {# ========================================================= #}
   
   {% if strategy %}
@@ -230,16 +228,16 @@
     <div class="section-header">
       <h2>Advanced Strategic Diagnostics</h2>
     </div>
-    <div class="section-subtitle">Analisi generata dai framework direzionali di livello Enterprise.</div>
+    <div class="section-subtitle">Analisi generata dai modelli direzionali di livello Enterprise.</div>
 
     <div class="grid-2">
-      {# MECE ROOT CAUSE #}
+      {# ROOT CAUSE ANALYSIS #}
       {% if strategy.root_cause %}
-      <div class="mece-card">
-        <div class="card-title">🎯 Causa Radice (Approccio MECE)</div>
+      <div class="root-card">
+        <div class="card-title">🎯 Causa Radice Primaria</div>
         <p style="color: #666; font-size: 0.9em; margin-bottom: 16px;">Analisi logica a cascata per isolare il problema centrale dell'azienda.</p>
-        <div class="mece-path">{{ strategy.root_cause.analysis_path }}</div>
-        <div class="mece-root">⚠️ {{ strategy.root_cause.root_cause }}</div>
+        <div class="root-path">{{ strategy.root_cause.analysis_path }}</div>
+        <div class="root-title">⚠️ {{ strategy.root_cause.root_cause }}</div>
         <div class="insight-box" style="margin-top: 24px; border-color: #e63946;">
           <div class="insight-title">Direttiva Operativa</div>
           <div class="insight-text">{{ strategy.root_cause.recommended_action }}</div>
@@ -247,10 +245,10 @@
       </div>
       {% endif %}
 
-      {# ORGANIZATIONAL HEALTH INDEX (7S) #}
+      {# ORGANIZATIONAL HEALTH #}
       {% if strategy.organizational_health %}
       <div class="card" style="border-top: 6px solid #4fc3f7; display: flex; flex-direction: column; justify-content: center;">
-        <div class="card-title">🏛️ Salute Organizzativa (OHI)</div>
+        <div class="card-title">🏛️ Salute Organizzativa</div>
         <div style="font-size: 3.5em; font-weight: 800; color: #1a1a2e; margin: 10px 0; line-height: 1;">
           {{ strategy.organizational_health.score }}<span style="font-size: 0.4em; color: #999;">/100</span>
         </div>
@@ -277,7 +275,11 @@
         {% for stage in strategy.value_chain.value_chain %}
         <div class="vc-stage {% if strategy.value_chain.bottleneck.stage == stage.stage %}bottleneck{% endif %}">
           <div style="font-size: 0.85em; font-weight: 700; color: #666; text-transform: uppercase;">{{ stage.stage }}</div>
-          <div class="vc-score">{{ stage.score }}<span style="font-size: 0.5em;">/100</span></div>
+          
+          {# FIX PER IL PUNTEGGIO OLTRE 100 #}
+          {% set safe_score = 100 if (stage.score|float) > 100 else stage.score %}
+          <div class="vc-score">{{ safe_score }}<span style="font-size: 0.5em;">/100</span></div>
+          
           <div style="font-size: 0.8em; color: #999;">{{ stage.label }}</div>
           {% if strategy.value_chain.bottleneck.stage == stage.stage %}
             <div style="position: absolute; top: -10px; right: -10px; background: #e63946; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">!</div>
@@ -292,11 +294,11 @@
     </div>
     {% endif %}
 
-    {# THREE HORIZONS PLAN #}
+    {# STRATEGIC ROADMAP #}
     {% if strategy.three_horizons %}
     <div style="margin-top: 48px;">
       <div class="section-header">
-        <h2>Three Horizons Roadmap</h2>
+        <h2>Roadmap Strategica (3 Fasi)</h2>
       </div>
       <div class="section-subtitle">
         Pianificazione basata sull'urgenza aziendale attuale: 
@@ -305,7 +307,7 @@
       
       <div class="horizons-grid">
         <div class="horizon-card h1">
-          <div class="horizon-badge">Orizzonte 1 (0-6 Mesi)</div>
+          <div class="horizon-badge">Fase 1 (0-6 Mesi)</div>
           <div style="font-weight: 800; font-size: 1.1em; margin-bottom: 4px;">Core Business</div>
           <div style="color: #666; font-size: 0.8em; margin-bottom: 16px;">Focus: {{ strategy.three_horizons.horizons['Horizon_1_Core'].focus }}</div>
           <div style="background: #f8fafc; padding: 8px; border-radius: 6px; margin-bottom: 16px; font-size: 0.9em; text-align: center; border: 1px solid #e2e8f0;">
@@ -317,7 +319,7 @@
         </div>
 
         <div class="horizon-card h2">
-          <div class="horizon-badge">Orizzonte 2 (6-18 Mesi)</div>
+          <div class="horizon-badge">Fase 2 (6-18 Mesi)</div>
           <div style="font-weight: 800; font-size: 1.1em; margin-bottom: 4px;">Scalabilità</div>
           <div style="color: #666; font-size: 0.8em; margin-bottom: 16px;">Focus: {{ strategy.three_horizons.horizons['Horizon_2_Emerging'].focus }}</div>
           <div style="background: #f8fafc; padding: 8px; border-radius: 6px; margin-bottom: 16px; font-size: 0.9em; text-align: center; border: 1px solid #e2e8f0;">
@@ -329,7 +331,7 @@
         </div>
 
         <div class="horizon-card h3">
-          <div class="horizon-badge">Orizzonte 3 (18-36 Mesi)</div>
+          <div class="horizon-badge">Fase 3 (18-36 Mesi)</div>
           <div style="font-weight: 800; font-size: 1.1em; margin-bottom: 4px;">Innovazione Disruptiva</div>
           <div style="color: #666; font-size: 0.8em; margin-bottom: 16px;">Focus: {{ strategy.three_horizons.horizons['Horizon_3_Future'].focus }}</div>
           <div style="background: #f8fafc; padding: 8px; border-radius: 6px; margin-bottom: 16px; font-size: 0.9em; text-align: center; border: 1px solid #e2e8f0;">

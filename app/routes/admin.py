@@ -33,7 +33,7 @@ def admin_required(f):
     return decorated_function
 
 @bp.route("/")
-@admin_required
+@login_required
 def index():
     from sqlalchemy import func
     from datetime import datetime, timedelta
