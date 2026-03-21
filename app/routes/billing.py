@@ -156,3 +156,5 @@ def pricing():
     from app.models.plan import Plan
     plans = Plan.query.order_by(Plan.price_month).all()
     return render_template('pricing.html', plans=plans)
+
+# Stripe Standby Mode: sab 21 mar 2026 18:56:06 CET
