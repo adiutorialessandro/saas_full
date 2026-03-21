@@ -147,11 +147,20 @@ def reset_user_password(user_id):
         return redirect(url_for('admin.organizations'))
     return render_template("admin/reset_user_password.html", form=form, user=u)
 
+# ==========================================
+# FIX: VISUALIZZAZIONE SCANSIONI ADMIN
+# ==========================================
 @bp.route("/scans/<int:scan_id>")
 @admin_required
 def view_scan(scan_id):
+    from app.routes.scans import _prepare_scan_view_model # Importiamo la logica DRY
+
     scan = Scan.query.get_or_404(scan_id)
-    return render_template("scans/view_scan.html", scan=scan)
+    
+    # Decodifichiamo i dati AI in modo sicuro per evitare errori Jinja
+    vm = _prepare_scan_view_model(scan)
+    
+    return render_template("scans/view_scan.html", scan=scan, vm=vm)
 
 @bp.route("/benchmarks", methods=["GET", "POST"])
 @admin_required
@@ -228,23 +237,16 @@ def edit_org_user_role(org_id, user_id):
 @bp.route("/plans/edit/<int:plan_id>", methods=["GET", "POST"])
 @admin_required
 def edit_plan(plan_id):
-    # ATTENZIONE: Se il tuo modello si chiama diversamente (es. SubscriptionPlan), cambialo qui sotto
-    from app.models import Plan 
-    from app import db
-    
     plan = Plan.query.get_or_404(plan_id)
     
     if request.method == "POST":
-        # Prendiamo i dati esatti dal form
         plan.name = request.form.get("name")
         plan.scan_limit = int(request.form.get("scan_limit", 0))
         plan.price_month = float(request.form.get("price_month", 0.0))
         plan.stripe_price_id = request.form.get("stripe_price_id")
         
-        # Salviamo nel database
         db.session.commit()
-        
-        # Rimandiamo l'utente alla tabella
+        flash("Piano aggiornato con successo!", "success")
         return redirect(url_for("admin.plans"))
         
     return render_template("admin/edit_plan.html", plan=plan)
