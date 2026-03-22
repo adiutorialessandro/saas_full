@@ -83,3 +83,14 @@ class CreatePlanForm(FlaskForm):
 class UpdateOrganizationPlanForm(FlaskForm):
     plan_id = SelectField("Piano", coerce=int, validators=[DataRequired()])
     submit = SubmitField("Aggiorna piano")
+
+class RetailDataForm(FlaskForm):
+    ricavi_dichiarati = FloatField("Ricavi Dichiarati (Annui €)", validators=[DataRequired()])
+    incassi_reali = FloatField("Incassi Reali Stimati (Annui €)", validators=[DataRequired()])
+    costi_personale = FloatField("Costi Personale (Annui €)", validators=[DataRequired()])
+    costi_struttura = FloatField("Costi Struttura (Annui €)", validators=[DataRequired()])
+    costi_prodotti = FloatField("Costi Prodotti e Materiali (Annui €)", validators=[DataRequired()])
+    compenso_titolare = FloatField("Compenso Titolare (Annuo €)", validators=[Optional()])
+    ticket_medio = FloatField("Ticket Medio (€)", validators=[Optional()])
+    clienti_mese = IntegerField("Clienti al Mese", validators=[Optional()])
+    submit = SubmitField("Genera Analisi Local Business")

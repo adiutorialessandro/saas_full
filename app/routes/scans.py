@@ -117,8 +117,12 @@ def view_scan(scan_id: int):
     scan = _get_accessible_scan_or_404(scan_id)
     vm = _prepare_scan_view_model(scan)
     
+    # 🚀 LA NUOVA LOGICA DI ROUTING!
+    if scan.modello == "Local/Retail":
+        return render_template("scans/view_retail_scan.html", scan=scan, vm=vm)
+    
+    # Fallback per tutti gli altri scan (B2B, SaaS, ecc.)
     return render_template("scans/view_scan.html", scan=scan, vm=vm)
-
 
 # =========================================================
 # DELETION LOGIC

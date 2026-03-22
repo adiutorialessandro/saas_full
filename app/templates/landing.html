@@ -1,141 +1,118 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SaaS Strategy | L'Advisory Board Digitale per la tua Azienda</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-        body { background: #f8fafc; color: #0f172a; line-height: 1.6; }
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  /* ===== LANDING PAGE STYLES ===== */
+  .hero-section { text-align: center; padding: 80px 20px; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: white; border-radius: 0 0 30px 30px; margin-top: -20px; }
+  .hero-title { font-size: 3.5rem; font-weight: 800; margin-bottom: 20px; line-height: 1.2; letter-spacing: -1px; }
+  .hero-title span { color: #4fc3f7; }
+  .hero-subtitle { font-size: 1.25rem; color: #a0aec0; max-width: 800px; margin: 0 auto 40px auto; line-height: 1.6; }
+  
+  .features-section { padding: 80px 20px; max-width: 1200px; margin: 0 auto; }
+  .section-title { text-align: center; font-size: 2.5rem; font-weight: 800; color: #1a1a2e; margin-bottom: 50px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+  .feature-card { background: white; padding: 40px 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; border: 1px solid #edf2f7; transition: transform 0.3s ease; }
+  .feature-card:hover { transform: translateY(-5px); }
+  .feature-icon { font-size: 3rem; color: #4fc3f7; margin-bottom: 20px; }
+  .feature-title { font-size: 1.5rem; font-weight: 700; color: #1a1a2e; margin-bottom: 15px; }
+  .feature-desc { color: #4a5568; line-height: 1.6; }
+
+  .pricing-section { padding: 80px 20px; background: #f8fafc; }
+  .pricing-card { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); text-align: center; border: 1px solid #e2e8f0; display: flex; flex-direction: column; }
+  .pricing-card.featured { transform: scale(1.05); border: 2px solid #4fc3f7; position: relative; }
+  .pricing-title { font-size: 1.5rem; font-weight: 700; color: #1a1a2e; margin-bottom: 10px; }
+  .pricing-price { font-size: 3rem; font-weight: 800; color: #1a1a2e; margin-bottom: 20px; }
+  .pricing-price span { font-size: 1rem; color: #718096; font-weight: 400; }
+  .pricing-features { list-style: none; padding: 0; margin: 0 0 30px 0; text-align: left; }
+  .pricing-features li { padding: 10px 0; color: #4a5568; border-bottom: 1px solid #edf2f7; display: flex; align-items: center; gap: 10px; }
+  
+  .btn-hero { background: linear-gradient(135deg, #4fc3f7, #29b6f6); color: white; padding: 16px 36px; border-radius: 12px; font-size: 1.2rem; font-weight: 700; text-decoration: none; display: inline-block; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(79, 195, 247, 0.4); }
+  .btn-hero:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(79, 195, 247, 0.6); color: white;}
+  .btn-plan { background: #1a1a2e; color: white; padding: 14px 24px; border-radius: 8px; font-weight: 700; text-decoration: none; display: inline-block; width: 100%; transition: background 0.3s; margin-top: auto; }
+  .btn-plan:hover { background: #2d3748; color: white;}
+  .btn-plan-featured { background: #4fc3f7; color: white; }
+  .btn-plan-featured:hover { background: #29b6f6; color: white; }
+</style>
+
+<div class="hero-section">
+  <div class="container">
+    <h1 class="hero-title">L'Advisory Board Digitale<br>per la tua <span>Azienda</span></h1>
+    <p class="hero-subtitle">
+      Confronta i tuoi KPI con i benchmark di settore grazie al nostro Motore Diagnostico Proprietario.
+      Ottieni un report strategico, finanziario e operativo in tempo reale. Dati 100% al sicuro.
+    </p>
+    {% if current_user.is_authenticated %}
+      <a href="{{ url_for('wizard.step1') }}" class="btn-hero">Inizia una Nuova Analisi</a>
+    {% else %}
+      <a href="{{ url_for('auth.register') }}" class="btn-hero">Inizia Gratuitamente</a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="features-section">
+  <h2 class="section-title">Logica Matematica. Nessuna Allucinazione.</h2>
+  <div class="grid-3">
+    
+    <div class="feature-card">
+      <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+      <h3 class="feature-title">Privacy & Sicurezza GDPR</h3>
+      <p class="feature-desc">I tuoi dati finanziari sono il tuo bene più prezioso. Non usiamo API di Intelligenze Artificiali esterne: i tuoi dati non lasciano mai i nostri server europei criptati.</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon"><i class="fas fa-bolt"></i></div>
+      <h3 class="feature-title">Motore Deterministico</h3>
+      <p class="feature-desc">Niente risposte casuali o "allucinazioni". Il nostro algoritmo proprietario utilizza logica matematica ferrea per analizzare il tuo Cash Runway e il tuo Break-Even Ratio.</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+      <h3 class="feature-title">Benchmark di Settore</h3>
+      <p class="feature-desc">Scopri esattamente quanti soldi stai lasciando sul tavolo rispetto ai top performer del tuo mercato. Ottieni una Roadmap chiara su dove tagliare o dove investire.</p>
+    </div>
+
+  </div>
+</div>
+
+<div class="pricing-section" id="pricing">
+  <div class="container" style="max-width: 1000px; margin: 0 auto;">
+    <h2 class="section-title">Piani semplici e trasparenti</h2>
+    <div class="grid-3">
+      
+      {% for plan in plans %}
+      <div class="pricing-card {% if plan.name == 'Pro' %}featured{% endif %}">
+        {% if plan.name == 'Pro' %}
+          <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: #4fc3f7; color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; text-transform: uppercase;">Più Scelto</div>
+        {% endif %}
         
-        /* NAVBAR */
-        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 5%; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: fixed; width: 100%; top: 0; z-index: 1000; }
-        .logo { font-size: 1.5rem; font-weight: 900; color: #1a1a2e; text-decoration: none; display: flex; align-items: center; gap: 10px; }
-        .nav-links { display: flex; gap: 20px; align-items: center; }
-        .btn { padding: 10px 24px; border-radius: 8px; font-weight: bold; text-decoration: none; transition: all 0.3s; }
-        .btn-outline { color: #38bdf8; border: 2px solid #38bdf8; }
-        .btn-outline:hover { background: #f0f9ff; }
-        .btn-primary { background: linear-gradient(135deg, #38bdf8, #8b5cf6); color: white; border: none; }
-        .btn-primary:hover { box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4); transform: translateY(-2px); }
-
-        /* HERO SECTION */
-        .hero { padding: 160px 5% 100px; text-align: center; background: #1a1a2e; color: white; position: relative; overflow: hidden; }
-        .hero::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(139,92,246,0.15) 0%, rgba(26,26,46,0) 50%); pointer-events: none; }
-        .hero h1 { font-size: 4rem; font-weight: 900; line-height: 1.1; margin-bottom: 20px; letter-spacing: -1px; }
-        .hero h1 span { background: linear-gradient(135deg, #38bdf8, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .hero p { font-size: 1.25rem; color: #94a3b8; max-width: 700px; margin: 0 auto 40px; }
-        .hero-actions { display: flex; justify-content: center; gap: 20px; }
-
-        /* FEATURES SECTION */
-        .features { padding: 100px 5%; max-width: 1200px; margin: 0 auto; }
-        .section-title { text-align: center; font-size: 2.5rem; font-weight: 800; margin-bottom: 60px; color: #0f172a; }
-        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; }
-        .feature-card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #e2e8f0; transition: transform 0.3s; }
-        .feature-card:hover { transform: translateY(-10px); border-color: #38bdf8; }
-        .feature-icon { width: 60px; height: 60px; background: #f0f9ff; color: #38bdf8; border-radius: 15px; display: flex; justify-content: center; align-items: center; font-size: 1.8rem; margin-bottom: 20px; }
-        .feature-card.purple .feature-icon { background: #faf5ff; color: #8b5cf6; }
-        .feature-card.green .feature-icon { background: #f0fdf4; color: #10b981; }
-        .feature-card h3 { font-size: 1.5rem; margin-bottom: 15px; font-weight: 800; }
-        .feature-card p { color: #64748b; font-size: 1rem; }
-
-        /* HOW IT WORKS */
-        .steps { background: white; padding: 100px 5%; }
-        .step-container { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px; }
-        .step-row { display: flex; align-items: center; gap: 40px; }
-        .step-row:nth-child(even) { flex-direction: row-reverse; }
-        .step-content { flex: 1; }
-        .step-number { font-size: 1.2rem; font-weight: bold; color: #8b5cf6; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
-        .step-content h3 { font-size: 2rem; font-weight: 800; margin-bottom: 15px; }
-        .step-content p { color: #64748b; font-size: 1.1rem; }
-        .step-image { flex: 1; background: #f8fafc; height: 300px; border-radius: 20px; border: 2px dashed #cbd5e1; display: flex; justify-content: center; align-items: center; color: #94a3b8; font-size: 1.2rem; }
-
-        /* CTA FOOTER */
-        .cta-footer { text-align: center; padding: 100px 5%; background: linear-gradient(135deg, #1a1a2e, #2d2a4a); color: white; }
-        .cta-footer h2 { font-size: 3rem; font-weight: 900; margin-bottom: 20px; }
-        .cta-footer p { font-size: 1.2rem; color: #94a3b8; margin-bottom: 40px; max-width: 600px; margin-left: auto; margin-right: auto; }
+        <h3 class="pricing-title">{{ plan.name }}</h3>
+        <div class="pricing-price">
+          {% if plan.price_month == 0 %}
+            Gratis
+          {% else %}
+            €{{ plan.price_month|int }}<span>/mese</span>
+          {% endif %}
+        </div>
         
-        .footer { padding: 30px 5%; text-align: center; background: #0f172a; color: #64748b; font-size: 0.9rem; }
-    </style>
-</head>
-<body>
+        <ul class="pricing-features">
+          <li><i class="fas fa-check" style="color: #48bb78;"></i>
+            {% if plan.scan_limit == -1 %} Scansioni Illimitate {% else %} {{ plan.scan_limit }} Scansioni Mensili {% endif %}
+          </li>
+          <li><i class="fas fa-check" style="color: #48bb78;"></i> Motore Algoritmico Proprietario</li>
+          <li><i class="fas fa-check" style="color: #48bb78;"></i> Export PDF in One-Click</li>
+          <li><i class="fas fa-check" style="color: #48bb78;"></i> 100% Privacy & Sicurezza</li>
+        </ul>
+        
+        {% if current_user.is_authenticated %}
+          <a href="{{ url_for('wizard.step1') }}" class="btn-plan {% if plan.name == 'Pro' %}btn-plan-featured{% endif %}">Usa ora</a>
+        {% else %}
+          <a href="{{ url_for('auth.register') }}" class="btn-plan {% if plan.name == 'Pro' %}btn-plan-featured{% endif %}">Registrati</a>
+        {% endif %}
+      </div>
+      {% endfor %}
 
-    <nav class="navbar">
-        <a href="/" class="logo"><i class="fas fa-chart-line" style="color: #38bdf8;"></i> SaaS Strategy</a>
-        <div class="nav-links">
-            <a href="{{ url_for('auth.login') }}" class="btn btn-outline">Accedi</a>
-            <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Inizia Gratis</a>
-        </div>
-    </nav>
+    </div>
+  </div>
+</div>
 
-    <section class="hero">
-        <h1>L'intelligenza di un Board d'Eccellenza.<br><span>In pochi secondi.</span></h1>
-        <p>Analizza i tuoi dati finanziari, scopri le inefficienze nascoste e genera un Action Plan di livello McKinsey guidato dall'Intelligenza Artificiale.</p>
-        <div class="hero-actions">
-            <a href="{{ url_for('auth.register') }}" class="btn btn-primary" style="padding: 16px 35px; font-size: 1.2rem;">Esegui il tuo primo Scan</a>
-        </div>
-    </section>
-
-    <section class="features">
-        <h2 class="section-title">Oltre i semplici grafici. <br>Vera consulenza automatizzata.</h2>
-        <div class="grid-3">
-            <div class="feature-card">
-                <div class="feature-icon"><i class="fas fa-calculator"></i></div>
-                <h3>What-If & Stress Test</h3>
-                <p>Simula scenari di crisi, calcola il tuo Runway e scopri quanti mesi di sopravvivenza guadagni tagliando i costi del 10%.</p>
-            </div>
-            <div class="feature-card purple">
-                <div class="feature-icon"><i class="fas fa-robot"></i></div>
-                <h3>AI Executive Memo</h3>
-                <p>Un algoritmo basato su OpenAI analizza i tuoi KPI e scrive un memo strategico diretto per te e per i tuoi investitori.</p>
-            </div>
-            <div class="feature-card green">
-                <div class="feature-icon"><i class="fas fa-sitemap"></i></div>
-                <h3>Framework McKinsey</h3>
-                <p>Dal modello 7S ai 3 Orizzonti dell'Innovazione. Il nostro motore mappa la tua organizzazione trovando il vero collo di bottiglia.</p>
-            </div>
-        </div>
-    </section>
-
-    <section class="steps">
-        <h2 class="section-title">Come funziona</h2>
-        <div class="step-container">
-            <div class="step-row">
-                <div class="step-content">
-                    <div class="step-number">Step 1</div>
-                    <h3>Inserisci i dati essenziali</h3>
-                    <p>Tramite un wizard guidato, inserisci i dati di base della tua azienda: fatturato, burn rate, costi fissi e rispondi a 8 domande sulla tua struttura organizzativa.</p>
-                </div>
-                <div class="step-image"><i class="fas fa-tasks fa-3x"></i></div>
-            </div>
-            <div class="step-row">
-                <div class="step-content">
-                    <div class="step-number">Step 2</div>
-                    <h3>Il Motore Algoritmico lavora</h3>
-                    <p>Il sistema calcola l'EBITDA Gap, confronta le tue metriche con i Benchmark di settore e interpella ChatGPT per formulare una diagnosi.</p>
-                </div>
-                <div class="step-image" style="background: #faf5ff; border-color: #d8b4fe; color: #c084fc;"><i class="fas fa-brain fa-3x"></i></div>
-            </div>
-            <div class="step-row">
-                <div class="step-content">
-                    <div class="step-number">Step 3</div>
-                    <h3>Ottieni il Dossier in PDF</h3>
-                    <p>Ricevi un report multipagina dal design "Luxury", pronto da stampare o presentare in CDA, con i KPI codificati a colori e il piano d'azione.</p>
-                </div>
-                <div class="step-image" style="background: #f0fdf4; border-color: #86efac; color: #4ade80;"><i class="fas fa-file-pdf fa-3x"></i></div>
-            </div>
-        </div>
-    </section>
-
-    <section class="cta-footer">
-        <h2>Pronto a scalare la tua azienda?</h2>
-        <p>Smetti di navigare a vista. Affidati ai dati, ai benchmark di mercato e all'intelligenza artificiale per prendere decisioni infallibili.</p>
-        <a href="{{ url_for('auth.register') }}" class="btn btn-primary" style="padding: 16px 35px; font-size: 1.2rem; background: linear-gradient(135deg, #10b981, #059669);">Inizia la prova gratuita</a>
-    </section>
-
-    <footer class="footer">
-        &copy; 2026 SaaS Strategy Engine. Tutti i diritti riservati.
-    </footer>
-
-</body>
-</html>
+{% endblock %}

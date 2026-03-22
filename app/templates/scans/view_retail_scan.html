@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <title>KPI SCAN - Executive Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    /* Reset e Impaginazione Stile PDF (A4) */
+    * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    body { background: #525659; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+    
+    .page { 
+      background: white; 
+      width: 210mm; 
+      min-height: 297mm; 
+      margin-bottom: 20px; 
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2); 
+      position: relative;
+      padding: 40px 50px;
+    }
+    
+    @media print {
+      body { background: white; padding: 0; }
+      .page { margin: 0; box-shadow: none; page-break-after: always; width: 100%; min-height: 100vh; }
+      .no-print { display: none !important; }
+    }
+
+    /* Colori Core Axis Advisory */
+    :root { --blu-scuro: #2a4365; --blu-chiaro: #3182ce; --rosso: #e53e3e; --grigio-bg: #edf2f7; --arancio: #dd6b20; }
+
+    /* Header Pagina */
+    .header { border-bottom: 2px solid var(--blu-scuro); padding-bottom: 10px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end; }
+    .header h1 { margin: 0; font-size: 14px; color: var(--blu-scuro); text-transform: uppercase; letter-spacing: 1px; }
+    .header h2 { margin: 5px 0 0 0; font-size: 24px; color: var(--blu-chiaro); }
+    .badge-riservato { background: var(--rosso); color: white; padding: 4px 8px; font-size: 10px; font-weight: bold; }
+
+    /* Tipografia e Box */
+    h3 { color: var(--blu-scuro); font-size: 18px; margin-top: 30px; border-left: 4px solid var(--blu-chiaro); padding-left: 10px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+    
+    .box-dato { background: var(--grigio-bg); padding: 15px; border-radius: 4px; text-align: center; }
+    .box-dato.alert { background: #fff5f5; border: 1px solid #fed7d7; }
+    .valore-big { font-size: 28px; font-weight: 900; color: var(--blu-scuro); margin: 5px 0; }
+    .valore-big.red { color: var(--rosso); }
+    .label-sm { font-size: 11px; color: #718096; text-transform: uppercase; font-weight: bold; }
+
+    /* Tabelle Stile Report */
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
+    th { background: var(--blu-scuro); color: white; text-align: left; padding: 10px; font-weight: 600; }
+    td { padding: 10px; border-bottom: 1px solid #e2e8f0; }
+    tr:nth-child(even) { background: #f7fafc; }
+    
+    /* Gauge Charts CSS (Simulazione Pagina 3) */
+    .gauge-container { margin-top: 15px; }
+    .gauge-bar-bg { width: 100%; height: 20px; background: #e2e8f0; position: relative; border-radius: 2px; }
+    .gauge-bar-fill { height: 100%; display: flex; align-items: center; justify-content: flex-end; padding-right: 5px; color: white; font-weight: bold; font-size: 11px; border-radius: 2px; }
+    .gauge-target { position: absolute; top: -5px; bottom: -5px; width: 2px; background: var(--arancio); border-left: 1px dashed white; z-index: 10; }
+    .gauge-label { display: flex; justify-content: space-between; font-size: 11px; font-weight: bold; margin-bottom: 5px; color: var(--blu-scuro); }
+
+    .btn-print { background: var(--blu-chiaro); color: white; padding: 15px 30px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; margin-bottom: 20px; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+{% set db = vm.doppio_binario %}
+{% set sc = vm.struttura_costi %}
+{% set ko = vm.kpi_operativi %}
+
+<button class="btn-print no-print" onclick="window.print()"><i class="fas fa-print"></i> Stampa Report Completo</button>
+
+<div class="page">
+    <div class="header">
+        <div>
+            <h1>SaaS Full Advisory Engine</h1>
+            <h2>KPI SCAN - Executive Dashboard</h2>
+            <div style="font-size: 12px; color: #718096; margin-top: 5px;">Azienda: {{ vm.meta.settore }} | Periodo: {{ vm.meta.mese_riferimento }} | Fonte: situazioni contabili + stima incassi</div>
+        </div>
+        <div class="badge-riservato">DOCUMENTO RISERVATO</div>
+    </div>
+
+    <div class="grid-3" style="margin-bottom: 40px;">
+        <div class="box-dato">
+            <div class="label-sm">Ricavi dichiarati anno</div>
+            <div class="valore-big">€ {{ "{:,.0f}".format(db.ricavi_dichiarati).replace(',', '.') }}</div>
+            <div style="font-size: 12px; color: #718096;">Dato Fiscale</div>
+        </div>
+        <div class="box-dato" style="border: 2px solid var(--blu-chiaro);">
+            <div class="label-sm">Incassi reali stimati (STIMA)</div>
+            <div class="valore-big" style="color: var(--blu-chiaro);">€ {{ "{:,.0f}".format(db.incassi_reali).replace(',', '.') }}</div>
+            <div style="font-size: 12px; color: #718096;">+{{ "{:,.1f}".format(db.incassi_reali / db.ricavi_dichiarati if db.ricavi_dichiarati else 0).replace(',', '.') }}x vs dichiarato</div>
+        </div>
+        <div class="box-dato alert">
+            <div class="label-sm" style="color: var(--rosso);">DA RICONCILIARE</div>
+            <div class="valore-big red">€ {{ "{:,.0f}".format(db.gap_mensile).replace(',', '.') }} <span style="font-size: 14px;">/mese</span></div>
+            <div style="font-size: 12px; color: var(--rosso);">Gap medio (reale - dichiarato)</div>
+        </div>
+    </div>
+
+    <h3>Cruscotto Triade - Acquisizione / Cassa / Margini</h3>
+    <table>
+        <tr>
+            <td style="width: 20%; font-weight: bold; color: var(--blu-scuro);">Acquisizione</td>
+            <td style="width: 25%; font-weight: bold;">Incassi reali da riconciliare</td>
+            <td>Necessario analizzare il funnel di conversione per capire la provenienza reale dei flussi.</td>
+        </tr>
+        <tr>
+            <td style="font-weight: bold; color: var(--blu-scuro);">Cassa</td>
+            <td style="font-weight: bold; color: var(--rosso);">€ {{ "{:,.0f}".format(db.gap_mensile).replace(',', '.') }} / mese</td>
+            <td>Gap incassi vs corrispettivi dichiarati. <strong>Serve ponte POS/RT.</strong></td>
+        </tr>
+        <tr>
+            <td style="font-weight: bold; color: var(--blu-scuro);">Margini</td>
+            <td style="font-weight: bold;">Utile reale: {% if db.utile_reale == 'ND' %}ND{% else %}€ {{ "{:,.0f}".format(db.utile_reale).replace(',', '.') }}{% endif %}</td>
+            <td>Utile dichiarato: € {{ "{:,.0f}".format(db.utile_dichiarato).replace(',', '.') }}. {% if db.utile_reale == 'ND' %}<span style="color:var(--rosso);">Manca compenso titolare.</span>{% endif %}</td>
+        </tr>
+    </table>
+
+    <h3>Azioni entro 7 giorni</h3>
+    <ul style="line-height: 1.8; font-weight: bold; color: #2d3748;">
+        <li>1. Ponte POS/RT - riconciliazione incassi vs corrispettivi mese</li>
+        <li>2. Chiusura cassa giornaliera - obiettivo: &ge; 26/30 giorni/mese</li>
+        <li>3. Inserimento compenso titolare - definire obiettivo mensile {% if ko.compenso_titolare == 'ND' %}[ND]{% endif %}</li>
+    </ul>
+
+    <div style="position: absolute; bottom: 20px; font-size: 10px; color: #a0aec0;">
+        STIMA = dato cliente non riconciliato | ND = dato non disponibile.<br>
+        SaaS Full Advisory Engine | Pag. 1/4
+    </div>
+</div>
+
+<div class="page">
+    <div class="header">
+        <div>
+            <h1>SaaS Full Advisory Engine</h1>
+            <h2>Margini & Struttura Economica</h2>
+        </div>
+        <div class="badge-riservato">DOCUMENTO RISERVATO</div>
+    </div>
+
+    <h3>Doppio Binario - Dichiarato vs Gestionale</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Voce</th>
+                <th>Dichiarato (Fiscale)</th>
+                <th>Gestionale (Incassi Stimati)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Ricavi / Incassi</strong></td>
+                <td>€ {{ "{:,.0f}".format(db.ricavi_dichiarati).replace(',', '.') }}</td>
+                <td style="color: var(--blu-chiaro); font-weight: bold;">€ {{ "{:,.0f}".format(db.incassi_reali).replace(',', '.') }} [STIMA]</td>
+            </tr>
+            <tr>
+                <td>Costi totali</td>
+                <td>€ {{ "{:,.0f}".format(sc.personale.valore + sc.struttura.valore + db.ricavi_dichiarati - db.utile_dichiarato).replace(',', '.') }}</td>
+                <td>ND</td>
+            </tr>
+            <tr>
+                <td><strong>Utile / Perdita</strong></td>
+                <td>€ {{ "{:,.0f}".format(db.utile_dichiarato).replace(',', '.') }}</td>
+                <td>{% if db.utile_reale == 'ND' %}ND{% else %}€ {{ "{:,.0f}".format(db.utile_reale).replace(',', '.') }}{% endif %}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div style="background: #ebf8ff; border: 1px solid #bee3f8; padding: 15px; border-radius: 4px; margin-bottom: 30px;">
+        <h4 style="margin-top: 0; color: var(--blu-scuro);">Insight chiave</h4>
+        <ul style="margin-bottom: 0; color: var(--blu-scuro);">
+            {% for insight in vm.insight_chiave %}
+                <li>{{ insight }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <h3>Struttura costi - base dichiarata vs base reale stimata</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Categoria</th>
+                <th>Valore €</th>
+                <th>% su dichiarato ({{ "{:,.0f}".format(db.ricavi_dichiarati).replace(',', '.') }} €)</th>
+                <th>% su reale stimato ({{ "{:,.0f}".format(db.incassi_reali).replace(',', '.') }} €)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Personale (salari + oneri + TFR)</td>
+                <td>€ {{ "{:,.0f}".format(sc.personale.valore).replace(',', '.') }}</td>
+                <td style="color: var(--rosso); font-weight: bold;">{{ sc.personale.perc_dichiarata }}%</td>
+                <td style="color: #38a169; font-weight: bold;">{{ sc.personale.perc_reale }}%</td>
+            </tr>
+            <tr>
+                <td>Struttura (affitto + utenze + software)</td>
+                <td>€ {{ "{:,.0f}".format(sc.struttura.valore).replace(',', '.') }}</td>
+                <td>{{ sc.struttura.perc_dichiarata }}%</td>
+                <td>{{ sc.struttura.perc_reale }}%</td>
+            </tr>
+        </tbody>
+    </table>
+    <p style="font-size: 11px; color: #718096;">* Le % su base dichiarata possono superare il 100% perché la base è sottostimata rispetto agli incassi reali.</p>
+
+    <div style="position: absolute; bottom: 20px; font-size: 10px; color: #a0aec0;">SaaS Full Advisory Engine | Pag. 2/4</div>
+</div>
+
+<div class="page">
+    <div class="header">
+        <div>
+            <h1>SaaS Full Advisory Engine</h1>
+            <h2>KPI Operativi & Benchmark</h2>
+        </div>
+        <div class="badge-riservato">DOCUMENTO RISERVATO</div>
+    </div>
+
+    <h3>Controllo settimanale. Dati da raccogliere</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>KPI</th>
+                <th>Valore</th>
+                <th>Semaforo</th>
+                <th>Nota operativa</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Ticket medio reale</td>
+                <td>{% if ko.ticket_medio == 'ND' %}ND{% else %}€ {{ ko.ticket_medio }}{% endif %}</td>
+                <td style="color: {% if ko.ticket_medio == 'ND' %}var(--rosso){% else %}#38a169{% endif %}; font-weight: bold;">■ {% if ko.ticket_medio == 'ND' %}ROSSO{% else %}VERDE{% endif %}</td>
+                <td>Media scontrino ultimi 90 gg</td>
+            </tr>
+            <tr>
+                <td>Clienti / mese</td>
+                <td>{{ ko.clienti_mese }}</td>
+                <td style="color: {% if ko.clienti_mese == 'ND' %}var(--rosso){% else %}#38a169{% endif %}; font-weight: bold;">■ {% if ko.clienti_mese == 'ND' %}ROSSO{% else %}VERDE{% endif %}</td>
+                <td>N° scontrini / mese</td>
+            </tr>
+            <tr>
+                <td>Costo personale annuo</td>
+                <td>€ {{ "{:,.0f}".format(sc.personale.valore).replace(',', '.') }}</td>
+                <td style="color: #d69e2e; font-weight: bold;">■ GIALLO</td>
+                <td>OK su base reale; pesante su base dichiarata ({{ sc.personale.perc_dichiarata }}%)</td>
+            </tr>
+            <tr>
+                <td>Compenso titolare</td>
+                <td>{% if ko.compenso_titolare == 'ND' %}ND{% else %}€ {{ "{:,.0f}".format(ko.compenso_titolare).replace(',', '.') }}{% endif %}</td>
+                <td style="color: {% if ko.compenso_titolare == 'ND' %}var(--rosso){% else %}#38a169{% endif %}; font-weight: bold;">■ {% if ko.compenso_titolare == 'ND' %}ROSSO{% else %}VERDE{% endif %}</td>
+                <td>Prelievo mensile o salario obiettivo</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>KPI Gauge - Posizione attuale vs benchmark settoriale</h3>
+    <div class="grid-4">
+        <div class="gauge-container">
+            <div class="gauge-label"><span>Personale/Ricavi</span></div>
+            <div class="gauge-bar-bg">
+                <div class="gauge-bar-fill" style="width: {{ [sc.personale.perc_dichiarata, 100]|min }}%; background: var(--rosso);">{{ sc.personale.perc_dichiarata }}%</div>
+                <div class="gauge-target" style="left: 35%;"></div>
+            </div>
+            <div style="font-size: 10px; color: #718096; margin-top: 5px;">Target: 35%</div>
+        </div>
+        <div class="gauge-container">
+            <div class="gauge-label"><span>Margine Reale</span></div>
+            <div class="gauge-bar-bg">
+                <div class="gauge-bar-fill" style="width: 25%; background: var(--blu-chiaro);">ND</div>
+                <div class="gauge-target" style="left: 60%;"></div>
+            </div>
+            <div style="font-size: 10px; color: #718096; margin-top: 5px;">Target: 60%</div>
+        </div>
+        <div class="gauge-container">
+            <div class="gauge-label"><span>EBITDA Margin</span></div>
+            <div class="gauge-bar-bg">
+                <div class="gauge-bar-fill" style="width: 10%; background: var(--rosso);">-</div>
+                <div class="gauge-target" style="left: 80%;"></div>
+            </div>
+            <div style="font-size: 10px; color: #718096; margin-top: 5px;">Target: 8%</div>
+        </div>
+    </div>
+
+    <h3>Decisioni operative immediate</h3>
+    <ul style="line-height: 1.8; color: #2d3748;">
+        <li>1. Misurare slot venduti / slot disponibili (saturazione)</li>
+        <li>2. Conferma appuntamenti via WhatsApp + caparra su servizi lunghi</li>
+        <li>3. Pre-booking a fine servizio &rarr; fidelizzazione automatica</li>
+    </ul>
+
+    <div style="position: absolute; bottom: 20px; font-size: 10px; color: #a0aec0;">SaaS Full Advisory Engine | Pag. 3/4</div>
+</div>
+
+<div class="page">
+    <div class="header">
+        <div>
+            <h1>SaaS Full Advisory Engine</h1>
+            <h2>Piano d'Azione 30/60/90</h2>
+        </div>
+        <div class="badge-riservato">DOCUMENTO RISERVATO</div>
+    </div>
+
+    <h3>Piano d'azione + KPI target</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Orizzonte</th>
+                <th>Azione</th>
+                <th>Dettaglio</th>
+                <th>Owner</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for task in vm.piano_operativo_30_60_90 %}
+            <tr>
+                <td style="font-weight: bold; color: var(--blu-chiaro);">{{ task.orizzonte }}</td>
+                <td style="font-weight: bold;">{{ task.azione }}</td>
+                <td>{{ task.dettaglio }} <br><span style="font-size: 11px; color: #718096;">Target: {{ task.target }}</span></td>
+                <td>{{ task.owner }}</td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <td style="font-weight: bold; color: var(--blu-chiaro);">60 gg</td>
+                <td style="font-weight: bold;">Emersione graduale ricavi</td>
+                <td>Aumentare i corrispettivi dichiarati/mese per chiudere il gap.<br><span style="font-size: 11px; color: #718096;">Target: Incremento progressivo</span></td>
+                <td>Titolare</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>Posizionamento suggerito - Livelli offerta</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Livello</th>
+                <th>Servizi inclusi (Esempio)</th>
+                <th>Fascia prezzo target</th>
+                <th>Obiettivo</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Base</strong></td>
+                <td>Servizio Core Standard</td>
+                <td>Low-Tier</td>
+                <td>Volume / Acquisizione nuovi clienti</td>
+            </tr>
+            <tr>
+                <td><strong>Combo</strong></td>
+                <td>Core + Upsell (Trattamento)</td>
+                <td>Mid-Tier</td>
+                <td>Aumento ticket medio + fidelizzazione</td>
+            </tr>
+            <tr>
+                <td><strong>Premium</strong></td>
+                <td>Full experience (Consulenza + Servizio Top)</td>
+                <td>High-Tier</td>
+                <td><strong>Margine puro + posizionamento brand</strong></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div style="position: absolute; bottom: 20px; font-size: 10px; color: #a0aec0;">SaaS Full Advisory Engine | Pag. 4/4</div>
+</div>
+
+</body>
+</html>

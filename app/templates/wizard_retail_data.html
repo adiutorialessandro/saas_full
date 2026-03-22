@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .step-indicator { text-align: center; color: #718096; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
+    .page-title { text-align: center; font-size: 2rem; font-weight: 800; color: #1a202c; margin-bottom: 10px; }
+    .page-subtitle { text-align: center; color: #718096; margin-bottom: 40px; }
+    
+    .section-card { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; margin-bottom: 24px; position: relative; overflow: hidden; }
+    .card-border-blue { border-top: 4px solid #3b82f6; }
+    .card-border-purple { border-top: 4px solid #8b5cf6; }
+    .card-border-green { border-top: 4px solid #10b981; }
+
+    .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 25px; }
+    .section-header i { font-size: 1.25rem; color: #3b82f6; }
+    .section-header.purple i { color: #8b5cf6; }
+    .section-header.green i { color: #10b981; }
+    .section-header h3 { font-size: 1.1rem; font-weight: 700; color: #1a202c; margin: 0; }
+
+    .form-grid { display: grid; gap: 20px; }
+    .grid-2 { grid-template-columns: 1fr 1fr; }
+    .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+    .form-group label { display: block; font-size: 0.875rem; font-weight: 600; color: #4a5568; margin-bottom: 8px; }
+    .form-input { width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.95rem; transition: border-color 0.2s; }
+    .form-input:focus { outline: none; border-color: #3b82f6; ring: 2px solid rgba(59, 130, 246, 0.2); }
+
+    .btn-submit { width: 100%; background: #3b82f6; color: white; padding: 14px; border-radius: 10px; font-weight: 700; font-size: 1rem; border: none; cursor: pointer; transition: background 0.2s; margin-top: 10px; }
+    .btn-submit:hover { background: #2563eb; }
+</style>
+
+<div class="container" style="max-width: 850px; margin-top: 40px; margin-bottom: 60px;">
+    <div class="step-indicator">STEP 2 DI 2</div>
+    <h1 class="page-title">Dati Finanziari & Operativi</h1>
+    <p class="page-subtitle">Inserisci i dati reali per calcolare il vero margine della tua attività.</p>
+
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        
+        <div class="section-card card-border-blue">
+            <div class="section-header">
+                <i class="fas fa-calculator"></i>
+                <h3>Analisi dei Ricavi (Doppio Binario)</h3>
+            </div>
+            <div class="form-grid grid-2">
+                <div class="form-group">
+                    <label>{{ form.ricavi_dichiarati.label }}</label>
+                    {{ form.ricavi_dichiarati(class="form-input", placeholder="Esempio: 59730") }}
+                </div>
+                <div class="form-group">
+                    <label>{{ form.incassi_reali.label }}</label>
+                    {{ form.incassi_reali(class="form-input", placeholder="Esempio: 180000") }}
+                </div>
+            </div>
+        </div>
+
+        <div class="section-card card-border-purple">
+            <div class="section-header purple">
+                <i class="fas fa-chart-pie"></i>
+                <h3>Struttura dei Costi (Annuo)</h3>
+            </div>
+            <div class="form-grid grid-3">
+                <div class="form-group">
+                    <label>{{ form.costi_personale.label }}</label>
+                    {{ form.costi_personale(class="form-input") }}
+                </div>
+                <div class="form-group">
+                    <label>{{ form.costi_struttura.label }}</label>
+                    {{ form.costi_struttura(class="form-input") }}
+                </div>
+                <div class="form-group">
+                    <label>{{ form.costi_prodotti.label }}</label>
+                    {{ form.costi_prodotti(class="form-input") }}
+                </div>
+            </div>
+        </div>
+
+        <div class="section-card card-border-green">
+            <div class="section-header green">
+                <i class="fas fa-list-check"></i>
+                <h3>Indicatori Operativi (Facoltativi)</h3>
+            </div>
+            <div class="form-grid grid-3">
+                <div class="form-group">
+                    <label>{{ form.compenso_titolare.label }}</label>
+                    {{ form.compenso_titolare(class="form-input", placeholder="ND") }}
+                </div>
+                <div class="form-group">
+                    <label>{{ form.ticket_medio.label }}</label>
+                    {{ form.ticket_medio(class="form-input", placeholder="ND") }}
+                </div>
+                <div class="form-group">
+                    <label>{{ form.clienti_mese.label }}</label>
+                    {{ form.clienti_mese(class="form-input", placeholder="ND") }}
+                </div>
+            </div>
+        </div>
+
+        {{ form.submit(class="btn-submit") }}
+    </form>
+</div>
+{% endblock %}
