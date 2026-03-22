@@ -2,32 +2,65 @@
 
 {% block content %}
 <style>
-  /* ===== LANDING PAGE STYLES ===== */
-  .hero-section { text-align: center; padding: 80px 20px; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: white; border-radius: 0 0 30px 30px; margin-top: -20px; }
-  .hero-title { font-size: 3.5rem; font-weight: 800; margin-bottom: 20px; line-height: 1.2; letter-spacing: -1px; }
-  .hero-title span { color: #4fc3f7; }
-  .hero-subtitle { font-size: 1.25rem; color: #a0aec0; max-width: 800px; margin: 0 auto 40px auto; line-height: 1.6; }
+  /* ===== HERO SECTION (DARK MODE AD ALTA CONVERSIONE) ===== */
+  .hero-section { 
+      background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%); 
+      color: white; 
+      padding: 100px 20px; 
+      text-align: center; 
+      border-radius: 0 0 30px 30px; 
+      margin-top: -20px; 
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15); 
+      position: relative; 
+      overflow: hidden; 
+  }
+  .hero-section::before { 
+      content: ''; 
+      position: absolute; 
+      top: -50%; left: -50%; width: 200%; height: 200%; 
+      background: radial-gradient(circle, rgba(49, 130, 206, 0.1) 0%, transparent 60%); 
+      z-index: 1; 
+  }
+  .hero-content { position: relative; z-index: 2; max-width: 900px; margin: 0 auto; }
   
+  .badge-free { 
+      background: rgba(49, 130, 206, 0.2); color: #63b3ed; padding: 8px 16px; 
+      border-radius: 20px; font-size: 0.9rem; font-weight: 800; text-transform: uppercase; 
+      letter-spacing: 1px; margin-bottom: 25px; display: inline-block; border: 1px solid rgba(49, 130, 206, 0.3); 
+  }
+  
+  .hero-title { font-size: 3.8rem; font-weight: 900; margin-bottom: 25px; line-height: 1.1; color: #ffffff; letter-spacing: -1px; }
+  .hero-title span { background: linear-gradient(to right, #fc8181, #e53e3e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-subtitle { font-size: 1.4rem; font-weight: 400; color: #a0aec0; margin: 0 auto 40px auto; line-height: 1.6; }
+  
+  .btn-hero { 
+      background: linear-gradient(135deg, #3182ce, #2b6cb0); color: white; padding: 18px 40px; 
+      font-size: 1.2rem; font-weight: 800; border-radius: 50px; text-decoration: none; 
+      display: inline-flex; align-items: center; gap: 12px; transition: all 0.3s ease; box-shadow: 0 10px 25px rgba(49, 130, 206, 0.4); 
+  }
+  .btn-hero:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(49, 130, 206, 0.6); color: white; }
+
+  /* ===== FEATURES SECTION ===== */
   .features-section { padding: 80px 20px; max-width: 1200px; margin: 0 auto; }
   .section-title { text-align: center; font-size: 2.5rem; font-weight: 800; color: #1a1a2e; margin-bottom: 50px; }
   .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
-  .feature-card { background: white; padding: 40px 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; border: 1px solid #edf2f7; transition: transform 0.3s ease; }
+  
+  .feature-card { background: white; padding: 40px 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: left; border-top: 4px solid #3182ce; transition: transform 0.3s ease; }
   .feature-card:hover { transform: translateY(-5px); }
-  .feature-icon { font-size: 3rem; color: #4fc3f7; margin-bottom: 20px; }
-  .feature-title { font-size: 1.5rem; font-weight: 700; color: #1a1a2e; margin-bottom: 15px; }
-  .feature-desc { color: #4a5568; line-height: 1.6; }
+  .feature-icon { font-size: 2.5rem; color: #3182ce; margin-bottom: 20px; }
+  .feature-title { font-size: 1.3rem; font-weight: 800; color: #1a1a2e; margin-bottom: 15px; }
+  .feature-desc { color: #4a5568; line-height: 1.6; font-size: 1.05rem; }
 
+  /* ===== PRICING SECTION ===== */
   .pricing-section { padding: 80px 20px; background: #f8fafc; }
-  .pricing-card { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); text-align: center; border: 1px solid #e2e8f0; display: flex; flex-direction: column; }
-  .pricing-card.featured { transform: scale(1.05); border: 2px solid #4fc3f7; position: relative; }
+  .pricing-card { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); text-align: center; border: 1px solid #e2e8f0; display: flex; flex-direction: column; transition: transform 0.3s; }
+  .pricing-card.featured { transform: scale(1.05); border: 2px solid #4fc3f7; position: relative; z-index: 2; }
   .pricing-title { font-size: 1.5rem; font-weight: 700; color: #1a1a2e; margin-bottom: 10px; }
   .pricing-price { font-size: 3rem; font-weight: 800; color: #1a1a2e; margin-bottom: 20px; }
   .pricing-price span { font-size: 1rem; color: #718096; font-weight: 400; }
   .pricing-features { list-style: none; padding: 0; margin: 0 0 30px 0; text-align: left; }
   .pricing-features li { padding: 10px 0; color: #4a5568; border-bottom: 1px solid #edf2f7; display: flex; align-items: center; gap: 10px; }
   
-  .btn-hero { background: linear-gradient(135deg, #4fc3f7, #29b6f6); color: white; padding: 16px 36px; border-radius: 12px; font-size: 1.2rem; font-weight: 700; text-decoration: none; display: inline-block; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(79, 195, 247, 0.4); }
-  .btn-hero:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(79, 195, 247, 0.6); color: white;}
   .btn-plan { background: #1a1a2e; color: white; padding: 14px 24px; border-radius: 8px; font-weight: 700; text-decoration: none; display: inline-block; width: 100%; transition: background 0.3s; margin-top: auto; }
   .btn-plan:hover { background: #2d3748; color: white;}
   .btn-plan-featured { background: #4fc3f7; color: white; }
@@ -35,17 +68,25 @@
 </style>
 
 <div class="hero-section">
-  <div class="container">
-    <h1 class="hero-title">L'Advisory Board Digitale<br>per la tua <span>Azienda</span></h1>
+  <div class="hero-content">
+    <div class="badge-free">Software di Diagnostica Aziendale</div>
+    
+    <h1 class="hero-title">Quanti soldi stai perdendo <span>senza saperlo?</span></h1>
+    
     <p class="hero-subtitle">
-      Confronta i tuoi KPI con i benchmark di settore grazie al nostro Motore Diagnostico Proprietario.
-      Ottieni un report strategico, finanziario e operativo in tempo reale. Dati 100% al sicuro.
+      I numeri che non vedi, stanno decidendo per te.<br>
+      Scopri come fermare le perdite nascoste <strong>in pochi minuti</strong>, con un report diagnostico gratuito.
     </p>
+    
     {% if current_user.is_authenticated %}
-      <a href="{{ url_for('wizard.step1') }}" class="btn-hero">Inizia una Nuova Analisi</a>
+      <a href="{{ url_for('wizard.step1') }}" class="btn-hero">Ottieni il tuo Report Gratuito <i class="fas fa-arrow-right"></i></a>
     {% else %}
-      <a href="{{ url_for('auth.register') }}" class="btn-hero">Inizia Gratuitamente</a>
+      <a href="{{ url_for('auth.register') }}" class="btn-hero">Ottieni il tuo Report Gratuito <i class="fas fa-arrow-right"></i></a>
     {% endif %}
+
+    <div style="margin-top: 20px; font-size: 0.9rem; color: #a0aec0;">
+      <i class="fas fa-lock" style="margin-right: 5px;"></i> Nessuna carta di credito richiesta. Dati 100% protetti.
+    </div>
   </div>
 </div>
 
@@ -54,21 +95,21 @@
   <div class="grid-3">
     
     <div class="feature-card">
-      <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
-      <h3 class="feature-title">Privacy & Sicurezza GDPR</h3>
-      <p class="feature-desc">I tuoi dati finanziari sono il tuo bene più prezioso. Non usiamo API di Intelligenze Artificiali esterne: i tuoi dati non lasciano mai i nostri server europei criptati.</p>
+      <div class="feature-icon"><i class="fas fa-search-dollar"></i></div>
+      <h3 class="feature-title">Il tuo Margine Nascosto</h3>
+      <p class="feature-desc">Scopri esattamente dove stai bruciando cassa e quanto utile stai lasciando sul tavolo ogni singolo mese rispetto ai tuoi concorrenti.</p>
     </div>
 
-    <div class="feature-card">
-      <div class="feature-icon"><i class="fas fa-bolt"></i></div>
-      <h3 class="feature-title">Motore Deterministico</h3>
-      <p class="feature-desc">Niente risposte casuali o "allucinazioni". Il nostro algoritmo proprietario utilizza logica matematica ferrea per analizzare il tuo Cash Runway e il tuo Break-Even Ratio.</p>
-    </div>
-
-    <div class="feature-card">
-      <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+    <div class="feature-card" style="border-top-color: #ed8936;">
+      <div class="feature-icon" style="color: #ed8936;"><i class="fas fa-chart-pie"></i></div>
       <h3 class="feature-title">Benchmark di Settore</h3>
-      <p class="feature-desc">Scopri esattamente quanti soldi stai lasciando sul tavolo rispetto ai top performer del tuo mercato. Ottieni una Roadmap chiara su dove tagliare o dove investire.</p>
+      <p class="feature-desc">Confronta i tuoi numeri con i top performer del tuo mercato in tempo reale. Scopri se i tuoi costi strutturali sono in linea.</p>
+    </div>
+
+    <div class="feature-card" style="border-top-color: #38a169;">
+      <div class="feature-icon" style="color: #38a169;"><i class="fas fa-map-signs"></i></div>
+      <h3 class="feature-title">Piano d'Azione 30/60/90</h3>
+      <p class="feature-desc">Non riceverai solo numeri e grafici, ma una roadmap operativa chiara per chiudere i gap finanziari e scalare in totale sicurezza.</p>
     </div>
 
   </div>
@@ -104,7 +145,7 @@
         </ul>
         
         {% if current_user.is_authenticated %}
-          <a href="{{ url_for('wizard.step1') }}" class="btn-plan {% if plan.name == 'Pro' %}btn-plan-featured{% endif %}">Usa ora</a>
+          <a href="{{ url_for('wizard.step1') }}" class="btn-plan {% if plan.name == 'Pro' %}btn-plan-featured{% endif %}">Inizia Ora</a>
         {% else %}
           <a href="{{ url_for('auth.register') }}" class="btn-plan {% if plan.name == 'Pro' %}btn-plan-featured{% endif %}">Registrati</a>
         {% endif %}

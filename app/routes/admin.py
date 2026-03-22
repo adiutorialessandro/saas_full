@@ -161,28 +161,40 @@ def view_scan(scan_id):
     # Decodifichiamo i dati AI in modo sicuro per evitare errori Jinja
     vm = _prepare_scan_view_model(scan)
     
-    if scan.modello == "Local/Retail":
+    # Assicuriamoci di intercettare sia B2C che Local/Retail
+    if scan.modello in ["Local/Retail", "B2C"]:
         return render_template("scans/view_retail_scan.html", scan=scan, vm=vm)
     
     return render_template("scans/view_scan.html", scan=scan, vm=vm)
 
+# ==========================================
+# FIX: GESTIONE BENCHMARK ANTI-CRASH
+# ==========================================
 @bp.route("/benchmarks", methods=["GET", "POST"])
 @admin_required
 def benchmarks():
-    benchmarks_list = SectorBenchmark.query.all()
+    benchmarks_list = SectorBenchmark.query.order_by(SectorBenchmark.sector_name.asc()).all()
     form = SectorBenchmarkForm()
     if form.validate_on_submit():
-        b = SectorBenchmark(
-            sector_name=form.sector_name.data,
-            margine_lordo_target=form.margine_lordo_target.data,
-            conversione_target=form.conversione_target.data,
-            break_even_sano=form.break_even_sano.data,
-            runway_minima=form.runway_minima.data
-        )
-        db.session.add(b)
-        db.session.commit()
-        flash("Benchmark creato.", "success")
+        # CONTROLLO SICUREZZA: Verifichiamo se il settore esiste già
+        esistente = SectorBenchmark.query.filter_by(sector_name=form.sector_name.data).first()
+        
+        if esistente:
+            flash(f"Attenzione: Il benchmark per il settore '{form.sector_name.data}' esiste già!", "danger")
+        else:
+            b = SectorBenchmark(
+                sector_name=form.sector_name.data,
+                margine_lordo_target=form.margine_lordo_target.data,
+                conversione_target=form.conversione_target.data,
+                break_even_sano=form.break_even_sano.data,
+                runway_minima=form.runway_minima.data
+            )
+            db.session.add(b)
+            db.session.commit()
+            flash("Benchmark creato con successo.", "success")
+            
         return redirect(url_for('admin.benchmarks'))
+        
     return render_template("admin/generic_form.html", form=form, title="Benchmark di Settore", benchmarks=benchmarks_list)
 
 # ==========================================

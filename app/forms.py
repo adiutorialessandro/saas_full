@@ -14,7 +14,8 @@ class LoginForm(FlaskForm):
     submit = SubmitField("Accedi")
 
 class OnboardingForm(FlaskForm):
-    tipologia_impresa = SelectField("Tipologia di impresa", choices=[('', 'Seleziona...'), ('Consulenza B2B', 'Consulenza B2B'), ('Retail', 'Retail'), ('Manifattura', 'Manifattura'), ('SaaS / Tech', 'SaaS / Tech'), ('Ho.Re.Ca.', 'Ho.Re.Ca.'), ('Immobiliare', 'Immobiliare'), ('Sanità / Studi medici', 'Sanità / Studi medici'), ('Generico', 'Altro (Generico)')], validators=[DataRequired()])
+    # Lasciamo il choices vuoto di base, lo riempiamo dinamicamente nell'__init__
+    tipologia_impresa = SelectField("Tipologia di impresa", choices=[], validators=[DataRequired()])
     modello = SelectField("Modello di business", choices=[('', 'Seleziona...'), ('B2B', 'B2B'), ('B2C', 'B2C'), ('SaaS', 'SaaS'), ('E-commerce', 'E-commerce'), ('Agenzia', 'Agenzia')], validators=[DataRequired()])
     dimensione = SelectField("Dimensione", choices=[('', 'Seleziona...'), ('Micro', '0-9 dipendenti'), ('Piccola', '10-49 dipendenti'), ('Media', '50-249 dipendenti'), ('Grande', 'Oltre 250 dipendenti')], validators=[DataRequired()])
     dipendenti = IntegerField("Dipendenti", validators=[DataRequired(), NumberRange(min=0)])
@@ -23,6 +24,27 @@ class OnboardingForm(FlaskForm):
     tipologia_clienti = SelectField("Tipologia clienti", choices=[('', 'Seleziona...'), ('PMI', 'PMI'), ('Corporate', 'Corporate'), ('Privati', 'Privati'), ('PA', 'PA')], validators=[DataRequired()])
     mese_riferimento = StringField("Mese (YYYY-MM)", validators=[DataRequired(), Regexp(r"^\d{4}-\d{2}$")])
     submit = SubmitField("Continua")
+
+    # METODO DINAMICO: Popola il menu a tendina dal Database
+    def __init__(self, *args, **kwargs):
+        super(OnboardingForm, self).__init__(*args, **kwargs)
+        
+        # IMPORT CORRETTO DEL MODELLO
+        from app.models.benchmark import SectorBenchmark 
+        
+        try:
+            benchmarks_salvati = SectorBenchmark.query.all()
+            # CAMPO CORRETTO: sector_name invece di nome_settore
+            scelte_dinamiche = [('', 'Seleziona...')] + [(b.sector_name, b.sector_name) for b in benchmarks_salvati]
+            
+            # Assicuriamoci che l'opzione Generico ci sia sempre
+            if not any(scelta[0] == 'Generico' for scelta in scelte_dinamiche):
+                scelte_dinamiche.append(('Generico', 'Altro (Generico)'))
+                
+            self.tipologia_impresa.choices = scelte_dinamiche
+        except Exception:
+            # Fallback in caso di database non ancora inizializzato
+            self.tipologia_impresa.choices = [('', 'Seleziona...'), ('Generico', 'Altro (Generico)')]
 
 class EssentialDataForm(FlaskForm):
     cassa_attuale = FloatField("Cassa attuale (€)", validators=[Optional()])

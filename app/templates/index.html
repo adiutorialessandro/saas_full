@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+        color: white;
+        padding: 120px 20px;
+        text-align: center;
+        border-radius: 24px;
+        margin-top: 20px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    /* Effetto luce di sfondo */
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(49, 130, 206, 0.1) 0%, transparent 60%);
+        z-index: 1;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .badge-free {
+        background: rgba(49, 130, 206, 0.2);
+        color: #63b3ed;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 25px;
+        display: inline-block;
+        border: 1px solid rgba(49, 130, 206, 0.3);
+    }
+
+    .hero-title {
+        font-size: 3.8rem;
+        font-weight: 900;
+        margin-bottom: 25px;
+        line-height: 1.1;
+        color: #ffffff;
+    }
+    
+    .hero-title span {
+        background: linear-gradient(to right, #fc8181, #e53e3e);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+        font-size: 1.5rem;
+        font-weight: 400;
+        color: #a0aec0;
+        margin: 0 auto 40px auto;
+        line-height: 1.6;
+    }
+
+    .hero-cta {
+        background: linear-gradient(135deg, #3182ce, #2b6cb0);
+        color: white;
+        padding: 20px 45px;
+        font-size: 1.25rem;
+        font-weight: 800;
+        border-radius: 50px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 25px rgba(49, 130, 206, 0.4);
+    }
+
+    .hero-cta:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(49, 130, 206, 0.6);
+        color: white;
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        margin-top: 60px;
+        margin-bottom: 60px;
+    }
+
+    .feature-card {
+        background: white;
+        padding: 40px 30px;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        text-align: left;
+        border-top: 4px solid #3182ce;
+        transition: transform 0.2s;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .feature-icon {
+        font-size: 2.5rem;
+        color: #3182ce;
+        margin-bottom: 20px;
+    }
+
+    .feature-title {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: #2d3748;
+        margin-bottom: 12px;
+    }
+
+    .feature-desc {
+        color: #718096;
+        line-height: 1.6;
+        font-size: 1.05rem;
+    }
+</style>
+
+<div class="container" style="max-width: 1200px; margin: 0 auto;">
+    
+    <div class="hero-section">
+        <div class="hero-content">
+            <div class="badge-free">Software di Diagnostica Aziendale</div>
+            
+            <h1 class="hero-title">Quanti soldi stai perdendo <span>senza saperlo?</span></h1>
+            
+            <p class="hero-subtitle">
+                I numeri che non vedi, stanno decidendo per te.<br>
+                Scopri come fermare le perdite nascoste <strong>in pochi minuti</strong>, con un report diagnostico gratuito.
+            </p>
+            
+            <a href="/register" class="hero-cta">
+                Ottieni il tuo Report Gratuito <i class="fas fa-arrow-right"></i>
+            </a>
+            
+            <div style="margin-top: 20px; font-size: 0.9rem; color: #718096;">
+                <i class="fas fa-lock" style="margin-right: 5px;"></i> Nessuna carta di credito richiesta. Dati 100% protetti.
+            </div>
+        </div>
+    </div>
+
+    <div class="features-grid">
+        <div class="feature-card">
+            <i class="fas fa-search-dollar feature-icon"></i>
+            <div class="feature-title">Il tuo Margine Nascosto</div>
+            <div class="feature-desc">Scopri esattamente dove stai bruciando cassa e quanto utile stai lasciando sul tavolo ogni singolo mese.</div>
+        </div>
+        <div class="feature-card" style="border-top-color: #ed8936;">
+            <i class="fas fa-chart-pie feature-icon" style="color: #ed8936;"></i>
+            <div class="feature-title">Benchmark di Settore</div>
+            <div class="feature-desc">Confronta i tuoi numeri con i top performer del tuo mercato. Scopri se i tuoi costi (es. Personale) sono in linea.</div>
+        </div>
+        <div class="feature-card" style="border-top-color: #38a169;">
+            <i class="fas fa-map-signs feature-icon" style="color: #38a169;"></i>
+            <div class="feature-title">Piano d'Azione 30/60/90</div>
+            <div class="feature-desc">Non riceverai solo numeri, ma una roadmap operativa chiara per chiudere i gap finanziari e scalare in sicurezza.</div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
