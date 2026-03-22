@@ -161,6 +161,9 @@ def view_scan(scan_id):
     # Decodifichiamo i dati AI in modo sicuro per evitare errori Jinja
     vm = _prepare_scan_view_model(scan)
     
+    if scan.modello == "Local/Retail":
+        return render_template("scans/view_retail_scan.html", scan=scan, vm=vm)
+    
     return render_template("scans/view_scan.html", scan=scan, vm=vm)
 
 @bp.route("/benchmarks", methods=["GET", "POST"])

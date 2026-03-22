@@ -67,25 +67,23 @@
 </head>
 <body>
 
-{# 
-  NORMALIZZAZIONE VARIABILI JINJA2 
-#}
+{# NORMALIZZAZIONE VARIABILI JINJA2 #}
 {% set vm = vm | default({}) %}
-{% set st = vm.state if vm.state is defined else vm.triade.state if vm.triade is defined else {} %}
-{% set kpi = vm.kpi if vm.kpi is defined else vm.triade.kpi if vm.triade is defined else {} %}
-{% set risks = vm.risks if vm.risks is defined else vm.triade.risks if vm.triade is defined else {} %}
-{% set strategy = vm.advanced_strategy if vm.advanced_strategy is defined else vm.triade.advanced_strategy if vm.triade is defined else {} %}
-{% set meta = vm.meta if vm.meta is defined else vm.triade.meta if vm.triade is defined else {} %}
+{% set st = vm.get('state', vm.get('triade', {}).get('state', {})) %}
+{% set kpi = vm.get('kpi', vm.get('triade', {}).get('kpi', {})) %}
+{% set risks = vm.get('risks', vm.get('triade', {}).get('risks', {})) %}
+{% set strategy = vm.get('advanced_strategy', vm.get('triade', {}).get('advanced_strategy', {})) %}
+{% set meta = vm.get('meta', vm.get('triade', {}).get('meta', {})) %}
 
 <div class="container">
 
   {# HEADER #}
   <div class="report-header">
     <div class="header-content">
-      <h1>{{ meta.settore|default("Analisi Aziendale") }}</h1>
+      <h1>{{ meta.get('settore', 'Analisi Aziendale') }}</h1>
       <div class="header-meta">
-        <span>📊 Modello: {{ meta.modello|default("N/A") }}</span>
-        <span>📅 Mese: {{ meta.mese_riferimento|default("N/A") }}</span>
+        <span>📊 Modello: {{ meta.get('modello', 'N/A') }}</span>
+        <span>📅 Mese: {{ meta.get('mese_riferimento', 'N/A') }}</span>
       </div>
     </div>
     <div class="header-actions">
@@ -94,7 +92,7 @@
     </div>
   </div>
   
-  {# FIX: OPENAI STRATEGIC MEMO #}
+  {# AI EXECUTIVE MEMO #}
   {% set ai_memo = st.get('ai_memo', '') %}
   {% if ai_memo %}
   <div style="background: linear-gradient(to right, #ffffff, #f5f3ff); border-left: 5px solid #8b5cf6; padding: 30px; border-radius: 16px; margin-bottom: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
@@ -107,32 +105,34 @@
   </div>
   {% endif %}
   
-  {# SCORE SUMMARY #}
+  {# SCORE SUMMARY - FIX DEFINITIVO CON .get() #}
+  {% set current_score = st.get('overall_score', 0) | int %}
   <div class="grid-2">
     <div class="card" style="border-top: 6px solid #29b6f6;">
       <div class="card-title">Business Stability Score</div>
       <div style="font-size: 4em; font-weight: 800; color: #1a1a2e; margin: 10px 0; line-height: 1;">
-        {{ st.overall_score|default(50) }}<span style="font-size: 0.4em; color: #999;">/100</span>
+        {{ current_score }}<span style="font-size: 0.4em; color: #999;">/100</span>
       </div>
-      <span class="badge badge-{{ 'green' if st.overall_score >= 75 else 'warning' if st.overall_score >= 40 else 'danger' }}">
-        Status: {{ st.overall|default("Sconosciuto")|upper }}
+      <span class="badge badge-{{ 'green' if current_score >= 75 else 'warning' if current_score >= 40 else 'danger' }}">
+        Status: {{ st.get('overall', 'Sconosciuto') | upper }}
       </span>
       <div class="card-desc" style="margin-top: 16px;">
-        <strong>Affidabilità Dati:</strong> {{ st.confidence|default(0) }}% <br>
-        <strong>Indice di Maturità:</strong> {{ st.maturity_label|default("N/A") }} <br>
-        <strong>Resilienza:</strong> {{ st.resilience_label|default("N/A") }}
+        <strong>Affidabilità Dati:</strong> {{ st.get('confidence', 0) }}% <br>
+        <strong>Indice di Maturità:</strong> {{ st.get('maturity_label', 'N/A') }} <br>
+        <strong>Resilienza:</strong> {{ st.get('resilience_label', 'N/A') }}
       </div>
     </div>
     <div class="card">
       <div class="card-title">Executive Summary</div>
-      <p style="font-size: 1.1em; color: #333; font-weight: 600; margin-top: 10px;">{{ st.summary|default("Nessun summary.") }}</p>
+      <p style="font-size: 1.1em; color: #333; font-weight: 600; margin-top: 10px;">{{ st.get('summary', 'Nessun summary.') }}</p>
       
-      {% if st.critical_kpis %}
+      {% set critical_kpis = st.get('critical_kpis', []) %}
+      {% if critical_kpis %}
       <div style="margin-top: 20px;">
         <strong style="color: #e63946; font-size: 0.9em; text-transform: uppercase;">Priorità Critiche Identificate:</strong>
         <ul style="margin-left: 20px; margin-top: 8px; color: #555;">
-          {% for k in st.critical_kpis %}
-            <li>{{ k.area }} (Livello di rischio: {{ k.risk }}%)</li>
+          {% for k in critical_kpis %}
+            <li>{{ k.get('area', 'Area ND') }} (Livello di rischio: {{ k.get('risk', 0) }}%)</li>
           {% endfor %}
         </ul>
       </div>
@@ -147,17 +147,17 @@
   <div class="grid-3">
     <div class="card">
       <div class="card-title">Cash Runway</div>
-      <div class="card-value">{{ "%.1f"|format(kpi.runway_mesi) if kpi.runway_mesi else "—" }} <span style="font-size:0.5em">mesi</span></div>
+      <div class="card-value">{{ "%.1f"|format(kpi.get('runway_mesi', 0)) if kpi.get('runway_mesi') else "—" }} <span style="font-size:0.5em">mesi</span></div>
       <div class="card-desc">Tempo di sopravvivenza aziendale a ricavi zero basato sulla cassa attuale e il burn rate mensile.</div>
     </div>
     <div class="card">
       <div class="card-title">Margine Lordo</div>
-      <div class="card-value">{{ "%.1f"|format(kpi.margine_pct * 100) if kpi.margine_pct else "—" }} <span style="font-size:0.5em">%</span></div>
+      <div class="card-value">{{ "%.1f"|format(kpi.get('margine_pct', 0) * 100) if kpi.get('margine_pct') else "—" }} <span style="font-size:0.5em">%</span></div>
       <div class="card-desc">Percentuale di valore trattenuta dalla vendita del prodotto al netto dei costi variabili/diretti.</div>
     </div>
     <div class="card">
       <div class="card-title">Break-even Ratio</div>
-      <div class="card-value">{{ "%.2f"|format(kpi.break_even_ratio) if kpi.break_even_ratio else "—" }} <span style="font-size:0.5em">x</span></div>
+      <div class="card-value">{{ "%.2f"|format(kpi.get('break_even_ratio', 0)) if kpi.get('break_even_ratio') else "—" }} <span style="font-size:0.5em">x</span></div>
       <div class="card-desc">Quante volte gli incassi mensili coprono il punto di pareggio operativo aziendale.</div>
     </div>
   </div>
@@ -165,7 +165,7 @@
   {# ========================================================= #}
   {# INIZIO BLOCCO FINANCIAL PROJECTIONS                       #}
   {# ========================================================= #}
-  {% set fin = vm.triade.financial_projections if vm.triade is defined and vm.triade.financial_projections else vm.financial_projections if vm.financial_projections else {} %}
+  {% set fin = vm.get('financial_projections', vm.get('triade', {}).get('financial_projections', {})) %}
   {% if fin %}
   <div style="margin-top: 60px; padding-top: 40px; border-top: 2px dashed #ccc;">
     <div class="section-header">
@@ -178,40 +178,42 @@
       <div class="card" style="border-top: 6px solid #e63946;">
         <div class="card-title">📉 Inefficiency Cost</div>
         <div style="font-size: 2.2em; font-weight: 800; color: #e63946; margin: 10px 0; line-height: 1;">
-          € {{ "{:,.0f}".format(fin.ebitda_gap).replace(',', '.') }}
+          € {{ "{:,.0f}".format(fin.get('ebitda_gap', 0)).replace(',', '.') }}
         </div>
         <div class="card-desc">Margine annuo lasciato sul tavolo (EBITDA Gap) a causa della distanza dal target di efficienza del settore.</div>
       </div>
 
       {# STRESS TEST #}
+      {% set s_test = fin.get('stress_test', {}) %}
       <div class="card" style="border-top: 6px solid #f59e0b;">
         <div class="card-title">🌪️ Stress Test (Runway)</div>
         <ul style="list-style: none; margin-top: 15px;">
           <li style="margin-bottom: 12px; display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 5px;">
-            <span style="color: #555;">Shock Ricavi -20%:</span> <strong>{{ fin.stress_test.shock_20 }} mesi</strong>
+            <span style="color: #555;">Shock Ricavi -20%:</span> <strong>{{ s_test.get('shock_20', 'ND') }} mesi</strong>
           </li>
           <li style="margin-bottom: 12px; display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 5px;">
-            <span style="color: #555;">Shock Ricavi -30%:</span> <strong>{{ fin.stress_test.shock_30 }} mesi</strong>
+            <span style="color: #555;">Shock Ricavi -30%:</span> <strong>{{ s_test.get('shock_30', 'ND') }} mesi</strong>
           </li>
           <li style="display: flex; justify-content: space-between;">
-            <span style="color: #555;">Ritardi Incasso (50%):</span> <strong>{{ fin.stress_test.late_payments }} mesi</strong>
+            <span style="color: #555;">Ritardi Incasso (50%):</span> <strong>{{ s_test.get('late_payments', 'ND') }} mesi</strong>
           </li>
         </ul>
         <div class="card-desc" style="font-size: 0.85em; margin-top: 15px;">Come cambia la sopravvivenza in caso di crisi esterna.</div>
       </div>
 
       {# SIMULATOR #}
+      {% set sim = fin.get('simulator', {}) %}
       <div class="card" style="border-top: 6px solid #10b981;">
         <div class="card-title">📈 What-If Simulator</div>
         <ul style="list-style: none; margin-top: 15px;">
           <li style="margin-bottom: 12px; display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 5px;">
-            <span style="color: #555;">Taglio Costi 10%:</span> <strong style="color: #10b981;">{{ fin.simulator.cost_cut_10 }} mesi</strong>
+            <span style="color: #555;">Taglio Costi 10%:</span> <strong style="color: #10b981;">{{ sim.get('cost_cut_10', 'ND') }} mesi</strong>
           </li>
           <li style="margin-bottom: 12px; display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 5px;">
-            <span style="color: #555;">Taglio Costi 20%:</span> <strong style="color: #10b981;">{{ fin.simulator.cost_cut_20 }} mesi</strong>
+            <span style="color: #555;">Taglio Costi 20%:</span> <strong style="color: #10b981;">{{ sim.get('cost_cut_20', 'ND') }} mesi</strong>
           </li>
           <li style="display: flex; justify-content: space-between;">
-            <span style="color: #555;">Ricavi +10%:</span> <strong style="color: #10b981;">{{ fin.simulator.rev_up_10 }} mesi</strong>
+            <span style="color: #555;">Ricavi +10%:</span> <strong style="color: #10b981;">{{ sim.get('rev_up_10', 'ND') }} mesi</strong>
           </li>
         </ul>
         <div class="card-desc" style="font-size: 0.85em; margin-top: 15px;">Impatto sul cashflow delle manovre correttive.</div>
@@ -220,9 +222,7 @@
   </div>
   {% endif %}
 
-  {# INIZIO BLOCCO ADVANCED STRATEGY                            #}
-  {# ========================================================= #}
-  
+  {# INIZIO BLOCCO ADVANCED STRATEGY #}
   {% if strategy %}
   <div style="margin-top: 60px; padding-top: 40px; border-top: 2px dashed #ccc;">
     <div class="section-header">
@@ -232,31 +232,33 @@
 
     <div class="grid-2">
       {# ROOT CAUSE ANALYSIS #}
-      {% if strategy.root_cause %}
+      {% set rc = strategy.get('root_cause', {}) %}
+      {% if rc %}
       <div class="root-card">
         <div class="card-title">🎯 Causa Radice Primaria</div>
         <p style="color: #666; font-size: 0.9em; margin-bottom: 16px;">Analisi logica a cascata per isolare il problema centrale dell'azienda.</p>
-        <div class="root-path">{{ strategy.root_cause.analysis_path }}</div>
-        <div class="root-title">⚠️ {{ strategy.root_cause.root_cause }}</div>
+        <div class="root-path">{{ rc.get('analysis_path', '') }}</div>
+        <div class="root-title">⚠️ {{ rc.get('root_cause', '') }}</div>
         <div class="insight-box" style="margin-top: 24px; border-color: #e63946;">
           <div class="insight-title">Direttiva Operativa</div>
-          <div class="insight-text">{{ strategy.root_cause.recommended_action }}</div>
+          <div class="insight-text">{{ rc.get('recommended_action', '') }}</div>
         </div>
       </div>
       {% endif %}
 
       {# ORGANIZATIONAL HEALTH #}
-      {% if strategy.organizational_health %}
+      {% set org_health = strategy.get('organizational_health', {}) %}
+      {% if org_health %}
       <div class="card" style="border-top: 6px solid #4fc3f7; display: flex; flex-direction: column; justify-content: center;">
         <div class="card-title">🏛️ Salute Organizzativa</div>
         <div style="font-size: 3.5em; font-weight: 800; color: #1a1a2e; margin: 10px 0; line-height: 1;">
-          {{ strategy.organizational_health.score }}<span style="font-size: 0.4em; color: #999;">/100</span>
+          {{ org_health.get('score', 0) }}<span style="font-size: 0.4em; color: #999;">/100</span>
         </div>
-        <span class="badge badge-green" style="align-self: flex-start; margin-bottom: 16px;">{{ strategy.organizational_health.status }}</span>
+        <span class="badge badge-green" style="align-self: flex-start; margin-bottom: 16px;">{{ org_health.get('status', '') }}</span>
         
         <div style="margin-top: 10px; padding: 16px; background: #f9fafb; border-radius: 8px; border: 1px solid #eee;">
           <ul style="margin-left: 20px; color: #444; font-size: 0.95em;">
-            {% for insight in strategy.organizational_health.insights %}
+            {% for insight in org_health.get('insights', []) %}
               <li style="margin-bottom: 6px;">{{ insight }}</li>
             {% endfor %}
           </ul>
@@ -266,22 +268,22 @@
     </div>
 
     {# VALUE CHAIN ANALYSIS #}
-    {% if strategy.value_chain %}
+    {% set vc = strategy.get('value_chain', {}) %}
+    {% if vc %}
     <div class="card" style="margin-top: 24px;">
       <div class="card-title">⚙️ Business System & Value Chain</div>
       <p style="color: #666; font-size: 0.95em;">Identificazione del collo di bottiglia operativo nella catena di creazione del valore.</p>
       
       <div class="value-chain-container">
-        {% for stage in strategy.value_chain.value_chain %}
-        <div class="vc-stage {% if strategy.value_chain.bottleneck.stage == stage.stage %}bottleneck{% endif %}">
-          <div style="font-size: 0.85em; font-weight: 700; color: #666; text-transform: uppercase;">{{ stage.stage }}</div>
+        {% for stage in vc.get('value_chain', []) %}
+        <div class="vc-stage {% if vc.get('bottleneck', {}).get('stage') == stage.get('stage') %}bottleneck{% endif %}">
+          <div style="font-size: 0.85em; font-weight: 700; color: #666; text-transform: uppercase;">{{ stage.get('stage', '') }}</div>
           
-          {# FIX PER IL PUNTEGGIO OLTRE 100 #}
-          {% set safe_score = 100 if (stage.score|float) > 100 else stage.score %}
+          {% set safe_score = 100 if (stage.get('score', 0)|float) > 100 else stage.get('score', 0) %}
           <div class="vc-score">{{ safe_score }}<span style="font-size: 0.5em;">/100</span></div>
           
-          <div style="font-size: 0.8em; color: #999;">{{ stage.label }}</div>
-          {% if strategy.value_chain.bottleneck.stage == stage.stage %}
+          <div style="font-size: 0.8em; color: #999;">{{ stage.get('label', '') }}</div>
+          {% if vc.get('bottleneck', {}).get('stage') == stage.get('stage') %}
             <div style="position: absolute; top: -10px; right: -10px; background: #e63946; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">!</div>
           {% endif %}
         </div>
@@ -289,31 +291,35 @@
       </div>
       <div class="insight-box" style="margin-top: 20px;">
         <div class="insight-title">Diagnosi del Business System</div>
-        <div class="insight-text">{{ strategy.value_chain.strategic_insight }}</div>
+        <div class="insight-text">{{ vc.get('strategic_insight', '') }}</div>
       </div>
     </div>
     {% endif %}
 
     {# STRATEGIC ROADMAP #}
-    {% if strategy.three_horizons %}
+    {% set th = strategy.get('three_horizons', {}) %}
+    {% if th %}
     <div style="margin-top: 48px;">
       <div class="section-header">
         <h2>Roadmap Strategica (3 Fasi)</h2>
       </div>
       <div class="section-subtitle">
         Pianificazione basata sull'urgenza aziendale attuale: 
-        <strong style="color: #e63946;">LIVELLO {{ strategy.three_horizons.urgency_level }}</strong>
+        <strong style="color: #e63946;">LIVELLO {{ th.get('urgency_level', 'N/A') }}</strong>
       </div>
+      
+      {% set horizons = th.get('horizons', {}) %}
+      {% set alloc = th.get('resource_allocation', {}) %}
       
       <div class="horizons-grid">
         <div class="horizon-card h1">
           <div class="horizon-badge">Fase 1 (0-6 Mesi)</div>
           <div style="font-weight: 800; font-size: 1.1em; margin-bottom: 4px;">Core Business</div>
-          <div style="color: #666; font-size: 0.8em; margin-bottom: 16px;">Focus: {{ strategy.three_horizons.horizons['Horizon_1_Core'].focus }}</div>
+          <div style="color: #666; font-size: 0.8em; margin-bottom: 16px;">Focus: {{ horizons.get('Horizon_1_Core', {}).get('focus', '') }}</div>
           <div style="background: #f8fafc; padding: 8px; border-radius: 6px; margin-bottom: 16px; font-size: 0.9em; text-align: center; border: 1px solid #e2e8f0;">
-            Allocazione Risorse (Tempo/Denaro): <strong>{{ strategy.three_horizons.resource_allocation['H1'] }}</strong>
+            Allocazione Risorse (Tempo/Denaro): <strong>{{ alloc.get('H1', 'ND') }}</strong>
           </div>
-          {% for action in strategy.three_horizons.horizons['Horizon_1_Core'].actions %}
+          {% for action in horizons.get('Horizon_1_Core', {}).get('actions', []) %}
             <div class="horizon-action">{{ action }}</div>
           {% endfor %}
         </div>
@@ -321,11 +327,11 @@
         <div class="horizon-card h2">
           <div class="horizon-badge">Fase 2 (6-18 Mesi)</div>
           <div style="font-weight: 800; font-size: 1.1em; margin-bottom: 4px;">Scalabilità</div>
-          <div style="color: #666; font-size: 0.8em; margin-bottom: 16px;">Focus: {{ strategy.three_horizons.horizons['Horizon_2_Emerging'].focus }}</div>
+          <div style="color: #666; font-size: 0.8em; margin-bottom: 16px;">Focus: {{ horizons.get('Horizon_2_Emerging', {}).get('focus', '') }}</div>
           <div style="background: #f8fafc; padding: 8px; border-radius: 6px; margin-bottom: 16px; font-size: 0.9em; text-align: center; border: 1px solid #e2e8f0;">
-            Allocazione Risorse (Tempo/Denaro): <strong>{{ strategy.three_horizons.resource_allocation['H2'] }}</strong>
+            Allocazione Risorse (Tempo/Denaro): <strong>{{ alloc.get('H2', 'ND') }}</strong>
           </div>
-          {% for action in strategy.three_horizons.horizons['Horizon_2_Emerging'].actions %}
+          {% for action in horizons.get('Horizon_2_Emerging', {}).get('actions', []) %}
             <div class="horizon-action">{{ action }}</div>
           {% endfor %}
         </div>
@@ -333,11 +339,11 @@
         <div class="horizon-card h3">
           <div class="horizon-badge">Fase 3 (18-36 Mesi)</div>
           <div style="font-weight: 800; font-size: 1.1em; margin-bottom: 4px;">Innovazione Disruptiva</div>
-          <div style="color: #666; font-size: 0.8em; margin-bottom: 16px;">Focus: {{ strategy.three_horizons.horizons['Horizon_3_Future'].focus }}</div>
+          <div style="color: #666; font-size: 0.8em; margin-bottom: 16px;">Focus: {{ horizons.get('Horizon_3_Future', {}).get('focus', '') }}</div>
           <div style="background: #f8fafc; padding: 8px; border-radius: 6px; margin-bottom: 16px; font-size: 0.9em; text-align: center; border: 1px solid #e2e8f0;">
-            Allocazione Risorse (Tempo/Denaro): <strong>{{ strategy.three_horizons.resource_allocation['H3'] }}</strong>
+            Allocazione Risorse (Tempo/Denaro): <strong>{{ alloc.get('H3', 'ND') }}</strong>
           </div>
-          {% for action in strategy.three_horizons.horizons['Horizon_3_Future'].actions %}
+          {% for action in horizons.get('Horizon_3_Future', {}).get('actions', []) %}
             <div class="horizon-action">{{ action }}</div>
           {% endfor %}
         </div>
@@ -346,10 +352,6 @@
     {% endif %}
   </div>
   {% endif %}
-  
-  {# ========================================================= #}
-  {# FINE BLOCCO STRATEGY                                      #}
-  {# ========================================================= #}
 
   <div class="footer">
     Generato da SaaS Full · Strategy Advisory Engine · Modello Dati v3.0
