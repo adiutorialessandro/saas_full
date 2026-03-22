@@ -316,3 +316,35 @@ def test_email():
         print(f"🔴 {error_msg}")
         flash(error_msg, "danger")
         return redirect(url_for('admin.index'))
+
+# ==========================================
+# 🛑 DANGER ZONE: ELIMINA SOCIETÀ E DATI
+# ==========================================
+@bp.route("/organizations/<int:org_id>/delete", methods=["POST"])
+@admin_required
+def delete_organization(org_id):
+    org = Organization.query.get_or_404(org_id)
+    
+    # Protezione extra: impediamo di cancellare la società ID 1 (solitamente la tua o del superadmin)
+    if org.id == 1:
+        flash("Operazione negata: Non puoi eliminare l'azienda principale di sistema.", "danger")
+        return redirect(url_for('admin.organization_detail', org_id=org.id))
+
+    try:
+        # 1. Eliminiamo tutti gli scan associati a questa società
+        Scan.query.filter_by(org_id=org.id).delete()
+        
+        # 2. Eliminiamo i collegamenti degli utenti a questa società
+        Membership.query.filter_by(org_id=org.id).delete()
+        
+        # 3. Infine, eliminiamo l'azienda stessa
+        db.session.delete(org)
+        db.session.commit()
+        
+        flash(f"Società '{org.name}' e tutti i suoi dati eliminati definitivamente.", "success")
+        return redirect(url_for('admin.organizations')) # Rimanda alla lista delle società
+        
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Errore durante l'eliminazione: {str(e)}", "danger")
+        return redirect(url_for('admin.organization_detail', org_id=org.id))

@@ -1,47 +1,72 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container" style="max-width: 1200px; margin: 40px auto;">
+<div class="container" style="max-width: 1200px; margin: 40px auto; padding: 0 20px;">
+    
     <div style="margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center;">
         <div>
-            <h1 style="font-size: 2rem; font-weight: 800;">Azienda: {{ org.name }}</h1>
-            <p class="muted">Piano Attuale: <strong style="color: var(--primary);">{{ org.plan.name if org.plan else 'Nessuno' }}</strong> | Status: {{ org.billing_status or 'Trial' }}</p>
+            <h1 style="font-size: 2rem; font-weight: 800; margin-bottom: 5px;">Azienda: {{ org.name }}</h1>
+            <p class="muted" style="font-size: 1.1rem;">
+                Piano Attuale: <strong style="color: var(--primary);">{{ org.plan.name if org.plan else 'Nessuno' }}</strong> 
+                | Status: {{ org.billing_status or 'Trial' }}
+            </p>
         </div>
         <div style="display: flex; gap: 10px;">
             <a href="{{ url_for('admin.organizations') }}" class="btn btn-secondary">← Torna alla lista</a>
-            <a href="{{ url_for('admin.update_org_plan', org_id=org.id) }}" class="btn btn-primary"><i class="fas fa-exchange-alt"></i> Cambia Piano</a>
+            <a href="{{ url_for('admin.update_org_plan', org_id=org.id) }}" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 8px;">
+                <i class="fas fa-exchange-alt"></i> Cambia Piano
+            </a>
         </div>
     </div>
 
     <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px;">
-        <div class="card" style="padding: 25px;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-                <h3 style="font-weight: 800;">Membri del Team</h3>
-                <a href="{{ url_for('admin.create_org_user', org_id=org.id) }}" class="btn btn-primary" style="font-size: 0.8rem; padding: 5px 15px;">+ Aggiungi</a>
+        
+        <div class="card" style="padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 20px; align-items: center;">
+                <h3 style="font-weight: 800; margin: 0;">Membri del Team</h3>
+                <a href="{{ url_for('admin.create_org_user', org_id=org.id) }}" class="btn btn-primary" style="font-size: 0.85rem; padding: 8px 16px; border-radius: 6px;">+ Aggiungi Utente</a>
             </div>
             <table style="width: 100%; border-collapse: collapse;">
                 {% for m in memberships %}
-                <tr style="border-bottom: 1px solid #eee;">
-                    <td style="padding: 10px 0;"><strong>{{ m.user.email }}</strong></td>
-                    <td style="padding: 10px 0;"><span class="badge badge-green">{{ m.role }}</span></td>
-                    <td style="padding: 10px 0; text-align: right;">
-                        <a href="{{ url_for('admin.edit_org_user_role', org_id=org.id, user_id=m.user.id) }}" style="color: var(--primary); text-decoration: none; font-size: 0.9em;">Modifica Ruolo</a>
+                <tr style="border-bottom: 1px solid #edf2f7;">
+                    <td style="padding: 15px 0;"><strong>{{ m.user.email }}</strong></td>
+                    <td style="padding: 15px 0;"><span class="badge badge-green" style="background: #c6f6d5; color: #22543d; padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; text-transform: uppercase;">{{ m.role }}</span></td>
+                    <td style="padding: 15px 0; text-align: right;">
+                        <a href="{{ url_for('admin.edit_org_user_role', org_id=org.id, user_id=m.user.id) }}" style="color: var(--primary); text-decoration: none; font-size: 0.9em; font-weight: bold;">Modifica Ruolo</a>
                     </td>
                 </tr>
                 {% endfor %}
             </table>
         </div>
 
-        <div class="card" style="padding: 25px;">
-            <h3 style="font-weight: 800; margin-bottom: 20px;">Analisi Eseguite</h3>
+        <div class="card" style="padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+            <h3 style="font-weight: 800; margin-top: 0; margin-bottom: 20px;">Analisi Eseguite ({{ scans|length }})</h3>
             {% for s in scans %}
-            <div style="padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between;">
-                <span>{{ s.mese_riferimento }}</span>
-                <a href="{{ url_for('admin.view_scan', scan_id=s.id) }}" style="color: var(--primary); font-weight: 700;">Vedi PDF</a>
+            <div style="padding: 12px 0; border-bottom: 1px solid #edf2f7; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: 500;">{{ s.mese_riferimento }} <span style="font-size: 0.8rem; color: #a0aec0;">(#{{ s.id }})</span></span>
+                <a href="{{ url_for('admin.view_scan', scan_id=s.id) }}" style="color: var(--primary); font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 5px;">
+                    <i class="fas fa-file-pdf"></i> Apri
+                </a>
             </div>
             {% else %}
-            <p class="muted">Nessuna analisi prodotta.</p>
+            <p class="muted" style="font-style: italic;">Nessuna analisi prodotta finora.</p>
             {% endfor %}
         </div>
     </div>
+
+    <div style="margin-top: 50px; padding: 30px; border: 2px solid #feb2b2; background-color: #fff5f5; border-radius: 12px;">
+        <h3 style="color: #c53030; margin-top: 0; font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-exclamation-triangle"></i> Zona Pericolo
+        </h3>
+        <p style="color: #4a5568; font-size: 1.05rem; margin-bottom: 20px;">
+            L'eliminazione della società <strong>{{ org.name }}</strong> è un'azione irreversibile. Verranno cancellati definitivamente tutti i suoi <strong>{{ scans|length }} report strategici</strong> e rimosso l'accesso alla piattaforma per tutti i suoi utenti.
+        </p>
+        
+        <form action="{{ url_for('admin.delete_organization', org_id=org.id) }}" method="POST" onsubmit="return confirm('⚠️ ATTENZIONE: Sei ASSOLUTAMENTE SICURO di voler eliminare {{ org.name }}?\n\nQuesta azione NON può essere annullata e perderai tutti i dati associati a questo cliente.');">
+            <button type="submit" style="background-color: #e53e3e; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 1rem; transition: background 0.3s;" onmouseover="this.style.backgroundColor='#c53030'" onmouseout="this.style.backgroundColor='#e53e3e'">
+                <i class="fas fa-trash-alt"></i> Elimina Società Definitivamente
+            </button>
+        </form>
+    </div>
+
 </div>
 {% endblock %}
