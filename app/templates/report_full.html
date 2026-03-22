@@ -8,13 +8,11 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   
   <style>
-    /* ===== RESET & BASE ===== */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html { scroll-behavior: smooth; font-size: 16px; }
     body { background: linear-gradient(135deg, #f5f8fb 0%, #e8eef5 100%); color: #1a1a2e; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; line-height: 1.6; min-height: 100vh; }
     .container { max-width: 1280px; margin: 0 auto; padding: 32px 20px; }
 
-    /* ===== HEADER ===== */
     .report-header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: white; padding: 48px 32px; border-radius: 16px; margin-bottom: 48px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15); }
     .header-content h1 { font-size: 2.4em; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.5px; }
     .header-meta { color: rgba(255, 255, 255, 0.85); font-size: 1.05em; display: flex; gap: 16px; align-items: center; }
@@ -23,33 +21,36 @@
     .btn-primary { background: linear-gradient(135deg, #4fc3f7, #29b6f6); color: white; box-shadow: 0 4px 15px rgba(79, 195, 247, 0.3); }
     .btn-secondary { background: rgba(255, 255, 255, 0.15); color: white; border: 1.5px solid rgba(255, 255, 255, 0.3); backdrop-filter: blur(10px); }
     
-    /* ===== SECTIONS & GRID ===== */
     .section-header { margin: 48px 0 28px 0; display: flex; align-items: center; gap: 16px; position: relative; }
     .section-header h2 { font-size: 1.8em; font-weight: 800; padding-left: 20px; }
     .section-header::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 6px; height: 32px; background: linear-gradient(180deg, #4fc3f7 0%, #29b6f6 100%); border-radius: 4px; }
     .section-subtitle { color: #666; font-size: 0.95em; margin: -20px 0 24px 0; }
+    
     .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 32px; }
     .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 24px; margin-bottom: 32px; }
 
-    /* ===== CARDS ===== */
     .card { background: white; border-radius: 16px; padding: 28px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); border: 1px solid rgba(0, 0, 0, 0.04); position: relative; }
     .card-title { font-size: 1.15em; font-weight: 700; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
     .card-value { font-size: 2.6em; font-weight: 800; color: #2d3748; margin: 8px 0 4px 0; line-height: 1.2; }
     .card-desc { color: #666; font-size: 0.95em; line-height: 1.6; margin-top: 12px; }
+    
     .badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.75em; text-transform: uppercase; }
-    .badge-verde, .badge-green { background: #e6f9f0; color: #1e7e5f; }
-    .badge-giallo, .badge-warning { background: #fffae6; color: #d4a100; }
-    .badge-rosso, .badge-orange, .badge-danger { background: #ffe6e6; color: #c5221f; }
-    .insight-box { background: #f5f8fb; border-left: 4px solid #4fc3f7; padding: 16px; border-radius: 8px; margin-top: 16px; }
-
-    /* ===== ADVANCED STRATEGY ===== */
+    .badge-green { background: #e6f9f0; color: #1e7e5f; }
+    .badge-warning { background: #fffae6; color: #d4a100; }
+    .badge-danger { background: #ffe6e6; color: #c5221f; }
+    
     .root-card { background: #fff; border-radius: 16px; padding: 32px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border-top: 6px solid #e63946; }
     .root-path { font-family: monospace; color: #666; background: #f5f8fb; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9em; }
     .root-title { font-size: 1.4em; font-weight: 800; color: #1a1a2e; margin-bottom: 12px; }
+    
+    .insight-box { background: #f5f8fb; border-left: 4px solid #4fc3f7; padding: 16px; border-radius: 8px; margin-top: 16px; }
+    .insight-title { font-weight: bold; color: #1a1a2e; margin-bottom: 5px; }
+
     .value-chain-container { display: flex; gap: 12px; margin-top: 24px; overflow-x: auto; padding-bottom: 12px; }
     .vc-stage { flex: 1; min-width: 140px; background: #f5f8fb; padding: 16px; border-radius: 8px; text-align: center; position: relative; border: 1px solid #e8eef5; }
     .vc-stage.bottleneck { background: #fff0f0; border-color: #ffcdd2; box-shadow: 0 4px 12px rgba(229, 57, 70, 0.15); }
     .vc-score { font-size: 1.8em; font-weight: 800; color: #1a1a2e; margin: 8px 0; }
+    
     .horizons-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-top: 24px; }
     .horizon-card { background: #fff; border-radius: 12px; padding: 24px; border: 1px solid #e8eef5; box-shadow: 0 2px 10px rgba(0,0,0,0.04); }
     .horizon-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8em; font-weight: 700; margin-bottom: 16px; }
@@ -57,21 +58,22 @@
     .horizon-card.h2 .horizon-badge { background: #fff0eb; color: #e67e22; }
     .horizon-card.h3 .horizon-badge { background: #f0f4ff; color: #3b82f6; }
     .horizon-action { padding-left: 16px; border-left: 3px solid #e8eef5; margin-bottom: 12px; font-size: 0.95em; color: #444; }
-
-    /* ===== ROADMAP & FOOTER ===== */
-    .roadmap-container { background: white; border-radius: 16px; padding: 28px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); }
-    .roadmap-list { list-style: none; }
-    .roadmap-item { padding: 24px; margin-bottom: 20px; background: linear-gradient(135deg, #f5f8fb 0%, #e8eef5 100%); border-left: 6px solid #4fc3f7; border-radius: 12px; }
+    
     .footer { text-align: center; padding: 32px 0; color: #999; font-size: 0.9em; border-top: 1px solid #e8eef5; margin-top: 48px; }
+
+    /* Custom Slider Styles */
+    input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%; background: #10b981; cursor: pointer; margin-top: -8px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+    input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; cursor: pointer; background: #e2e8f0; border-radius: 4px; }
+    input[type=range]:focus { outline: none; }
   </style>
 </head>
 <body>
 
-{# NORMALIZZAZIONE VARIABILI JINJA2 #}
+{# NORMALIZZAZIONE VARIABILI #}
 {% set vm = vm | default({}) %}
 {% set st = vm.get('state', vm.get('triade', {}).get('state', {})) %}
 {% set kpi = vm.get('kpi', vm.get('triade', {}).get('kpi', {})) %}
-{% set risks = vm.get('risks', vm.get('triade', {}).get('risks', {})) %}
 {% set strategy = vm.get('advanced_strategy', vm.get('triade', {}).get('advanced_strategy', {})) %}
 {% set meta = vm.get('meta', vm.get('triade', {}).get('meta', {})) %}
 
@@ -92,20 +94,9 @@
     </div>
   </div>
   
-  {# AI EXECUTIVE MEMO #}
-  {% set ai_memo = st.get('ai_memo', '') %}
-  {% if ai_memo %}
-  <div style="background: linear-gradient(to right, #ffffff, #f5f3ff); border-left: 5px solid #8b5cf6; padding: 30px; border-radius: 16px; margin-bottom: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
-      <h3 style="color: #6d28d9; font-weight: 800; font-size: 1.4rem; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
-          <i class="fas fa-robot"></i> AI Executive Memo
-      </h3>
-      <div style="font-size: 1.1rem; line-height: 1.8; color: #334155; font-style: italic;">
-          {{ ai_memo | replace('\n', '<br>') | safe }}
-      </div>
-  </div>
-  {% endif %}
+  {# NOTA: Il blocco AI Executive Memo è stato completamente rimosso. #}
   
-  {# SCORE SUMMARY - FIX DEFINITIVO CON .get() #}
+  {# SCORE SUMMARY #}
   {% set current_score = st.get('overall_score', 0) | int %}
   <div class="grid-2">
     <div class="card" style="border-top: 6px solid #29b6f6;">
@@ -146,32 +137,30 @@
   </div>
   <div class="grid-3">
     <div class="card">
-      <div class="card-title">Cash Runway</div>
+      <div class="card-title">Cash Runway Base</div>
       <div class="card-value">{{ "%.1f"|format(kpi.get('runway_mesi', 0)) if kpi.get('runway_mesi') else "—" }} <span style="font-size:0.5em">mesi</span></div>
-      <div class="card-desc">Tempo di sopravvivenza aziendale a ricavi zero basato sulla cassa attuale e il burn rate mensile.</div>
+      <div class="card-desc">Sopravvivenza calcolata sulla base della liquidità attuale senza interventi.</div>
     </div>
     <div class="card">
       <div class="card-title">Margine Lordo</div>
       <div class="card-value">{{ "%.1f"|format(kpi.get('margine_pct', 0) * 100) if kpi.get('margine_pct') else "—" }} <span style="font-size:0.5em">%</span></div>
-      <div class="card-desc">Percentuale di valore trattenuta dalla vendita del prodotto al netto dei costi variabili/diretti.</div>
+      <div class="card-desc">Valore trattenuto dalla vendita al netto dei costi variabili diretti.</div>
     </div>
     <div class="card">
       <div class="card-title">Break-even Ratio</div>
       <div class="card-value">{{ "%.2f"|format(kpi.get('break_even_ratio', 0)) if kpi.get('break_even_ratio') else "—" }} <span style="font-size:0.5em">x</span></div>
-      <div class="card-desc">Quante volte gli incassi mensili coprono il punto di pareggio operativo aziendale.</div>
+      <div class="card-desc">Quante volte gli incassi mensili coprono il pareggio operativo.</div>
     </div>
   </div>
 
-  {# ========================================================= #}
-  {# INIZIO BLOCCO FINANCIAL PROJECTIONS                       #}
-  {# ========================================================= #}
+  {# FINANCIAL INTELLIGENCE & INTERACTIVE SIMULATOR #}
   {% set fin = vm.get('financial_projections', vm.get('triade', {}).get('financial_projections', {})) %}
   {% if fin %}
   <div style="margin-top: 60px; padding-top: 40px; border-top: 2px dashed #ccc;">
     <div class="section-header">
       <h2>Financial Intelligence & Stress Test</h2>
     </div>
-    <div class="section-subtitle">Simulazioni di cassa, scenari di crisi e inefficienze.</div>
+    <div class="section-subtitle">Simulazioni interattive di cassa e inefficienze strutturali.</div>
 
     <div class="grid-3">
       {# EBITDA GAP #}
@@ -180,13 +169,13 @@
         <div style="font-size: 2.2em; font-weight: 800; color: #e63946; margin: 10px 0; line-height: 1;">
           € {{ "{:,.0f}".format(fin.get('ebitda_gap', 0)).replace(',', '.') }}
         </div>
-        <div class="card-desc">Margine annuo lasciato sul tavolo (EBITDA Gap) a causa della distanza dal target di efficienza del settore.</div>
+        <div class="card-desc">Margine annuo lasciato sul tavolo rispetto al benchmark dei top performer di settore.</div>
       </div>
 
       {# STRESS TEST #}
       {% set s_test = fin.get('stress_test', {}) %}
       <div class="card" style="border-top: 6px solid #f59e0b;">
-        <div class="card-title">🌪️ Stress Test (Runway)</div>
+        <div class="card-title">🌪️ Stress Test (Crisi)</div>
         <ul style="list-style: none; margin-top: 15px;">
           <li style="margin-bottom: 12px; display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 5px;">
             <span style="color: #555;">Shock Ricavi -20%:</span> <strong>{{ s_test.get('shock_20', 'ND') }} mesi</strong>
@@ -198,40 +187,49 @@
             <span style="color: #555;">Ritardi Incasso (50%):</span> <strong>{{ s_test.get('late_payments', 'ND') }} mesi</strong>
           </li>
         </ul>
-        <div class="card-desc" style="font-size: 0.85em; margin-top: 15px;">Come cambia la sopravvivenza in caso di crisi esterna.</div>
+        <div class="card-desc" style="font-size: 0.85em; margin-top: 15px;">Impatto sulla Runway in caso di crollo improvviso del mercato.</div>
       </div>
 
-      {# SIMULATOR #}
-      {% set sim = fin.get('simulator', {}) %}
-      <div class="card" style="border-top: 6px solid #10b981;">
-        <div class="card-title">📈 What-If Simulator</div>
-        <ul style="list-style: none; margin-top: 15px;">
-          <li style="margin-bottom: 12px; display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 5px;">
-            <span style="color: #555;">Taglio Costi 10%:</span> <strong style="color: #10b981;">{{ sim.get('cost_cut_10', 'ND') }} mesi</strong>
-          </li>
-          <li style="margin-bottom: 12px; display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 5px;">
-            <span style="color: #555;">Taglio Costi 20%:</span> <strong style="color: #10b981;">{{ sim.get('cost_cut_20', 'ND') }} mesi</strong>
-          </li>
-          <li style="display: flex; justify-content: space-between;">
-            <span style="color: #555;">Ricavi +10%:</span> <strong style="color: #10b981;">{{ sim.get('rev_up_10', 'ND') }} mesi</strong>
-          </li>
-        </ul>
-        <div class="card-desc" style="font-size: 0.85em; margin-top: 15px;">Impatto sul cashflow delle manovre correttive.</div>
+      {# WHAT-IF INTERACTIVE SIMULATOR #}
+      <div class="card" style="border-top: 6px solid #10b981; padding-bottom: 15px;">
+        <div class="card-title">🕹️ Simulatore Interattivo</div>
+        
+        <div style="margin-top: 10px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+            <label for="costCutSlider" style="font-size: 0.85em; font-weight: bold; color: #4a5568;">Taglio Costi / Efficienza</label>
+            <span style="font-size: 0.85em; font-weight: bold; color: #10b981;">-<span id="costCutVal">0</span>%</span>
+          </div>
+          <input type="range" id="costCutSlider" min="0" max="30" value="0">
+        </div>
+        
+        <div style="margin-top: 15px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+            <label for="revUpSlider" style="font-size: 0.85em; font-weight: bold; color: #4a5568;">Aumento Ricavi / Prezzi</label>
+            <span style="font-size: 0.85em; font-weight: bold; color: #3182ce;">+<span id="revUpVal">0</span>%</span>
+          </div>
+          <input type="range" id="revUpSlider" min="0" max="30" value="0">
+        </div>
+
+        <div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #cbd5e0; text-align: center;">
+          <div style="font-size: 0.8em; color: #718096; text-transform: uppercase; letter-spacing: 1px;">Nuova Cash Runway Proiettata</div>
+          <div style="font-size: 2.8em; font-weight: 900; color: #10b981; line-height: 1; margin-top: 5px;">
+            <span id="newRunway">{{ "%.1f"|format(kpi.get('runway_mesi', 0)) if kpi.get('runway_mesi') else "0.0" }}</span>
+            <span style="font-size: 0.3em; color: #a0aec0;">mesi</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
   {% endif %}
 
-  {# INIZIO BLOCCO ADVANCED STRATEGY #}
+  {# ADVANCED STRATEGY #}
   {% if strategy %}
   <div style="margin-top: 60px; padding-top: 40px; border-top: 2px dashed #ccc;">
     <div class="section-header">
       <h2>Advanced Strategic Diagnostics</h2>
     </div>
-    <div class="section-subtitle">Analisi generata dai modelli direzionali di livello Enterprise.</div>
 
     <div class="grid-2">
-      {# ROOT CAUSE ANALYSIS #}
       {% set rc = strategy.get('root_cause', {}) %}
       {% if rc %}
       <div class="root-card">
@@ -246,7 +244,6 @@
       </div>
       {% endif %}
 
-      {# ORGANIZATIONAL HEALTH #}
       {% set org_health = strategy.get('organizational_health', {}) %}
       {% if org_health %}
       <div class="card" style="border-top: 6px solid #4fc3f7; display: flex; flex-direction: column; justify-content: center;">
@@ -267,45 +264,11 @@
       {% endif %}
     </div>
 
-    {# VALUE CHAIN ANALYSIS #}
-    {% set vc = strategy.get('value_chain', {}) %}
-    {% if vc %}
-    <div class="card" style="margin-top: 24px;">
-      <div class="card-title">⚙️ Business System & Value Chain</div>
-      <p style="color: #666; font-size: 0.95em;">Identificazione del collo di bottiglia operativo nella catena di creazione del valore.</p>
-      
-      <div class="value-chain-container">
-        {% for stage in vc.get('value_chain', []) %}
-        <div class="vc-stage {% if vc.get('bottleneck', {}).get('stage') == stage.get('stage') %}bottleneck{% endif %}">
-          <div style="font-size: 0.85em; font-weight: 700; color: #666; text-transform: uppercase;">{{ stage.get('stage', '') }}</div>
-          
-          {% set safe_score = 100 if (stage.get('score', 0)|float) > 100 else stage.get('score', 0) %}
-          <div class="vc-score">{{ safe_score }}<span style="font-size: 0.5em;">/100</span></div>
-          
-          <div style="font-size: 0.8em; color: #999;">{{ stage.get('label', '') }}</div>
-          {% if vc.get('bottleneck', {}).get('stage') == stage.get('stage') %}
-            <div style="position: absolute; top: -10px; right: -10px; background: #e63946; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">!</div>
-          {% endif %}
-        </div>
-        {% endfor %}
-      </div>
-      <div class="insight-box" style="margin-top: 20px;">
-        <div class="insight-title">Diagnosi del Business System</div>
-        <div class="insight-text">{{ vc.get('strategic_insight', '') }}</div>
-      </div>
-    </div>
-    {% endif %}
-
-    {# STRATEGIC ROADMAP #}
     {% set th = strategy.get('three_horizons', {}) %}
     {% if th %}
     <div style="margin-top: 48px;">
       <div class="section-header">
         <h2>Roadmap Strategica (3 Fasi)</h2>
-      </div>
-      <div class="section-subtitle">
-        Pianificazione basata sull'urgenza aziendale attuale: 
-        <strong style="color: #e63946;">LIVELLO {{ th.get('urgency_level', 'N/A') }}</strong>
       </div>
       
       {% set horizons = th.get('horizons', {}) %}
@@ -316,9 +279,6 @@
           <div class="horizon-badge">Fase 1 (0-6 Mesi)</div>
           <div style="font-weight: 800; font-size: 1.1em; margin-bottom: 4px;">Core Business</div>
           <div style="color: #666; font-size: 0.8em; margin-bottom: 16px;">Focus: {{ horizons.get('Horizon_1_Core', {}).get('focus', '') }}</div>
-          <div style="background: #f8fafc; padding: 8px; border-radius: 6px; margin-bottom: 16px; font-size: 0.9em; text-align: center; border: 1px solid #e2e8f0;">
-            Allocazione Risorse (Tempo/Denaro): <strong>{{ alloc.get('H1', 'ND') }}</strong>
-          </div>
           {% for action in horizons.get('Horizon_1_Core', {}).get('actions', []) %}
             <div class="horizon-action">{{ action }}</div>
           {% endfor %}
@@ -328,9 +288,6 @@
           <div class="horizon-badge">Fase 2 (6-18 Mesi)</div>
           <div style="font-weight: 800; font-size: 1.1em; margin-bottom: 4px;">Scalabilità</div>
           <div style="color: #666; font-size: 0.8em; margin-bottom: 16px;">Focus: {{ horizons.get('Horizon_2_Emerging', {}).get('focus', '') }}</div>
-          <div style="background: #f8fafc; padding: 8px; border-radius: 6px; margin-bottom: 16px; font-size: 0.9em; text-align: center; border: 1px solid #e2e8f0;">
-            Allocazione Risorse (Tempo/Denaro): <strong>{{ alloc.get('H2', 'ND') }}</strong>
-          </div>
           {% for action in horizons.get('Horizon_2_Emerging', {}).get('actions', []) %}
             <div class="horizon-action">{{ action }}</div>
           {% endfor %}
@@ -340,9 +297,6 @@
           <div class="horizon-badge">Fase 3 (18-36 Mesi)</div>
           <div style="font-weight: 800; font-size: 1.1em; margin-bottom: 4px;">Innovazione Disruptiva</div>
           <div style="color: #666; font-size: 0.8em; margin-bottom: 16px;">Focus: {{ horizons.get('Horizon_3_Future', {}).get('focus', '') }}</div>
-          <div style="background: #f8fafc; padding: 8px; border-radius: 6px; margin-bottom: 16px; font-size: 0.9em; text-align: center; border: 1px solid #e2e8f0;">
-            Allocazione Risorse (Tempo/Denaro): <strong>{{ alloc.get('H3', 'ND') }}</strong>
-          </div>
           {% for action in horizons.get('Horizon_3_Future', {}).get('actions', []) %}
             <div class="horizon-action">{{ action }}</div>
           {% endfor %}
@@ -354,10 +308,51 @@
   {% endif %}
 
   <div class="footer">
-    Generato da SaaS Full · Strategy Advisory Engine · Modello Dati v3.0
+    Generato da SaaS Full · Strategy Advisory Engine · Modello Dati Deterministico
   </div>
 
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Recupera la runway base, gestendo eventuali virgole europee
+    const rawRunway = "{{ kpi.get('runway_mesi', 0) }}".replace(',', '.');
+    const baseRunway = parseFloat(rawRunway) || 0;
+    
+    const costCutSlider = document.getElementById('costCutSlider');
+    const costCutVal = document.getElementById('costCutVal');
+    const revUpSlider = document.getElementById('revUpSlider');
+    const revUpVal = document.getElementById('revUpVal');
+    const newRunwayDisplay = document.getElementById('newRunway');
+
+    function updateRunway() {
+        if (!costCutSlider || !revUpSlider || !newRunwayDisplay) return;
+
+        const cutPct = parseInt(costCutSlider.value) / 100;
+        const revPct = parseInt(revUpSlider.value) / 100;
+        
+        // Calcolo logico dell'estensione Runway:
+        // Ridurre i costi (denominatore del burn rate) aumenta la runway.
+        // Aumentare i ricavi abbassa ulteriormente il burn rate netto.
+        let multiplier = 1 / ((1 - cutPct) - (revPct * 0.6)); // 0.6 è una stima del margine di contribuzione sui nuovi ricavi
+        
+        // Cap di sicurezza visiva se il business diventa cash-flow positive all'improvviso
+        if (multiplier < 0 || multiplier > 15) multiplier = 15; 
+        
+        let newRunway = baseRunway * multiplier;
+        if (newRunway > 99) newRunway = 99.9; // Tetto massimo visivo
+        
+        costCutVal.textContent = costCutSlider.value;
+        revUpVal.textContent = revUpSlider.value;
+        newRunwayDisplay.textContent = newRunway.toFixed(1).replace('.', ',');
+    }
+
+    if(costCutSlider && revUpSlider) {
+        costCutSlider.addEventListener('input', updateRunway);
+        revUpSlider.addEventListener('input', updateRunway);
+    }
+});
+</script>
 
 </body>
 </html>

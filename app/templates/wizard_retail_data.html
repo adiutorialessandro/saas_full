@@ -2,101 +2,99 @@
 
 {% block content %}
 <style>
-    .step-indicator { text-align: center; color: #718096; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
-    .page-title { text-align: center; font-size: 2rem; font-weight: 800; color: #1a202c; margin-bottom: 10px; }
-    .page-subtitle { text-align: center; color: #718096; margin-bottom: 40px; }
+    /* Centratura e Layout */
+    .wizard-container { max-width: 850px; margin: 40px auto; padding: 0 20px; }
+    .step-indicator { text-align: center; color: #3182ce; font-weight: 800; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; margin-bottom: 10px; }
+    .wizard-header { text-align: center; margin-bottom: 40px; }
+    .wizard-header h2 { font-size: 2.2rem; font-weight: 900; color: #1a202c; margin-bottom: 10px; }
+    .wizard-header p { color: #718096; font-size: 1.1rem; }
+
+    /* Design delle Card */
+    .card-form { background: white; border-radius: 16px; padding: 30px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); border-top: 5px solid #3182ce; position: relative; }
+    .card-form.purple { border-top-color: #805ad5; }
+    .card-form.green { border-top-color: #38a169; }
+
+    .card-title { display: flex; align-items: center; gap: 12px; font-size: 1.1rem; font-weight: 800; color: #2d3748; margin-bottom: 20px; }
+    .card-title i { color: #3182ce; }
+    .purple .card-title i { color: #805ad5; }
+    .green .card-title i { color: #38a169; }
+
+    /* Griglie Form */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .form-grid.three-col { grid-template-columns: 1fr 1fr 1fr; }
     
-    .section-card { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; margin-bottom: 24px; position: relative; overflow: hidden; }
-    .card-border-blue { border-top: 4px solid #3b82f6; }
-    .card-border-purple { border-top: 4px solid #8b5cf6; }
-    .card-border-green { border-top: 4px solid #10b981; }
-
-    .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 25px; }
-    .section-header i { font-size: 1.25rem; color: #3b82f6; }
-    .section-header.purple i { color: #8b5cf6; }
-    .section-header.green i { color: #10b981; }
-    .section-header h3 { font-size: 1.1rem; font-weight: 700; color: #1a202c; margin: 0; }
-
-    .form-grid { display: grid; gap: 20px; }
-    .grid-2 { grid-template-columns: 1fr 1fr; }
-    .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
-
-    .form-group label { display: block; font-size: 0.875rem; font-weight: 600; color: #4a5568; margin-bottom: 8px; }
-    .form-input { width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.95rem; transition: border-color 0.2s; }
-    .form-input:focus { outline: none; border-color: #3b82f6; ring: 2px solid rgba(59, 130, 246, 0.2); }
-
-    .btn-submit { width: 100%; background: #3b82f6; color: white; padding: 14px; border-radius: 10px; font-weight: 700; font-size: 1rem; border: none; cursor: pointer; transition: background 0.2s; margin-top: 10px; }
-    .btn-submit:hover { background: #2563eb; }
+    .form-group label { display: block; margin-bottom: 8px; font-weight: 700; color: #4a5568; font-size: 0.9rem; }
+    .form-control { width: 100%; padding: 12px 16px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 1rem; transition: all 0.2s; }
+    .form-control:focus { outline: none; border-color: #3182ce; box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1); }
+    
+    /* Pulsante Rocket */
+    .btn-next { background: linear-gradient(135deg, #3182ce, #2b6cb0); color: white; padding: 16px 40px; border: none; border-radius: 50px; font-weight: 800; font-size: 1.1rem; cursor: pointer; display: block; width: 100%; margin-top: 30px; transition: all 0.3s; box-shadow: 0 10px 20px rgba(49, 130, 206, 0.3); }
+    .btn-next:hover { transform: translateY(-2px); box-shadow: 0 15px 25px rgba(49, 130, 206, 0.4); }
 </style>
 
-<div class="container" style="max-width: 850px; margin-top: 40px; margin-bottom: 60px;">
-    <div class="step-indicator">STEP 2 DI 2</div>
-    <h1 class="page-title">Dati Finanziari & Operativi</h1>
-    <p class="page-subtitle">Inserisci i dati reali per calcolare il vero margine della tua attività.</p>
+<div class="wizard-container">
+    <div class="step-indicator">Step 2 di 2</div>
+    <div class="wizard-header">
+        <h2>Dati Finanziari & Operativi</h2>
+        <p>Inserisci i dati reali per calcolare il vero margine della tua attività.</p>
+    </div>
 
     <form method="POST">
         {{ form.hidden_tag() }}
-        
-        <div class="section-card card-border-blue">
-            <div class="section-header">
-                <i class="fas fa-calculator"></i>
-                <h3>Analisi dei Ricavi (Doppio Binario)</h3>
-            </div>
-            <div class="form-grid grid-2">
+
+        <div class="card-form">
+            <div class="card-title"><i class="fas fa-calculator"></i> Analisi dei Ricavi (Doppio Binario)</div>
+            <div class="form-grid">
                 <div class="form-group">
-                    <label>{{ form.ricavi_dichiarati.label }}</label>
-                    {{ form.ricavi_dichiarati(class="form-input", placeholder="Esempio: 59730") }}
+                    <label>Ricavi Dichiarati (Annui €)</label>
+                    {{ form.ricavi_dichiarati(class="form-control", placeholder="Es. 59730") }}
                 </div>
                 <div class="form-group">
-                    <label>{{ form.incassi_reali.label }}</label>
-                    {{ form.incassi_reali(class="form-input", placeholder="Esempio: 180000") }}
+                    <label>Incassi Reali Stimati (Annui €)</label>
+                    {{ form.incassi_reali(class="form-control", placeholder="Es. 180000") }}
                 </div>
             </div>
         </div>
 
-        <div class="section-card card-border-purple">
-            <div class="section-header purple">
-                <i class="fas fa-chart-pie"></i>
-                <h3>Struttura dei Costi (Annuo)</h3>
-            </div>
-            <div class="form-grid grid-3">
+        <div class="card-form purple">
+            <div class="card-title"><i class="fas fa-chart-pie"></i> Struttura dei Costi (Annuo)</div>
+            <div class="form-grid three-col">
                 <div class="form-group">
-                    <label>{{ form.costi_personale.label }}</label>
-                    {{ form.costi_personale(class="form-input") }}
+                    <label>Costi Personale (€)</label>
+                    {{ form.costi_personale(class="form-control", placeholder="Es. 33439") }}
                 </div>
                 <div class="form-group">
-                    <label>{{ form.costi_struttura.label }}</label>
-                    {{ form.costi_struttura(class="form-input") }}
+                    <label>Costi Struttura (€)</label>
+                    {{ form.costi_struttura(class="form-control", placeholder="Es. 20751") }}
                 </div>
                 <div class="form-group">
-                    <label>{{ form.costi_prodotti.label }}</label>
-                    {{ form.costi_prodotti(class="form-input") }}
+                    <label>Costi Prodotti (€)</label>
+                    {{ form.costi_prodotti(class="form-control", placeholder="Es. 11838") }}
                 </div>
             </div>
         </div>
 
-        <div class="section-card card-border-green">
-            <div class="section-header green">
-                <i class="fas fa-list-check"></i>
-                <h3>Indicatori Operativi (Facoltativi)</h3>
-            </div>
-            <div class="form-grid grid-3">
+        <div class="card-form green">
+            <div class="card-title"><i class="fas fa-list-check"></i> Indicatori Operativi (Facoltativi)</div>
+            <div class="form-grid three-col">
                 <div class="form-group">
-                    <label>{{ form.compenso_titolare.label }}</label>
-                    {{ form.compenso_titolare(class="form-input", placeholder="ND") }}
+                    <label>Compenso Titolare (€)</label>
+                    {{ form.compenso_titolare(class="form-control", placeholder="Annuo obiettivo") }}
                 </div>
                 <div class="form-group">
-                    <label>{{ form.ticket_medio.label }}</label>
-                    {{ form.ticket_medio(class="form-input", placeholder="ND") }}
+                    <label>Ticket Medio (€)</label>
+                    {{ form.ticket_medio(class="form-control", placeholder="Es. 45") }}
                 </div>
                 <div class="form-group">
-                    <label>{{ form.clienti_mese.label }}</label>
-                    {{ form.clienti_mese(class="form-input", placeholder="ND") }}
+                    <label>Clienti al Mese</label>
+                    {{ form.clienti_mese(class="form-control", placeholder="Es. 350") }}
                 </div>
             </div>
         </div>
 
-        {{ form.submit(class="btn-submit") }}
+        <button type="submit" class="btn-next">
+            Genera Analisi Strategica <i class="fas fa-rocket" style="margin-left: 10px;"></i>
+        </button>
     </form>
 </div>
 {% endblock %}
