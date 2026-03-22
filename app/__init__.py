@@ -62,7 +62,7 @@ def create_app(config_class=Config):
     @app.route("/")
     def index():
         from .models.plan import Plan
-        plans = Plan.query.all()
+        plans = Plan.query.order_by(Plan.price_month.asc()).all()
         return render_template("landing.html", plans=plans)
     
     @app.route('/pricing')
