@@ -11,19 +11,30 @@ from app.extensions import db
 from app.services.diagnostic_engine import generate_deterministic_report, Inputs
 from app.services.retail_engine import generate_retail_report, RetailInputs
 
+# 🛡️ IMPORTS AGGIUNTI PER IL PAYWALL E LA SICUREZZA TENANT
+from app.tenant import ensure_current_org_id
+from app.models.organization import Organization
+
 logger = logging.getLogger(__name__)
 bp = Blueprint('wizard', __name__, url_prefix='/wizard')
 
 @bp.route('/step1', methods=['GET', 'POST'])
 @login_required
 def step1():
-    org = current_user.current_org
+    # 🧱 IL PAYWALL (Blindato)
+    org_id = ensure_current_org_id()
+    org = Organization.query.get(org_id)
+    
     if org and org.plan and org.plan.scan_limit != -1:
-        scan_count = Scan.query.filter_by(org_id=org.id).count()
+        scan_count = Scan.query.filter_by(org_id=org_id).count()
+        
         if scan_count >= org.plan.scan_limit:
-            flash("Hai raggiunto il limite di scansioni gratuite.", "warning")
-            return redirect(url_for('billing.pricing'))
+            # Messaggio dinamico che fa capire all'utente il suo limite
+            flash(f"Hai raggiunto il limite di {org.plan.scan_limit} report previsto dal tuo piano {org.plan.name}. Fai l'upgrade per continuare l'analisi.", "warning")
+            # 🚀 Reindirizzamento corretto alla rotta principale dei prezzi
+            return redirect(url_for('pricing'))
 
+    # Se passa il controllo, mostra il form normale
     form = OnboardingForm()
     if form.validate_on_submit():
         session['wizard_step1'] = {

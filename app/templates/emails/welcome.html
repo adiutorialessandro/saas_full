@@ -1,68 +1,45 @@
-<!doctype html>
-<html lang="it">
+<!DOCTYPE html>
+<html>
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Benvenuto</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-
-<body style="margin:0;background:#f4f6f8;font-family:Arial,Helvetica,sans-serif">
-
-  <table width="100%" cellpadding="0" cellspacing="0" style="padding:30px 0">
-    <tr>
-      <td align="center">
-
-        <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;padding:40px">
-
-          <tr>
-            <td align="center" style="padding-bottom:20px">
-              <h2 style="margin:0;color:#111">SaaS Full</h2>
-            </td>
-          </tr>
-
-          <tr>
-            <td style="font-size:16px;color:#333;line-height:1.6">
-              <p>Ciao <b>{{ user_email }}</b>,</p>
-
-              <p>
-                il tuo account è stato creato con successo.
-              </p>
-
-              <p>
-                Ora puoi accedere alla piattaforma e iniziare a utilizzare gli strumenti di analisi aziendale.
-              </p>
-            </td>
-          </tr>
-
-          <tr>
-            <td align="center" style="padding:30px 0">
-              <a href="{{ config.APP_BASE_URL }}"
-                 style="
-                   background:#111;
-                   color:#fff;
-                   padding:14px 28px;
-                   text-decoration:none;
-                   border-radius:6px;
-                   font-weight:bold;
-                   display:inline-block;
-                 ">
-                Accedi alla piattaforma
-              </a>
-            </td>
-          </tr>
-
-          <tr>
-            <td style="font-size:13px;color:#888;padding-top:20px;border-top:1px solid #eee">
-              <p style="margin:0">Questa email è stata inviata automaticamente da SaaS Full.</p>
-              <p style="margin:5px 0 0 0">{{ config.APP_BASE_URL }}</p>
-            </td>
-          </tr>
-
-        </table>
-
-      </td>
-    </tr>
-  </table>
-
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 40px 20px; line-height: 1.6;">
+    
+    <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+        
+        <div style="background-color: #1a365d; padding: 35px 20px; text-align: center;">
+            <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 800; letter-spacing: 0.5px;">SaaS Full Advisory</h1>
+        </div>
+        
+        <div style="padding: 40px 30px; color: #334155;">
+            <h2 style="color: #0f172a; margin-top: 0; font-size: 22px;">Benvenuto a bordo! 🚀</h2>
+            
+            <p style="font-size: 16px;">Siamo felici di averti con noi. Il tuo account è stato creato con successo e il tuo spazio di lavoro privato è già pronto.</p>
+            
+            <p style="font-size: 16px;">Con SaaS Full puoi trasformare i tuoi dati aziendali in strategie chiare, identificare le inefficienze nascoste e calcolare la tua cash runway con precisione matematica.</p>
+            
+            <div style="text-align: center; margin: 35px 0;">
+                <a href="{{ login_url }}" style="display: inline-block; background-color: #3182ce; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: bold; font-size: 16px;">Vai alla tua Dashboard</a>
+            </div>
+            
+            <h3 style="color: #0f172a; font-size: 18px; margin-bottom: 10px;">Qual è il prossimo passo?</h3>
+            <ul style="color: #475569; font-size: 16px; padding-left: 20px;">
+                <li style="margin-bottom: 8px;">Accedi alla piattaforma</li>
+                <li style="margin-bottom: 8px;">Clicca sul pulsante blu <strong>"+ Nuovo Scan"</strong></li>
+                <li style="margin-bottom: 8px;">Inserisci i dati della tua azienda e ottieni subito il tuo primo report strategico!</li>
+            </ul>
+            
+            <p style="font-size: 16px; margin-top: 30px;">Se hai dubbi o bisogno di supporto, rispondi semplicemente a questa email.</p>
+            
+            <p style="font-size: 16px; margin-top: 30px;">A presto,<br><strong style="color: #0f172a;">Il team di SaaS Full</strong></p>
+        </div>
+        
+        <div style="background-color: #f1f5f9; padding: 25px 20px; text-align: center; font-size: 12px; color: #64748b; border-top: 1px solid #e2e8f0;">
+            © 2026 SaaS Full Advisory Engine. Tutti i diritti riservati.<br>
+            Stai ricevendo questa email perché ti sei registrato sulla nostra piattaforma.
+        </div>
+        
+    </div>
 </body>
 </html>

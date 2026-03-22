@@ -413,7 +413,121 @@
     <div class="footer"><div>Pag. 9/9</div></div>
 </div>
 
+<div class="card" style="margin-top: 40px; border: 2px solid #10b981; border-radius: 12px; padding: 30px; background: linear-gradient(to bottom right, #ffffff, #f0fdf4);">
+    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+        <div style="background: #10b981; color: white; padding: 10px; border-radius: 8px;">
+            <i class="fas fa-store" style="font-size: 1.5rem;"></i>
+        </div>
+        <div>
+            <h2 style="margin: 0; font-size: 1.8rem; font-weight: 800; color: #0f172a;">Simulatore Profitto Locale</h2>
+            <p style="margin: 5px 0 0 0; color: #64748b;">Ottimizza i parametri del tuo punto vendita e vedi l'impatto sull'utile.</p>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+        
+        <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+            <h3 style="font-size: 1.1rem; margin-bottom: 20px; color: #1e293b;"><i class="fas fa-tools text-success"></i> Leve del Negozio</h3>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: flex; justify-content: space-between; font-weight: bold; font-size: 0.9rem; margin-bottom: 8px;">
+                    Aumento Scontrino Medio <span id="val_ticket" style="color: #10b981;">+0%</span>
+                </label>
+                <input type="range" id="sim_ticket" min="0" max="50" value="0" step="1" style="width: 100%; cursor: pointer; accent-color: #10b981;">
+                <small style="color: #94a3b8;">(Cross-selling, up-selling in cassa)</small>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: flex; justify-content: space-between; font-weight: bold; font-size: 0.9rem; margin-bottom: 8px;">
+                    Nuovi Clienti / Ingressi <span id="val_clienti" style="color: #3b82f6;">+0%</span>
+                </label>
+                <input type="range" id="sim_clienti" min="0" max="100" value="0" step="5" style="width: 100%; cursor: pointer; accent-color: #3b82f6;">
+            </div>
+
+            <div style="margin-bottom: 10px;">
+                <label style="display: flex; justify-content: space-between; font-weight: bold; font-size: 0.9rem; margin-bottom: 8px;">
+                    Efficienza Acquisti (Costi Merce) <span id="val_merce" style="color: #f59e0b;">-0%</span>
+                </label>
+                <input type="range" id="sim_merce" min="0" max="15" value="0" step="1" style="width: 100%; cursor: pointer; accent-color: #f59e0b;">
+            </div>
+        </div>
+
+        <div style="background: #111827; padding: 25px; border-radius: 10px; color: white; display: flex; flex-direction: column; justify-content: center;">
+            <h3 style="font-size: 1.1rem; margin-top: 0; margin-bottom: 20px; color: #94a3b8; text-transform: uppercase;">Proiezione Punto Vendita</h3>
+            
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #374151; padding-bottom: 10px; margin-bottom: 10px;">
+                <span style="color: #94a3b8;">Nuovi Incassi Reali</span>
+                <strong id="out_incassi" style="font-size: 1.2rem; color: #10b981;">€ 0</strong>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #374151; padding-bottom: 10px; margin-bottom: 15px;">
+                <span style="color: #94a3b8;">Margine Lordo Stimato</span>
+                <strong id="out_margine" style="font-size: 1.2rem; color: #fbbf24;">€ 0</strong>
+            </div>
+
+            <div style="background: rgba(59, 130, 246, 0.2); border: 1px solid #3b82f6; padding: 15px; border-radius: 8px; text-align: center;">
+                <div style="font-size: 0.8rem; color: #93c5fd; margin-bottom: 5px; text-transform: uppercase;">Utile Operativo Potenziale</div>
+                <div id="out_utile_retail" style="font-size: 2.5rem; font-weight: 900; color: #60a5fa;">€ 0</div>
+                <div id="out_delta_retail" style="font-size: 0.85rem; color: #bfdbfe; margin-top: 5px;">(+ € 0)</div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Recupero dati Retail
+    const kpi = {{ vm.kpi | tojson | safe if vm and vm.kpi else '{}' }};
+    
+    // Parametri base Retail
+    const baseIncassi = parseFloat(kpi.incassi_reali || kpi.incassi_reali_stimati || 15000);
+    const baseCostiProdotti = parseFloat(kpi.costi_prodotti || 5000); // Variabili
+    const baseCostiFissi = (parseFloat(kpi.costi_personale || 0) + parseFloat(kpi.costi_struttura || 0));
+    
+    const baseUtile = baseIncassi - baseCostiProdotti - baseCostiFissi;
+
+    const simTicket = document.getElementById('sim_ticket');
+    const simClienti = document.getElementById('sim_clienti');
+    const simMerce = document.getElementById('sim_merce');
+
+    function formatEuro(num) {
+        return new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(num);
+    }
+
+    function ricalcolaRetail() {
+        const pctTicket = parseFloat(simTicket.value) / 100;
+        const pctClienti = parseFloat(simClienti.value) / 100;
+        const pctMerce = parseFloat(simMerce.value) / 100;
+
+        document.getElementById('val_ticket').textContent = "+" + simTicket.value + "%";
+        document.getElementById('val_clienti').textContent = "+" + simClienti.value + "%";
+        document.getElementById('val_merce').textContent = "-" + simMerce.value + "%";
+
+        // Matematica Retail:
+        // 1. I nuovi incassi dipendono da più clienti x scontrino più alto
+        const nuovoIncasso = baseIncassi * (1 + pctClienti) * (1 + pctTicket);
+        
+        // 2. I costi merce scalano con i volumi, ma migliorano con l'efficienza
+        const nuoviCostiMerce = (baseCostiProdotti * (1 + pctClienti) * (1 + pctTicket)) * (1 - pctMerce);
+        
+        // 3. Utile
+        const nuovoUtile = nuovoIncasso - nuoviCostiMerce - baseCostiFissi;
+        const delta = nuovoUtile - baseUtile;
+
+        document.getElementById('out_incassi').textContent = formatEuro(nuovoIncasso);
+        document.getElementById('out_margine').textContent = formatEuro(nuovoIncasso - nuoviCostiMerce);
+        document.getElementById('out_utile_retail').textContent = formatEuro(nuovoUtile);
+        document.getElementById('out_delta_retail').textContent = "(+ " + formatEuro(delta) + " al mese)";
+    }
+
+    simTicket.addEventListener('input', ricalcolaRetail);
+    simClienti.addEventListener('input', ricalcolaRetail);
+    simMerce.addEventListener('input', ricalcolaRetail);
+
+    ricalcolaRetail();
+});
+</script>
+
 // GRAFICI A CIAMBELLA PAGINA 2
 window.onload = function() {
     const p_pers_dich = {{ pers.get('p_dich', 56.0) }};

@@ -2,6 +2,7 @@ import functools
 from flask import Blueprint, render_template, request, redirect, url_for, flash, abort
 from flask_login import login_required, current_user
 from flask_mail import Message # 📬 Aggiunto per l'invio delle email
+from app.services.email_service import send_plan_change_email, send_admin_creation_email
 
 from app.extensions import db
 from app.models.user import User
@@ -229,13 +230,36 @@ def update_org_plan(org_id):
     org = Organization.query.get_or_404(org_id)
     form = UpdateOrganizationPlanForm()
     form.plan_id.choices = [(p.id, p.name) for p in Plan.query.order_by('price_month').all()]
+    
     if request.method == "GET":
         form.plan_id.data = org.plan_id
+        
     if form.validate_on_submit():
         org.plan_id = form.plan_id.data
         db.session.commit()
-        flash(f"Piano aggiornato per l'azienda {org.name}.", "success")
+        
+        # 📧 LOGICA DI INVIO EMAIL CON DEBUGGING VISIBILE
+        new_plan = Plan.query.get(form.plan_id.data)
+        owner_membership = Membership.query.filter_by(org_id=org.id, role="owner").first()
+        
+        if owner_membership:
+            owner = User.query.get(owner_membership.user_id)
+            print(f"👉 [DEBUG] Provo a inviare l'email di cambio piano a: {owner.email}")
+            
+            # Proviamo a inviare e salviamo il risultato (True/False)
+            success = send_plan_change_email(owner.email, new_plan.name)
+            
+            if success:
+                flash(f"Piano aggiornato e notifica inviata con successo a {owner.email}.", "success")
+            else:
+                flash(f"Piano aggiornato, ma ERRORE nell'invio dell'email a {owner.email}. Il server email ha rifiutato l'invio.", "danger")
+                print("👉 [DEBUG] L'invio ha restituito False. Controlla le credenziali in email_service.py")
+        else:
+            print(f"👉 [DEBUG] ATTENZIONE: Nessun 'owner' trovato per l'azienda {org.name} (ID: {org.id})!")
+            flash(f"Piano aggiornato. (Nessuna notifica inviata perché l'azienda non ha un account owner collegato).", "info")
+            
         return redirect(url_for('admin.organization_detail', org_id=org.id))
+        
     return render_template("admin/generic_form.html", form=form, title=f"Cambia Piano: {org.name}")
 
 @bp.route("/organizations/<int:org_id>/users/<int:user_id>/role", methods=["GET", "POST"])

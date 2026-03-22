@@ -20,4 +20,138 @@
     {% include "report_full.html" %}
 
 </div>
+<div class="card" style="margin-top: 40px; border: 2px solid #8b5cf6; border-radius: 12px; padding: 30px; background: linear-gradient(to bottom right, #ffffff, #f8fafc);">
+    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+        <div style="background: #8b5cf6; color: white; padding: 10px; border-radius: 8px;">
+            <i class="fas fa-magic" style="font-size: 1.5rem;"></i>
+        </div>
+        <div>
+            <h2 style="margin: 0; font-size: 1.8rem; font-weight: 800; color: #0f172a;">Simulatore "What-If"</h2>
+            <p style="margin: 5px 0 0 0; color: #64748b;">Sposta le levette per vedere come micro-cambiamenti impattano il tuo utile netto.</p>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+        
+        <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+            <h3 style="font-size: 1.1rem; margin-bottom: 20px; color: #1e293b;"><i class="fas fa-sliders-h text-primary"></i> Leve Strategiche</h3>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: flex; justify-content: space-between; font-weight: bold; font-size: 0.9rem; margin-bottom: 8px;">
+                    Aumento Prezzi (Upsell) <span id="val_prezzi" style="color: #3b82f6;">+0%</span>
+                </label>
+                <input type="range" id="sim_prezzi" min="0" max="50" value="0" step="1" style="width: 100%; cursor: pointer; accent-color: #3b82f6;">
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: flex; justify-content: space-between; font-weight: bold; font-size: 0.9rem; margin-bottom: 8px;">
+                    Taglio Costi Fissi <span id="val_costi" style="color: #ef4444;">-0%</span>
+                </label>
+                <input type="range" id="sim_costi" min="0" max="30" value="0" step="1" style="width: 100%; cursor: pointer; accent-color: #ef4444;">
+            </div>
+
+            <div style="margin-bottom: 10px;">
+                <label style="display: flex; justify-content: space-between; font-weight: bold; font-size: 0.9rem; margin-bottom: 8px;">
+                    Aumento Volume Clienti <span id="val_volumi" style="color: #10b981;">+0%</span>
+                </label>
+                <input type="range" id="sim_volumi" min="0" max="100" value="0" step="5" style="width: 100%; cursor: pointer; accent-color: #10b981;">
+            </div>
+        </div>
+
+        <div style="background: #0f172a; padding: 25px; border-radius: 10px; color: white; display: flex; flex-direction: column; justify-content: center;">
+            <h3 style="font-size: 1.1rem; margin-top: 0; margin-bottom: 20px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Proiezione Mensile</h3>
+            
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 10px;">
+                <span style="color: #cbd5e1;">Nuovo Fatturato Stimato</span>
+                <strong id="out_fatturato" style="font-size: 1.2rem; color: #38bdf8;">€ 0</strong>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 15px;">
+                <span style="color: #cbd5e1;">Nuovi Costi Fissi</span>
+                <strong id="out_costi" style="font-size: 1.2rem; color: #f87171;">€ 0</strong>
+            </div>
+
+            <div style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; padding: 15px; border-radius: 8px; text-align: center;">
+                <div style="font-size: 0.9rem; color: #a7f3d0; margin-bottom: 5px; text-transform: uppercase; font-weight: bold;">Nuovo Utile Netto</div>
+                <div id="out_utile" style="font-size: 2.5rem; font-weight: 900; color: #34d399;">€ 0</div>
+                <div id="out_delta" style="font-size: 0.9rem; color: white; margin-top: 5px;">(+ € 0 rispetto a oggi)</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. Peschiamo i dati in modo sicurissimo usando Jinja per evitare crash di sintassi
+    let baseIncassi = parseFloat("{{ vm.kpi.get('incassi_mese', vm.kpi.get('ricavi_dichiarati', 0)) }}");
+    let baseCostiFissi = parseFloat("{{ vm.kpi.get('costi_fissi_mese', vm.kpi.get('costi_struttura', 0)) }}");
+    
+    // Fallback di sicurezza se l'azienda non ha inserito dati validi
+    if (isNaN(baseIncassi) || baseIncassi <= 0) baseIncassi = 10000;
+    if (isNaN(baseCostiFissi) || baseCostiFissi <= 0) baseCostiFissi = 5000;
+    
+    const baseUtile = baseIncassi - baseCostiFissi;
+
+    // 2. Collega gli elementi HTML
+    const simPrezzi = document.getElementById('sim_prezzi');
+    const simCosti = document.getElementById('sim_costi');
+    const simVolumi = document.getElementById('sim_volumi');
+    
+    const valPrezzi = document.getElementById('val_prezzi');
+    const valCosti = document.getElementById('val_costi');
+    const valVolumi = document.getElementById('val_volumi');
+    
+    const outFatturato = document.getElementById('out_fatturato');
+    const outCosti = document.getElementById('out_costi');
+    const outUtile = document.getElementById('out_utile');
+    const outDelta = document.getElementById('out_delta');
+
+    // Funzione formattazione Euro
+    const formatEuro = (num) => new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(num);
+
+    // 3. Il Motore Matematico
+    function ricalcola() {
+        if (!simPrezzi) return; // Sicurezza anti-crash
+
+        const pctPrezzi = parseFloat(simPrezzi.value) / 100;
+        const pctCosti = parseFloat(simCosti.value) / 100;
+        const pctVolumi = parseFloat(simVolumi.value) / 100;
+
+        valPrezzi.textContent = `+${simPrezzi.value}%`;
+        valCosti.textContent = `-${simCosti.value}%`;
+        valVolumi.textContent = `+${simVolumi.value}%`;
+
+        // Nuovo fatturato (Volume + Prezzo)
+        const nuovoFatturato = baseIncassi * (1 + pctVolumi) * (1 + pctPrezzi);
+        // Nuovi costi
+        const nuoviCosti = baseCostiFissi * (1 - pctCosti);
+        
+        const nuovoUtile = nuovoFatturato - nuoviCosti;
+        const deltaUtile = nuovoUtile - baseUtile;
+
+        outFatturato.textContent = formatEuro(nuovoFatturato);
+        outCosti.textContent = formatEuro(nuoviCosti);
+        outUtile.textContent = formatEuro(nuovoUtile);
+        
+        if (deltaUtile > 0) {
+            outDelta.textContent = `(+ ${formatEuro(deltaUtile)} rispetto a oggi)`;
+            outDelta.style.color = "#a7f3d0";
+        } else if (deltaUtile < 0) {
+            outDelta.textContent = `(- ${formatEuro(Math.abs(deltaUtile))} rispetto a oggi)`;
+            outDelta.style.color = "#f87171";
+        } else {
+            outDelta.textContent = `(Situazione di partenza)`;
+            outDelta.style.color = "#94a3b8";
+        }
+    }
+
+    // 4. Mettiti in ascolto
+    simPrezzi.addEventListener('input', ricalcola);
+    simCosti.addEventListener('input', ricalcola);
+    simVolumi.addEventListener('input', ricalcola);
+
+    // Lancia subito al caricamento
+    ricalcola();
+});
+</script>
 {% endblock %}
