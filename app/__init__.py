@@ -1,34 +1,31 @@
 import os
 from flask import Flask, render_template
-from flask_mail import Mail  # 📬 Aggiunto per le email
-from .extensions import db, migrate, login_manager
-from .config import Config
 
-# 📬 Inizializza l'oggetto Mail globale
-mail = Mail()
+# 📬 Importiamo TUTTE le estensioni centralizzate, inclusa mail
+from .extensions import db, migrate, login_manager, mail
+from config import Config
 
 def create_app(config_class=Config):
     app = Flask(__name__)
+    
+    # Carica la configurazione dal file config.py (dove abbiamo messo MAIL_DEFAULT_SENDER)
     app.config.from_object(config_class)
 
     # ========================================================
-    # 📬 CONFIGURAZIONE EMAIL (FLASK-MAIL)
+    # INIZIALIZZAZIONE ESTENSIONI
     # ========================================================
-    app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
-    app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
-    app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', 'True') == 'True'
-    app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
-    app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
-    app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')
-
-    # Inizializzazione estensioni
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
-    mail.init_app(app)  # 📬 Collega Mail alla tua app Flask
+    
+    # 📬 Inizializza Mail leggendo in automatico le chiavi caricate da Config
+    mail.init_app(app)
 
     login_manager.login_view = "auth.login"
 
+    # ========================================================
+    # REGISTRAZIONE BLUEPRINT
+    # ========================================================
     from .routes.auth import bp as auth_bp
     from .routes.admin import bp as admin_bp
     from .routes.orgs import bp as orgs_bp
@@ -59,6 +56,9 @@ def create_app(config_class=Config):
         except Exception:
             return str(value)
 
+    # ========================================================
+    # ROTTE PUBBLICHE (LANDING E PRICING)
+    # ========================================================
     @app.route("/")
     def index():
         from .models.plan import Plan
@@ -77,6 +77,7 @@ def create_app(config_class=Config):
     with app.app_context():
         db.create_all()
         
+        # POPOLAMENTO BENCHMARK
         from .models.benchmark import SectorBenchmark
         if SectorBenchmark.query.count() == 0:
             benchmarks = [
@@ -112,4 +113,5 @@ def create_app(config_class=Config):
 
     return app
 
+# Import dei modelli a fondo file per evitare import circolari
 from .models import user, organization, scan, plan, invite, membership
