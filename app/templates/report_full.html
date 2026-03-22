@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SaaS Full – Report Strategico Avanzato</title>
+  
   <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   
@@ -46,11 +47,6 @@
     .insight-box { background: #f5f8fb; border-left: 4px solid #4fc3f7; padding: 16px; border-radius: 8px; margin-top: 16px; }
     .insight-title { font-weight: bold; color: #1a1a2e; margin-bottom: 5px; }
 
-    .value-chain-container { display: flex; gap: 12px; margin-top: 24px; overflow-x: auto; padding-bottom: 12px; }
-    .vc-stage { flex: 1; min-width: 140px; background: #f5f8fb; padding: 16px; border-radius: 8px; text-align: center; position: relative; border: 1px solid #e8eef5; }
-    .vc-stage.bottleneck { background: #fff0f0; border-color: #ffcdd2; box-shadow: 0 4px 12px rgba(229, 57, 70, 0.15); }
-    .vc-score { font-size: 1.8em; font-weight: 800; color: #1a1a2e; margin: 8px 0; }
-    
     .horizons-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-top: 24px; }
     .horizon-card { background: #fff; border-radius: 12px; padding: 24px; border: 1px solid #e8eef5; box-shadow: 0 2px 10px rgba(0,0,0,0.04); }
     .horizon-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8em; font-weight: 700; margin-bottom: 16px; }
@@ -70,12 +66,13 @@
 </head>
 <body>
 
-{# NORMALIZZAZIONE VARIABILI #}
+{# NORMALIZZAZIONE VARIABILI JINJA #}
 {% set vm = vm | default({}) %}
 {% set st = vm.get('state', vm.get('triade', {}).get('state', {})) %}
 {% set kpi = vm.get('kpi', vm.get('triade', {}).get('kpi', {})) %}
 {% set strategy = vm.get('advanced_strategy', vm.get('triade', {}).get('advanced_strategy', {})) %}
 {% set meta = vm.get('meta', vm.get('triade', {}).get('meta', {})) %}
+{% set sc = vm.get('triade', {}).get('struttura_costi', {}) %}
 
 <div class="container">
 
@@ -93,8 +90,6 @@
       <button class="btn btn-primary" onclick="window.print()">⬇ Stampa PDF</button>
     </div>
   </div>
-  
-  {# NOTA: Il blocco AI Executive Memo è stato completamente rimosso. #}
   
   {# SCORE SUMMARY #}
   {% set current_score = st.get('overall_score', 0) | int %}
@@ -153,6 +148,31 @@
     </div>
   </div>
 
+  <div class="card" style="margin-bottom: 40px; padding: 40px;">
+    <h3 style="text-align: center; margin-bottom: 30px; font-weight: 800; font-size: 1.5rem;">Analisi Struttura dei Costi</h3>
+    
+    <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 40px;">
+        <div style="width: 300px; text-align: center;">
+            <div style="font-weight: bold; color: #3182ce; margin-bottom: 15px; font-size: 1.1rem; text-transform: uppercase;">Base Fiscale / Dichiarata</div>
+            <canvas id="chartDichiarata" width="300" height="300"></canvas>
+            <div style="margin-top: 15px; font-size: 0.85rem; color: #64748b; font-weight: bold;">
+                <span style="color: #ed8936;">■ Personale</span> 
+                <span style="color: #3182ce; margin-left: 10px;">■ Struttura</span> 
+                <span style="color: #63b3ed; margin-left: 10px;">■ Variabili</span>
+            </div>
+        </div>
+
+        <div style="width: 300px; text-align: center;">
+            <div style="font-weight: bold; color: #10b981; margin-bottom: 15px; font-size: 1.1rem; text-transform: uppercase;">Base Reale / Incassi Stimati</div>
+            <canvas id="chartReale" width="300" height="300"></canvas>
+            <div style="margin-top: 15px; font-size: 0.85rem; color: #64748b; font-weight: bold;">
+                <span style="color: #ed8936;">■ Personale</span> 
+                <span style="color: #3182ce; margin-left: 10px;">■ Struttura</span> 
+                <span style="color: #63b3ed; margin-left: 10px;">■ Variabili</span>
+            </div>
+        </div>
+    </div>
+  </div>
   {# FINANCIAL INTELLIGENCE & INTERACTIVE SIMULATOR #}
   {% set fin = vm.get('financial_projections', vm.get('triade', {}).get('financial_projections', {})) %}
   {% if fin %}
@@ -190,9 +210,9 @@
         <div class="card-desc" style="font-size: 0.85em; margin-top: 15px;">Impatto sulla Runway in caso di crollo improvviso del mercato.</div>
       </div>
 
-      {# WHAT-IF INTERACTIVE SIMULATOR #}
+      {# WHAT-IF INTERACTIVE SIMULATOR (CASH RUNWAY) #}
       <div class="card" style="border-top: 6px solid #10b981; padding-bottom: 15px;">
-        <div class="card-title">🕹️ Simulatore Interattivo</div>
+        <div class="card-title">🕹️ Simulatore Runway</div>
         
         <div style="margin-top: 10px;">
           <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
@@ -272,7 +292,6 @@
       </div>
       
       {% set horizons = th.get('horizons', {}) %}
-      {% set alloc = th.get('resource_allocation', {}) %}
       
       <div class="horizons-grid">
         <div class="horizon-card h1">
@@ -315,7 +334,48 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Recupera la runway base, gestendo eventuali virgole europee
+    
+    // =====================================
+    // 1. MOTORE GRAFICI A CIAMBELLA
+    // =====================================
+    if (typeof Chart !== 'undefined' && document.getElementById('chartDichiarata')) {
+        
+        // Peschiamo i dati da Jinja in modo sicuro (con fallback)
+        const p_pers_dich = {{ sc.get('personale', {}).get('p_dich', 56.0) }};
+        const p_stru_dich = {{ sc.get('struttura', {}).get('p_dich', 34.7) }};
+        const p_prod_dich = {{ sc.get('prodotti', {}).get('p_dich', 19.8) }};
+        const p_altro_dich = Math.max(0, 100 - p_pers_dich - p_stru_dich - p_prod_dich);
+
+        const p_pers_reale = {{ sc.get('personale', {}).get('p_reale', 18.6) }};
+        const p_stru_reale = {{ sc.get('struttura', {}).get('p_reale', 11.5) }};
+        const p_prod_reale = {{ sc.get('prodotti', {}).get('p_reale', 6.6) }};
+        const p_altro_reale = Math.max(0, 100 - p_pers_reale - p_stru_reale - p_prod_reale);
+
+        const chartConfig = { 
+            type: 'doughnut', 
+            options: { 
+                cutout: '70%', 
+                plugins: { legend: { display: false } }, 
+                animation: true 
+            } 
+        };
+
+        const colori = ['#ed8936', '#3182ce', '#63b3ed', '#e2e8f0'];
+
+        new Chart(document.getElementById('chartDichiarata'), { 
+            ...chartConfig, 
+            data: { datasets: [{ data: [p_pers_dich, p_stru_dich, p_prod_dich, p_altro_dich], backgroundColor: colori, borderWidth: 0 }] } 
+        });
+
+        new Chart(document.getElementById('chartReale'), { 
+            ...chartConfig, 
+            data: { datasets: [{ data: [p_pers_reale, p_stru_reale, p_prod_reale, p_altro_reale], backgroundColor: colori, borderWidth: 0 }] } 
+        });
+    }
+
+    // =====================================
+    // 2. MOTORE SIMULATORE CASH RUNWAY
+    // =====================================
     const rawRunway = "{{ kpi.get('runway_mesi', 0) }}".replace(',', '.');
     const baseRunway = parseFloat(rawRunway) || 0;
     
@@ -331,16 +391,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const cutPct = parseInt(costCutSlider.value) / 100;
         const revPct = parseInt(revUpSlider.value) / 100;
         
-        // Calcolo logico dell'estensione Runway:
-        // Ridurre i costi (denominatore del burn rate) aumenta la runway.
-        // Aumentare i ricavi abbassa ulteriormente il burn rate netto.
-        let multiplier = 1 / ((1 - cutPct) - (revPct * 0.6)); // 0.6 è una stima del margine di contribuzione sui nuovi ricavi
+        let multiplier = 1 / ((1 - cutPct) - (revPct * 0.6)); 
         
-        // Cap di sicurezza visiva se il business diventa cash-flow positive all'improvviso
         if (multiplier < 0 || multiplier > 15) multiplier = 15; 
         
         let newRunway = baseRunway * multiplier;
-        if (newRunway > 99) newRunway = 99.9; // Tetto massimo visivo
+        if (newRunway > 99) newRunway = 99.9; 
         
         costCutVal.textContent = costCutSlider.value;
         revUpVal.textContent = revUpSlider.value;
