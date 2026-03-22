@@ -187,3 +187,23 @@ def triad_trend():
         "sales": sales,
         "ops": ops,
     })
+
+@bp.get("/<int:scan_id>/print")
+@login_required
+def print_core_axis(scan_id: int):
+    """Genera la versione HTML impaginata in A4 per la stampa PDF del report Core Axis."""
+    scan = get_accessible_scan_or_404(scan_id)
+    
+    try:
+        report = json.loads(scan.report_json or "{}")
+    except Exception:
+        report = {}
+        
+    triade = report.get("triade", {}) if isinstance(report, dict) else {}
+    vm = triade if isinstance(triade, dict) else {}
+    
+    # Recuperiamo l'organizzazione per stampare il nome in alto a destra
+    from ..models.organization import Organization
+    org = Organization.query.get(scan.org_id)
+    
+    return render_template("scans/pdf_core_axis.html", scan=scan, vm=vm, org=org)

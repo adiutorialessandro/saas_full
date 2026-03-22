@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Core Axis Advisory - KPI Scan</title>
+    <style>
+        /* === IMPOSTAZIONI DI STAMPA A4 ORIZZONTALE === */
+        @page { size: A4 landscape; margin: 0; }
+        
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #1a1a2e; margin: 0; padding: 0; background: #fff; -webkit-print-color-adjust: exact; }
+        
+        .page { width: 297mm; height: 210mm; padding: 12mm 15mm; box-sizing: border-box; page-break-after: always; position: relative; overflow: hidden; }
+        
+        /* Header & Footer */
+        .header { border-bottom: 3px solid #1a1a2e; padding-bottom: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .header-left h1 { font-size: 11pt; color: #64748b; margin: 0 0 2px 0; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; }
+        .header-left h2 { font-size: 22pt; color: #1a1a2e; margin: 0; font-weight: 900; }
+        .header-right { text-align: right; font-size: 10pt; color: #4a5568; }
+        .header-right strong { color: #1a1a2e; }
+
+        .footer { position: absolute; bottom: 10mm; left: 15mm; right: 15mm; display: flex; justify-content: space-between; font-size: 9pt; color: #a0aec0; border-top: 1px solid #e2e8f0; padding-top: 5px; font-weight: bold; }
+        .footer .riservato { color: #e53e3e; }
+
+        /* Blocchi & Tabelle Generiche */
+        .kpi-row { display: flex; gap: 15px; margin-bottom: 20px; }
+        .kpi-box { flex: 1; background: #f8fafc; border-left: 6px solid #94a3b8; padding: 15px; border-radius: 4px; }
+        .kpi-box.blue { border-left-color: #3182ce; background: #ebf8ff; }
+        .kpi-box.red { border-left-color: #e53e3e; background: #fff5f5; }
+        .kpi-label { font-size: 10pt; color: #64748b; text-transform: uppercase; font-weight: bold; margin-bottom: 5px; }
+        .kpi-value { font-size: 26pt; font-weight: 900; color: #1a1a2e; margin-bottom: 5px; line-height: 1; }
+        .kpi-sub { font-size: 10pt; font-weight: bold; color: #4a5568; }
+        .text-red { color: #e53e3e !important; }
+
+        .section-title { font-size: 14pt; font-weight: 800; background: #1a1a2e; color: white; padding: 6px 12px; margin-bottom: 15px; border-radius: 4px; }
+        .triade-grid { display: flex; gap: 15px; margin-bottom: 20px; }
+        .triade-col { flex: 1; border: 1px solid #e2e8f0; padding: 15px; border-radius: 4px; }
+        .triade-col h3 { margin: 0 0 10px 0; font-size: 12pt; color: #3182ce; border-bottom: 2px solid #3182ce; padding-bottom: 5px; }
+        
+        table.core-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 10.5pt; }
+        table.core-table th { background-color: #f1f5f9; color: #1a1a2e; padding: 8px 10px; text-align: left; border-bottom: 2px solid #cbd5e1; font-weight: 800; }
+        table.core-table td { padding: 8px 10px; border-bottom: 1px solid #e2e8f0; color: #334155; }
+        table.core-table tr:nth-child(even) { background-color: #f8fafc; }
+        table.core-table td strong { color: #1a1a2e; }
+
+        .insight-box { border-left: 4px solid #f59e0b; background: #fffbeb; padding: 12px 15px; margin-bottom: 20px; font-size: 10.5pt; color: #92400e; border-radius: 0 4px 4px 0; }
+        ul.action-list { margin: 0; padding-left: 20px; font-size: 11pt; line-height: 1.6; color: #1a1a2e; font-weight: 600; }
+        .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 9pt; font-weight: bold; color: white; text-align: center; min-width: 60px; }
+        .badge.red { background-color: #e53e3e; } .badge.yellow { background-color: #d97706; } .badge.green { background-color: #10b981; } .badge.gray { background-color: #94a3b8; }
+
+        /* Gauges */
+        .gauges-container { display: flex; gap: 20px; margin-bottom: 20px; }
+        .gauge-col { flex: 1; border: 1px solid #e2e8f0; padding: 15px; border-radius: 6px; text-align: center; }
+        .gauge-title { font-size: 11pt; font-weight: 800; margin-bottom: 15px; }
+        .gauge-track { width: 100%; height: 35px; background: #f1f5f9; position: relative; border-radius: 4px; margin-bottom: 10px; display: flex; align-items: center; border: 1px solid #cbd5e1; }
+        .gauge-bar { height: 100%; display: flex; align-items: center; padding-left: 10px; color: white; font-weight: bold; font-size: 10pt; border-radius: 3px 0 0 3px; }
+        .gauge-bar.danger { background: #e53e3e; } .gauge-bar.success { background: #3182ce; } .gauge-bar.warning { background: #f59e0b; }
+        .target-line { position: absolute; top: -5px; bottom: -5px; border-left: 2px dashed #d97706; z-index: 10; }
+        
+        .split-layout { display: flex; gap: 30px; }
+        .split-col { flex: 1; }
+
+        /* === GRAFICO A CASCATA (WATERFALL) CSS === */
+        .waterfall-container { display: flex; align-items: flex-end; justify-content: space-between; height: 220px; border-bottom: 2px solid #1a1a2e; padding-bottom: 0; margin: 30px 0; }
+        .wf-col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; width: 18%; height: 100%; }
+        .wf-bar { width: 100%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12pt; border-radius: 4px 4px 0 0; text-align: center; }
+        .wf-bar.dark { background-color: #64748b; }
+        .wf-bar.light { background-color: #cbd5e1; color: #1a1a2e; }
+        .wf-bar.red { background-color: #e53e3e; }
+        .wf-bar.dashed { background: transparent; border: 2px dashed #cbd5e1; color: #64748b; }
+        .wf-label { text-align: center; font-size: 9pt; color: #4a5568; font-weight: bold; margin-top: 10px; height: 30px; line-height: 1.2; }
+    </style>
+</head>
+<body>
+
+    <div class="page">
+        <div class="header">
+            <div class="header-left">
+                <h1>CORE AXIS ADVISORY</h1>
+                <h2>KPI SCAN - Executive Dashboard</h2>
+            </div>
+            <div class="header-right">
+                <strong>{{ org.name | default('Azienda Cliente') }}</strong><br>
+                Periodo: {{ scan.mese_riferimento | default('Ultimo Esercizio') }}
+            </div>
+        </div>
+
+        <div class="kpi-row">
+            <div class="kpi-box">
+                <div class="kpi-label">Ricavi Dichiarati</div>
+                <div class="kpi-value">€ {{ "{:,.0f}".format(vm.ricavi_dichiarati | default(59730)).replace(',', '.') }}</div>
+            </div>
+            <div class="kpi-box blue">
+                <div class="kpi-label">Incassi Reali Stimati</div>
+                <div class="kpi-value">€ {{ "{:,.0f}".format(vm.incassi_reali | default(180000)).replace(',', '.') }}</div>
+                <div class="kpi-sub">+3,0x vs dichiarato (STIMA)</div>
+            </div>
+            <div class="kpi-box red">
+                <div class="kpi-label text-red">DA RICONCILIARE</div>
+                <div class="kpi-value text-red">€ {{ "{:,.0f}".format(vm.gap_mensile | default(10023)).replace(',', '.') }} <span style="font-size: 14pt;">/mese</span></div>
+            </div>
+        </div>
+
+        <div class="section-title">Cruscotto Triade - Acquisizione / Cassa / Margini</div>
+        <div class="triade-grid">
+            <div class="triade-col">
+                <h3>Acquisizione</h3>
+                <p><strong>-25,6%</strong> Ricavi dichiarati vs anno prec.</p>
+                <p class="text-red"><strong>ATTENZIONE:</strong> Incassi reali ~15k/mese da riconciliare prima di valutare il marketing.</p>
+            </div>
+            <div class="triade-col">
+                <h3>Cassa</h3>
+                <p class="text-red"><strong>€ 10.023 / mese</strong></p>
+                <p>Gap incassi vs corrispettivi dichiarati.</p>
+                <p><strong>Azione:</strong> Serve ponte POS/RT immediato.</p>
+            </div>
+            <div class="triade-col">
+                <h3>Margini</h3>
+                <p><strong>Utile Reale: ND</strong></p>
+                <p>Utile dichiarato: <span class="text-red">-3.275 €</span></p>
+            </div>
+        </div>
+
+        <div class="section-title" style="background: #e53e3e;">Azioni Entro 7 Giorni</div>
+        <ul class="action-list">
+            <li>1. Ponte POS/RT - riconciliazione esatta incassi vs corrispettivi mese.</li>
+            <li>2. Chiusura cassa giornaliera - obiettivo: ≥ 26/30 giorni/mese.</li>
+            <li>3. Inserimento compenso titolare "figurativo" - definire obiettivo mensile netto.</li>
+        </ul>
+
+        <div class="footer"><span>Generato da SaaS Full</span><span class="riservato">DOCUMENTO RISERVATO</span><span>Pagina 1 di 6</span></div>
+    </div>
+
+    <div class="page">
+        <div class="header">
+            <div class="header-left"><h1>CORE AXIS ADVISORY</h1><h2>Margini & Struttura Economica</h2></div>
+            <div class="header-right"><strong>Doppio Binario: Dichiarato vs Gestionale</strong></div>
+        </div>
+        <table class="core-table">
+            <tr><th>Voce P&L</th><th>Anno Prec. (Dichiarato)</th><th>Anno Corr. (Dichiarato)</th><th style="background: #ebf8ff;">Attuale (Reale / Stimato)</th></tr>
+            <tr><td><strong>Ricavi / Incassi</strong></td><td>€ 80.316</td><td>€ 59.730</td><td style="background: #ebf8ff;"><strong>€ 180.000 [STIMA]</strong></td></tr>
+            <tr><td><strong>Costi Totali</strong></td><td>€ 70.894</td><td>€ 63.004</td><td style="background: #ebf8ff;">ND</td></tr>
+            <tr><td><strong>Utile / Perdita</strong></td><td style="color: #10b981;">+ € 9.423</td><td class="text-red">- € 3.275</td><td style="background: #ebf8ff;">ND</td></tr>
+        </table>
+        <div class="insight-box"><strong>💡 Insight Chiave:</strong> L'utile reale è Sconosciuto (ND) finché mancano compenso titolare e ponte POS/RT. Il delta deve essere spiegato prima di agire.</div>
+        <div class="section-title">Struttura Costi - Base Dichiarata vs Base Reale Stimata</div>
+        <table class="core-table">
+            <tr><th>Categoria di Costo</th><th>Valore Assoluto (€)</th><th>% su Dichiarato (59.730 €)</th><th style="background: #f0fdf4;">% su Reale Stimato (180.000 €)</th></tr>
+            <tr><td><strong>Personale</strong></td><td>€ 33.439</td><td class="text-red"><strong>56,0%</strong></td><td style="background: #f0fdf4; color: #166534;"><strong>18,6%</strong></td></tr>
+            <tr><td><strong>Struttura</strong></td><td>€ 20.751</td><td>34,7%</td><td style="background: #f0fdf4;">11,5%</td></tr>
+            <tr><td><strong>Prodotti/Materiali</strong></td><td>€ 11.838</td><td>19,8%</td><td style="background: #f0fdf4;">6,6%</td></tr>
+        </table>
+        <div class="footer"><span>Generato da SaaS Full</span><span class="riservato">DOCUMENTO RISERVATO</span><span>Pagina 2 di 6</span></div>
+    </div>
+
+    <div class="page">
+        <div class="header">
+            <div class="header-left">
+                <h1>CORE AXIS ADVISORY</h1>
+                <h2>Cassa & Runway</h2>
+            </div>
+            <div class="header-right">
+                <strong>Bridge Mensile - Incassi vs Dichiarato</strong>
+            </div>
+        </div>
+
+        <div class="kpi-row" style="margin-bottom: 0;">
+            <div class="kpi-box blue" style="padding: 10px;">
+                <div class="kpi-label">Incassi Reali Stimati</div>
+                <div class="kpi-value" style="font-size: 18pt;">€ 15.000 / mese</div>
+            </div>
+            <div class="kpi-box" style="padding: 10px;">
+                <div class="kpi-label">Corrispettivi Dichiarati / mese</div>
+                <div class="kpi-value" style="font-size: 18pt;">- € 4.977 / mese</div>
+            </div>
+        </div>
+
+        <div class="waterfall-container">
+            <div class="wf-col">
+                <div class="wf-bar dark" style="height: 100%;">€ 15.000</div>
+                <div class="wf-label">Incassi totali<br>(POS+cont.+bon.)</div>
+            </div>
+            <div class="wf-col">
+                <div class="wf-bar dashed" style="height: 15%; margin-bottom: 85%;">ND</div>
+                <div class="wf-label">Resi /<br>Annulli</div>
+            </div>
+            <div class="wf-col">
+                <div class="wf-bar dark" style="height: 100%;">€ 15.000</div>
+                <div class="wf-label">Incassi<br>netti</div>
+            </div>
+            <div class="wf-col">
+                <div class="wf-bar light" style="height: 33%;"> - € 4.977</div>
+                <div class="wf-label">Corrispettivi<br>dichiarati mese</div>
+            </div>
+            <div class="wf-col">
+                <div class="wf-bar red" style="height: 67%;">€ 10.023</div>
+                <div class="wf-label" style="color: #e53e3e;">Delta da<br>riconciliare</div>
+            </div>
+        </div>
+
+        <div class="section-title">Decisioni 7-30 Giorni</div>
+        <table class="core-table">
+            <tr><th style="width: 25%;">Azione</th><th>Dettaglio Operativo</th></tr>
+            <tr><td><strong>Ponte POS/RT</strong></td><td>Riconciliazione mensile incassi (POS + contanti + bonifici) vs RT/corrispettivi.</td></tr>
+            <tr><td><strong>Chiusura cassa</strong></td><td>Obiettivo: ≥ 26/30 gg/mese. Senza chiusura, i numeri sono solo opinioni.</td></tr>
+            <tr><td><strong>Compenso titolare</strong></td><td>Inserire come costo fisso mensile. Finché è ND il margine reale non esiste.</td></tr>
+        </table>
+
+        <div class="footer"><span>Generato da SaaS Full</span><span class="riservato">DOCUMENTO RISERVATO</span><span>Pagina 5 di 6</span></div>
+    </div>
+
+    <div class="page">
+        <div class="header">
+            <div class="header-left">
+                <h1>CORE AXIS ADVISORY</h1>
+                <h2>Piano 30/60/90 & Checklist</h2>
+            </div>
+            <div class="header-right">
+                <strong>Prove > Promesse. Zero rumore, tutto verificabile.</strong>
+            </div>
+        </div>
+
+        <div class="section-title">Deliverable Chiave - Milestone Operative</div>
+        <table class="core-table">
+            <tr><th style="width: 15%;">Orizzonte</th><th>Azione Strategica</th><th>KPI Misurato</th><th>Owner</th></tr>
+            <tr><td><strong>30 gg</strong></td><td>Ponte cassa (POS + cont. + bon. vs RT)</td><td>Delta mensile spiegato al 100%</td><td>Titolare</td></tr>
+            <tr><td><strong>30 gg</strong></td><td>Chiusura cassa giornaliera</td><td>Giorni chiusi > 26/30</td><td>Store Mgr</td></tr>
+            <tr><td><strong>60 gg</strong></td><td>Emersione graduale ricavi dichiarati</td><td>Ricavi base ≥ Target Minimo</td><td>Titolare</td></tr>
+            <tr><td><strong>60 gg</strong></td><td>Regole no-show + caparra (anti-drop)</td><td>No-show % ridotto del 30%</td><td>Reception</td></tr>
+            <tr><td><strong>90 gg</strong></td><td>Compenso titolare inserito in gestione</td><td>Prelievo target tracciato</td><td>Titolare</td></tr>
+        </table>
+
+        <div class="split-layout">
+            <div class="split-col">
+                <div class="section-title" style="background: #94a3b8;">Checklist Dati da Raccogliere</div>
+                <table class="core-table">
+                    <tr><th>Documento / Dato Richiesto</th><th style="width: 80px;">Stato</th></tr>
+                    <tr><td>Riepilogo POS ultimo mese</td><td><span class="badge gray">ND</span></td></tr>
+                    <tr><td>Incassi contanti ultimo mese</td><td><span class="badge gray">ND</span></td></tr>
+                    <tr><td>Corrispettivi / RT ultimo mese</td><td><span class="badge gray">ND</span></td></tr>
+                    <tr><td>Estratto conto bancario</td><td><span class="badge gray">ND</span></td></tr>
+                    <tr><td>Compenso titolare obiettivo</td><td><span class="badge gray">ND</span></td></tr>
+                </table>
+            </div>
+            <div class="split-col">
+                <div class="insight-box" style="margin-top: 45px;">
+                    <strong>Il prossimo passo:</strong> Consegnare questa checklist all'imprenditore o al suo team contabile. Senza la raccolta di questi dati "ND" nei prossimi 7 giorni, è impossibile redigere un budget previsionale per la crescita o scalare gli investimenti in marketing in sicurezza.
+                </div>
+            </div>
+        </div>
+
+        <div class="footer"><span>Generato da SaaS Full</span><span class="riservato">DOCUMENTO RISERVATO</span><span>Pagina 6 di 6</span></div>
+    </div>
+
+</body>
+</html>

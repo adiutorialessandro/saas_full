@@ -68,11 +68,11 @@
 
 {# NORMALIZZAZIONE VARIABILI JINJA #}
 {% set vm = vm | default({}) %}
-{% set st = vm.get('state', vm.get('triade', {}).get('state', {})) %}
-{% set kpi = vm.get('kpi', vm.get('triade', {}).get('kpi', {})) %}
-{% set strategy = vm.get('advanced_strategy', vm.get('triade', {}).get('advanced_strategy', {})) %}
-{% set meta = vm.get('meta', vm.get('triade', {}).get('meta', {})) %}
-{% set sc = vm.get('triade', {}).get('struttura_costi', {}) %}
+{% set st = vm.get('state', {}) %}
+{% set kpi = vm.get('kpi', {}) %}
+{% set strategy = vm.get('advanced_strategy', {}) %}
+{% set meta = vm.get('meta', {}) %}
+{% set sc = vm.get('struttura_costi', {}) %}
 
 <div class="container">
 
@@ -87,7 +87,9 @@
     </div>
     <div class="header-actions">
       <a class="btn btn-secondary" href="javascript:history.back()">← Torna</a>
-      <button class="btn btn-primary" onclick="window.print()">⬇ Stampa PDF</button>
+      <a href="{{ url_for('report.print_core_axis', scan_id=scan.id) }}" target="_blank" class="btn btn-primary" style="text-decoration: none;">
+          <i class="fas fa-file-pdf"></i> Scarica Report PDF
+      </a>
     </div>
   </div>
   
@@ -174,7 +176,7 @@
     </div>
   </div>
   {# FINANCIAL INTELLIGENCE & INTERACTIVE SIMULATOR #}
-  {% set fin = vm.get('financial_projections', vm.get('triade', {}).get('financial_projections', {})) %}
+  {% set fin = vm.get('financial_projections', {}) %}
   {% if fin %}
   <div style="margin-top: 60px; padding-top: 40px; border-top: 2px dashed #ccc;">
     <div class="section-header">
